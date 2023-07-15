@@ -1,0 +1,73 @@
+
+
+
+
+
+Analysis Type:	PANTHER Overrepresentation Test (Released 20221013)
+Annotation Version and Release Date:	GO Ontology database DOI:  10.5281/zenodo.6799722 Released 2022-07-01
+Analyzed List:	upload_1 (Homo sapiens)
+Reference List:	Homo sapiens (all genes in database)
+Test Type:	FISHER
+Correction:	FDR
+GO biological process complete	Homo sapiens - REFLIST (20589)	upload_1 (355)	upload_1 (expected)	upload_1 (over/under)	upload_1 (fold Enrichment)	upload_1 (raw P-value)	upload_1 (FDR)
+positive regulation of chromosome separation (GO:1905820)	28	6	.48	+	12.43	2.05E-05	8.03E-03
+hypothalamus development (GO:0021854)	25	5	.43	+	11.60	1.37E-04	3.90E-02
+mitochondrial electron transport, NADH to ubiquinone (GO:0006120)	46	7	.79	+	8.83	2.99E-05	1.14E-02
+mitochondrial ATP synthesis coupled electron transport (GO:0042775)	91	11	1.57	+	7.01	1.28E-06	7.71E-04
+ATP synthesis coupled electron transport (GO:0042773)	91	11	1.57	+	7.01	1.28E-06	7.43E-04
+aerobic electron transport chain (GO:0019646)	86	9	1.48	+	6.07	3.40E-05	1.27E-02
+respiratory electron transport chain (GO:0022904)	113	11	1.95	+	5.65	8.72E-06	4.27E-03
+cytoplasmic translation (GO:0002181)	124	12	2.14	+	5.61	3.61E-06	1.95E-03
+oxidative phosphorylation (GO:0006119)	119	11	2.05	+	5.36	1.37E-05	5.96E-03
+positive regulation of chromosome organization (GO:2001252)	106	9	1.83	+	4.92	1.52E-04	4.17E-02
+endoplasmic reticulum to Golgi vesicle-mediated transport (GO:0006888)	127	10	2.19	+	4.57	1.18E-04	3.48E-02
+ribosome biogenesis (GO:0042254)	303	22	5.22	+	4.21	4.27E-08	3.72E-05
+aerobic respiration (GO:0009060)	159	11	2.74	+	4.01	1.59E-04	4.24E-02
+rRNA processing (GO:0006364)	223	15	3.85	+	3.90	1.46E-05	6.18E-03
+regulation of mRNA catabolic process (GO:0061013)	181	12	3.12	+	3.85	1.18E-04	3.44E-02
+mRNA splicing, via spliceosome (GO:0000398)	243	15	4.19	+	3.58	3.74E-05	1.36E-02
+RNA splicing, via transesterification reactions with bulged adenosine as nucleophile (GO:0000377)	243	15	4.19	+	3.58	3.74E-05	1.33E-02
+RNA splicing, via transesterification reactions (GO:0000375)	247	15	4.26	+	3.52	4.46E-05	1.55E-02
+RNA splicing (GO:0008380)	368	22	6.35	+	3.47	9.81E-07	6.16E-04
+rRNA metabolic process (GO:0016072)	254	15	4.38	+	3.43	6.02E-05	1.93E-02
+ribonucleoprotein complex biogenesis (GO:0022613)	449	26	7.74	+	3.36	1.79E-07	1.28E-04
+ncRNA processing (GO:0034470)	413	22	7.12	+	3.09	5.78E-06	2.92E-03
+mRNA processing (GO:0006397)	451	24	7.78	+	3.09	2.20E-06	1.23E-03
+translation (GO:0006412)	379	20	6.53	+	3.06	1.75E-05	7.04E-03
+RNA processing (GO:0006396)	868	45	14.97	+	3.01	1.35E-10	1.51E-07
+peptide biosynthetic process (GO:0043043)	408	21	7.03	+	2.99	1.54E-05	6.36E-03
+peptide metabolic process (GO:0006518)	537	25	9.26	+	2.70	1.25E-05	5.59E-03
+mRNA metabolic process (GO:0016071)	607	28	10.47	+	2.68	4.40E-06	2.30E-03
+chromosome organization (GO:0051276)	444	20	7.66	+	2.61	1.42E-04	3.96E-02
+amide biosynthetic process (GO:0043604)	527	23	9.09	+	2.53	7.17E-05	2.25E-02
+RNA metabolic process (GO:0016070)	1635	64	28.19	+	2.27	1.45E-09	1.51E-06
+gene expression (GO:0010467)	2314	88	39.90	+	2.21	1.54E-12	3.46E-09
+cellular amide metabolic process (GO:0043603)	802	30	13.83	+	2.17	9.84E-05	3.02E-02
+nucleic acid metabolic process (GO:0090304)	2276	83	39.24	+	2.12	8.01E-11	9.66E-08
+cellular nitrogen compound biosynthetic process (GO:0044271)	1588	56	27.38	+	2.05	6.68E-07	4.37E-04
+cellular nitrogen compound metabolic process (GO:0034641)	3573	126	61.61	+	2.05	7.69E-16	4.02E-12
+nucleobase-containing compound metabolic process (GO:0006139)	2825	98	48.71	+	2.01	1.20E-11	2.09E-08
+organonitrogen compound biosynthetic process (GO:1901566)	1333	46	22.98	+	2.00	1.13E-05	5.20E-03
+cellular aromatic compound metabolic process (GO:0006725)	3050	103	52.59	+	1.96	1.21E-11	1.90E-08
+heterocycle metabolic process (GO:0046483)	2999	101	51.71	+	1.95	2.52E-11	3.29E-08
+organic cyclic compound metabolic process (GO:1901360)	3292	110	56.76	+	1.94	3.63E-12	7.11E-09
+protein-containing complex organization (GO:0043933)	1423	46	24.54	+	1.87	5.49E-05	1.83E-02
+cellular biosynthetic process (GO:0044249)	2464	79	42.48	+	1.86	6.80E-08	5.61E-05
+organic substance biosynthetic process (GO:1901576)	2534	80	43.69	+	1.83	1.01E-07	7.94E-05
+biosynthetic process (GO:0009058)	2603	81	44.88	+	1.80	2.08E-07	1.42E-04
+macromolecule biosynthetic process (GO:0009059)	1487	46	25.64	+	1.79	1.80E-04	4.64E-02
+cellular macromolecule metabolic process (GO:0044260)	2518	73	43.42	+	1.68	9.83E-06	4.67E-03
+cellular metabolic process (GO:0044237)	6606	189	113.90	+	1.66	4.10E-16	6.43E-12
+nitrogen compound metabolic process (GO:0006807)	6710	188	115.70	+	1.62	5.84E-15	1.53E-11
+cellular component biogenesis (GO:0044085)	2633	73	45.40	+	1.61	5.77E-05	1.89E-02
+primary metabolic process (GO:0044238)	7228	200	124.63	+	1.60	7.25E-16	5.68E-12
+macromolecule metabolic process (GO:0043170)	5941	163	102.44	+	1.59	1.69E-11	2.40E-08
+organic substance metabolic process (GO:0071704)	7697	207	132.71	+	1.56	2.85E-15	8.95E-12
+metabolic process (GO:0008152)	8131	215	140.20	+	1.53	2.28E-15	8.95E-12
+regulation of nucleobase-containing compound metabolic process (GO:0019219)	4067	100	70.12	+	1.43	1.62E-04	4.25E-02
+organonitrogen compound metabolic process (GO:1901564)	5013	121	86.44	+	1.40	4.84E-05	1.65E-02
+cellular component organization or biogenesis (GO:0071840)	5727	133	98.75	+	1.35	1.00E-04	3.02E-02
+cellular process (GO:0009987)	15044	302	259.39	+	1.16	1.15E-07	8.58E-05
+biological_process (GO:0008150)	17864	340	308.01	+	1.10	2.76E-08	2.70E-05
+Unclassified (UNCLASSIFIED)	2725	15	46.99	-	.32	2.76E-08	2.54E-05
+detection of stimulus involved in sensory perception (GO:0050906)	560	0	9.66	-	 < 0.01	1.55E-04	4.18E-02

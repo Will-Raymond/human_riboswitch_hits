@@ -1,0 +1,61 @@
+
+
+
+
+
+Analysis Type:	PANTHER Overrepresentation Test (Released 20221013)
+Annotation Version and Release Date:	GO Ontology database DOI:  10.5281/zenodo.6799722 Released 2022-07-01
+Analyzed List:	upload_1 (Homo sapiens)
+Reference List:	Homo sapiens (all genes in database)
+Test Type:	FISHER
+Correction:	FDR
+GO cellular component complete	Homo sapiens - REFLIST (20589)	upload_1 (355)	upload_1 (expected)	upload_1 (over/under)	upload_1 (fold Enrichment)	upload_1 (raw P-value)	upload_1 (FDR)
+condensin complex (GO:0000796)	8	3	.14	+	21.75	7.20E-04	3.13E-02
+respiratory chain complex I (GO:0045271)	49	6	.84	+	7.10	3.27E-04	1.86E-02
+NADH dehydrogenase complex (GO:0030964)	49	6	.84	+	7.10	3.27E-04	1.81E-02
+mitochondrial respiratory chain complex I (GO:0005747)	49	6	.84	+	7.10	3.27E-04	1.76E-02
+U2-type precatalytic spliceosome (GO:0071005)	50	6	.86	+	6.96	3.61E-04	1.85E-02
+precatalytic spliceosome (GO:0071011)	53	6	.91	+	6.57	4.81E-04	2.23E-02
+cytosolic ribosome (GO:0022626)	105	11	1.81	+	6.08	4.57E-06	4.91E-04
+cytosolic large ribosomal subunit (GO:0022625)	59	6	1.02	+	5.90	8.09E-04	3.37E-02
+respiratory chain complex (GO:0098803)	89	8	1.53	+	5.21	2.45E-04	1.57E-02
+inclusion body (GO:0016234)	78	7	1.34	+	5.20	6.02E-04	2.73E-02
+small ribosomal subunit (GO:0015935)	78	7	1.34	+	5.20	6.02E-04	2.68E-02
+mitochondrial respirasome (GO:0005746)	92	8	1.59	+	5.04	3.02E-04	1.76E-02
+ribosomal subunit (GO:0044391)	189	16	3.26	+	4.91	4.65E-07	5.59E-05
+respirasome (GO:0070469)	99	8	1.71	+	4.69	4.78E-04	2.27E-02
+oxidoreductase complex (GO:1990204)	125	10	2.16	+	4.64	1.04E-04	7.34E-03
+ribosome (GO:0005840)	228	18	3.93	+	4.58	2.34E-07	3.19E-05
+large ribosomal subunit (GO:0015934)	115	9	1.98	+	4.54	2.68E-04	1.61E-02
+spliceosomal complex (GO:0005681)	197	12	3.40	+	3.53	2.49E-04	1.54E-02
+ribonucleoprotein complex (GO:1990904)	714	39	12.31	+	3.17	6.30E-10	1.17E-07
+mitochondrial protein-containing complex (GO:0098798)	293	14	5.05	+	2.77	8.09E-04	3.44E-02
+mitochondrial matrix (GO:0005759)	486	21	8.38	+	2.51	1.68E-04	1.14E-02
+mitochondrial inner membrane (GO:0005743)	497	21	8.57	+	2.45	3.52E-04	1.84E-02
+organelle inner membrane (GO:0019866)	560	22	9.66	+	2.28	4.61E-04	2.24E-02
+nuclear protein-containing complex (GO:0140513)	1276	49	22.00	+	2.23	2.42E-07	3.09E-05
+nucleolus (GO:0005730)	1002	38	17.28	+	2.20	9.88E-06	9.61E-04
+catalytic complex (GO:1902494)	1686	58	29.07	+	2.00	8.17E-07	9.27E-05
+mitochondrion (GO:0005739)	1671	49	28.81	+	1.70	3.94E-04	1.96E-02
+chromosome (GO:0005694)	1852	54	31.93	+	1.69	1.74E-04	1.15E-02
+nuclear lumen (GO:0031981)	4494	131	77.49	+	1.69	1.57E-10	3.21E-08
+organelle lumen (GO:0043233)	5614	163	96.80	+	1.68	1.21E-13	1.24E-10
+intracellular organelle lumen (GO:0070013)	5614	163	96.80	+	1.68	1.21E-13	8.25E-11
+membrane-enclosed lumen (GO:0031974)	5614	163	96.80	+	1.68	1.21E-13	6.19E-11
+nucleoplasm (GO:0005654)	4130	119	71.21	+	1.67	4.70E-09	8.00E-07
+protein-containing complex (GO:0032991)	5771	148	99.50	+	1.49	5.01E-08	7.87E-06
+nucleus (GO:0005634)	7682	194	132.45	+	1.46	6.55E-11	1.49E-08
+cytosol (GO:0005829)	5458	134	94.11	+	1.42	5.04E-06	5.14E-04
+intracellular non-membrane-bounded organelle (GO:0043232)	5225	128	90.09	+	1.42	1.18E-05	1.10E-03
+non-membrane-bounded organelle (GO:0043228)	5226	128	90.11	+	1.42	1.19E-05	1.05E-03
+intracellular membrane-bounded organelle (GO:0043231)	12154	280	209.56	+	1.34	4.44E-15	9.07E-12
+membrane-bounded organelle (GO:0043227)	13230	292	228.11	+	1.28	1.71E-13	7.00E-11
+intracellular organelle (GO:0043229)	13254	292	228.53	+	1.28	2.51E-13	7.32E-11
+organelle (GO:0043226)	14064	302	242.49	+	1.25	1.02E-12	2.60E-10
+cytoplasm (GO:0005737)	12097	257	208.58	+	1.23	1.47E-07	2.15E-05
+intracellular anatomical structure (GO:0005622)	14945	315	257.68	+	1.22	2.37E-13	8.06E-11
+cellular anatomical entity (GO:0110165)	18802	345	324.19	+	1.06	1.38E-05	1.13E-03
+cellular_component (GO:0005575)	18949	346	326.72	+	1.06	3.64E-05	2.76E-03
+cell periphery (GO:0071944)	6460	74	111.38	-	.66	1.35E-05	1.15E-03
+plasma membrane (GO:0005886)	5977	68	103.06	-	.66	3.27E-05	2.57E-03
+Unclassified (UNCLASSIFIED)	1640	9	28.28	-	.32	3.64E-05	2.66E-03

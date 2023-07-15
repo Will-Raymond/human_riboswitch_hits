@@ -1,0 +1,89 @@
+
+
+
+
+
+Analysis Type:	PANTHER Overrepresentation Test (Released 20221013)
+Annotation Version and Release Date:	GO Ontology database DOI:  10.5281/zenodo.6799722 Released 2022-07-01
+Analyzed List:	upload_1 (Homo sapiens)
+Reference List:	Homo sapiens (all genes in database)
+Test Type:	FISHER
+Correction:	FDR
+GO cellular component complete	Homo sapiens - REFLIST (20589)	upload_1 (1180)	upload_1 (expected)	upload_1 (over/under)	upload_1 (fold Enrichment)	upload_1 (raw P-value)	upload_1 (FDR)
+transcription export complex 2 (GO:0070390)	5	4	.29	+	13.96	8.69E-04	2.69E-02
+nuclear pore nuclear basket (GO:0044615)	12	5	.69	+	7.27	1.66E-03	4.65E-02
+intraciliary transport particle B (GO:0030992)	17	7	.97	+	7.18	2.07E-04	9.19E-03
+eukaryotic 43S preinitiation complex (GO:0016282)	17	6	.97	+	6.16	1.14E-03	3.47E-02
+intraciliary transport particle (GO:0030990)	24	8	1.38	+	5.82	2.38E-04	9.93E-03
+translation preinitiation complex (GO:0070993)	18	6	1.03	+	5.82	1.45E-03	4.17E-02
+cytosolic small ribosomal subunit (GO:0022627)	45	15	2.58	+	5.82	4.98E-07	3.51E-05
+small ribosomal subunit (GO:0015935)	78	22	4.47	+	4.92	1.47E-08	1.11E-06
+core mediator complex (GO:0070847)	26	7	1.49	+	4.70	1.67E-03	4.60E-02
+cytosolic ribosome (GO:0022626)	105	28	6.02	+	4.65	4.83E-10	3.95E-08
+cytosolic large ribosomal subunit (GO:0022625)	59	14	3.38	+	4.14	3.21E-05	1.82E-03
+ribosomal subunit (GO:0044391)	189	43	10.83	+	3.97	1.15E-12	1.07E-10
+respiratory chain complex I (GO:0045271)	49	11	2.81	+	3.92	3.35E-04	1.29E-02
+NADH dehydrogenase complex (GO:0030964)	49	11	2.81	+	3.92	3.35E-04	1.27E-02
+mitochondrial respiratory chain complex I (GO:0005747)	49	11	2.81	+	3.92	3.35E-04	1.24E-02
+ribosome (GO:0005840)	228	51	13.07	+	3.90	1.62E-14	1.65E-12
+proteasome complex (GO:0000502)	60	12	3.44	+	3.49	4.57E-04	1.61E-02
+U2-type precatalytic spliceosome (GO:0071005)	50	10	2.87	+	3.49	1.34E-03	3.96E-02
+large ribosomal subunit (GO:0015934)	115	22	6.59	+	3.34	4.49E-06	2.96E-04
+organellar ribosome (GO:0000313)	90	16	5.16	+	3.10	1.84E-04	8.56E-03
+mitochondrial ribosome (GO:0005761)	90	16	5.16	+	3.10	1.84E-04	8.37E-03
+mitochondrial respirasome (GO:0005746)	92	16	5.27	+	3.03	2.30E-04	9.79E-03
+respiratory chain complex (GO:0098803)	89	15	5.10	+	2.94	4.79E-04	1.63E-02
+oxidoreductase complex (GO:1990204)	125	21	7.16	+	2.93	4.08E-05	2.14E-03
+condensed nuclear chromosome (GO:0000794)	80	13	4.58	+	2.84	1.49E-03	4.24E-02
+respirasome (GO:0070469)	99	16	5.67	+	2.82	4.75E-04	1.64E-02
+U2-type spliceosomal complex (GO:0005684)	92	14	5.27	+	2.66	1.74E-03	4.69E-02
+ribonucleoprotein complex (GO:1990904)	714	105	40.92	+	2.57	1.30E-16	2.04E-14
+endopeptidase complex (GO:1905369)	103	15	5.90	+	2.54	1.79E-03	4.76E-02
+fibrillar center (GO:0001650)	145	20	8.31	+	2.41	7.31E-04	2.37E-02
+ciliary basal body (GO:0036064)	165	22	9.46	+	2.33	8.62E-04	2.71E-02
+spliceosomal complex (GO:0005681)	197	26	11.29	+	2.30	2.51E-04	1.03E-02
+mitochondrial protein-containing complex (GO:0098798)	293	37	16.79	+	2.20	3.61E-05	1.94E-03
+nuclear chromosome (GO:0000228)	226	27	12.95	+	2.08	7.11E-04	2.34E-02
+nucleolus (GO:0005730)	1002	111	57.43	+	1.93	3.83E-10	3.26E-08
+mitochondrial matrix (GO:0005759)	486	53	27.85	+	1.90	2.82E-05	1.65E-03
+nuclear protein-containing complex (GO:0140513)	1276	135	73.13	+	1.85	7.28E-11	6.47E-09
+transport vesicle (GO:0030133)	429	45	24.59	+	1.83	2.85E-04	1.12E-02
+mitochondrial inner membrane (GO:0005743)	497	50	28.48	+	1.76	3.53E-04	1.29E-02
+nuclear speck (GO:0016607)	419	41	24.01	+	1.71	1.70E-03	4.62E-02
+mitochondrial envelope (GO:0005740)	798	75	45.74	+	1.64	8.94E-05	4.45E-03
+catalytic complex (GO:1902494)	1686	157	96.63	+	1.62	9.64E-09	7.57E-07
+organelle inner membrane (GO:0019866)	560	52	32.09	+	1.62	1.42E-03	4.15E-02
+mitochondrial membrane (GO:0031966)	749	69	42.93	+	1.61	2.72E-04	1.09E-02
+nuclear lumen (GO:0031981)	4494	408	257.56	+	1.58	2.52E-22	5.71E-20
+envelope (GO:0031975)	1260	114	72.21	+	1.58	4.71E-06	3.01E-04
+organelle envelope (GO:0031967)	1260	114	72.21	+	1.58	4.71E-06	2.92E-04
+nucleoplasm (GO:0005654)	4130	372	236.70	+	1.57	2.11E-19	3.60E-17
+organelle lumen (GO:0043233)	5614	499	321.75	+	1.55	5.82E-27	2.38E-24
+intracellular organelle lumen (GO:0070013)	5614	499	321.75	+	1.55	5.82E-27	1.98E-24
+membrane-enclosed lumen (GO:0031974)	5614	499	321.75	+	1.55	5.82E-27	1.70E-24
+mitochondrion (GO:0005739)	1671	148	95.77	+	1.55	4.38E-07	3.19E-05
+chromosome (GO:0005694)	1852	158	106.14	+	1.49	1.40E-06	9.55E-05
+cytosol (GO:0005829)	5458	462	312.81	+	1.48	4.65E-20	8.64E-18
+intracellular non-membrane-bounded organelle (GO:0043232)	5225	431	299.46	+	1.44	2.39E-16	3.26E-14
+non-membrane-bounded organelle (GO:0043228)	5226	431	299.51	+	1.44	2.41E-16	3.08E-14
+protein-containing complex (GO:0032991)	5771	466	330.75	+	1.41	2.07E-16	3.02E-14
+microtubule cytoskeleton (GO:0015630)	1374	110	78.75	+	1.40	8.50E-04	2.71E-02
+nucleus (GO:0005634)	7682	572	440.27	+	1.30	3.34E-14	3.25E-12
+organelle membrane (GO:0031090)	3688	271	211.37	+	1.28	2.26E-05	1.36E-03
+intracellular membrane-bounded organelle (GO:0043231)	12154	868	696.57	+	1.25	3.69E-24	9.44E-22
+intracellular organelle (GO:0043229)	13254	939	759.62	+	1.24	1.41E-28	9.62E-26
+cytoplasm (GO:0005737)	12097	857	693.31	+	1.24	5.86E-22	1.20E-19
+membrane-bounded organelle (GO:0043227)	13230	934	758.24	+	1.23	2.65E-27	1.35E-24
+organelle (GO:0043226)	14064	983	806.04	+	1.22	3.55E-30	3.63E-27
+intracellular anatomical structure (GO:0005622)	14945	1038	856.53	+	1.21	5.83E-36	1.19E-32
+vesicle (GO:0031982)	3975	274	227.82	+	1.20	1.31E-03	3.94E-02
+cellular anatomical entity (GO:0110165)	18802	1147	1077.58	+	1.06	1.26E-15	1.36E-13
+cellular_component (GO:0005575)	18949	1153	1086.01	+	1.06	3.38E-16	4.06E-14
+plasma membrane (GO:0005886)	5977	284	342.55	-	.83	2.11E-04	9.17E-03
+cell periphery (GO:0071944)	6460	303	370.24	-	.82	3.40E-05	1.88E-03
+intrinsic component of plasma membrane (GO:0031226)	1806	67	103.51	-	.65	1.44E-04	6.84E-03
+integral component of plasma membrane (GO:0005887)	1724	63	98.81	-	.64	1.29E-04	6.27E-03
+Unclassified (UNCLASSIFIED)	1640	27	93.99	-	.29	3.38E-16	3.83E-14
+intermediate filament (GO:0005882)	226	2	12.95	-	.15	5.69E-04	1.91E-02
+T cell receptor complex (GO:0042101)	149	0	8.54	-	 < 0.01	4.03E-04	1.45E-02
+immunoglobulin complex (GO:0019814)	188	0	10.77	-	 < 0.01	5.78E-05	2.95E-03

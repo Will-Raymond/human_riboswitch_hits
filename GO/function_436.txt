@@ -1,0 +1,23 @@
+
+
+
+
+
+Analysis Type:	PANTHER Overrepresentation Test (Released 20221013)
+Annotation Version and Release Date:	GO Ontology database DOI:  10.5281/zenodo.6799722 Released 2022-07-01
+Analyzed List:	upload_1 (Homo sapiens)
+Reference List:	Homo sapiens (all genes in database)
+Test Type:	FISHER
+Correction:	FDR
+GO molecular function complete	Homo sapiens - REFLIST (20589)	upload_1 (355)	upload_1 (expected)	upload_1 (over/under)	upload_1 (fold Enrichment)	upload_1 (raw P-value)	upload_1 (FDR)
+structural constituent of ribosome (GO:0003735)	168	16	2.90	+	5.52	1.06E-07	6.60E-05
+RNA binding (GO:0003723)	1666	86	28.73	+	2.99	7.73E-20	3.85E-16
+nucleic acid binding (GO:0003676)	4007	137	69.09	+	1.98	1.58E-16	1.97E-13
+heterocyclic compound binding (GO:1901363)	5983	179	103.16	+	1.74	8.83E-17	1.46E-13
+organic cyclic compound binding (GO:0097159)	6054	181	104.38	+	1.73	4.09E-17	1.02E-13
+catalytic activity (GO:0003824)	5610	131	96.73	+	1.35	9.03E-05	4.09E-02
+protein binding (GO:0005515)	14448	284	249.12	+	1.14	3.83E-05	2.12E-02
+binding (GO:0005488)	16594	324	286.12	+	1.13	5.93E-08	4.22E-05
+molecular_function (GO:0003674)	18292	346	315.39	+	1.10	3.15E-09	3.13E-06
+Unclassified (UNCLASSIFIED)	2297	9	39.61	-	.23	3.15E-09	2.61E-06
+G protein-coupled receptor activity (GO:0004930)	882	2	15.21	-	.13	4.83E-05	2.40E-02
