@@ -12,7 +12,7 @@
 ##### <sup><sup>2</sup>  Chemical and Biological Engineering, Colorado State University Fort Collins, CO 80523, USA</sup>
 
 
-![](./rs_abstract.png?raw=true)
+![](./Figures/Abstract.png?raw=true)
 
 
 This is the repo containing all the data files to recreate the above manuscript.
