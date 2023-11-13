@@ -35,9 +35,9 @@ This repository contains all the final data files used for the analysis in the a
 
 ```
 
-├─  alns/
+├─  alns/ - final alignment images for the website
 │		├─ aln_%%ID%%_%%ENS_NORM%%.png
-├─  data_files/
+├─  data_files/ - raw/processed data files used to make the feature sets
 │		├─ CCDS_nucleotide.current_11.28.2021.fa
 │		├─ riboswitch_RNAcentral_8.19.21.json
 │		├─ rs_dot.json
@@ -50,25 +50,33 @@ This repository contains all the final data files used for the analysis in the a
 │		├─ data_processor.py
 │		├─ process_rna_central_rs_json.py
 │		├─ rna_central_dot_structure_scraper.py
-├─  elkanoto_models/
+│		├─ species_in_RS_set.txt
+├─  elkanoto_models/ - PUlearn models
 │		├─ EKmodel_witheld_w_struct_features_9_26_%%LIGAND%%_%%LIGAND%%.joblib
 │		├─ load_ensemble.py
 │		├─ utr_proba_norm.npy
-├─  ensemble_predictions/
+├─  ensemble_predictions/ - predictions from the ensemble classifier
 │		├─ all_utr_predictions.npy
 │		├─ final_set_436.json
 │		├─ final_set_1533.json
 │		├─ utr_dot_hits_1533.json
 │		├─ utr_proba_norm.npy
-├─  feature_npy_files/
+│		├─ utr_proba_1533.npy
+├─  feature_npy_files/ - extracted feature data arrays
 │		├─ X_RS_full.npy
 │		├─ X_UTR.npy
-│		├─ X_SUB.npy
 │		├─ ids_UTR.npy
 │		├─ ids_RS.npy
 ├─  Figures/  ─  figure files for the paper
-├─  GO/
-│		├─ 
+├─  GO/ ─  GO analysis output files 
+│		├─ component_436.txt
+│		├─ component_1533.txt
+│		├─ function_436.txt
+│		├─ function_1533.txt
+│		├─ process_436.txt
+│		├─ process_1533.txt
+│		├─ gene_list_436.txt
+│		├─ gene_list_1533.txt
 ```
 
 
@@ -79,4 +87,4 @@ This repository contains all the final data files used for the analysis in the a
   
   
 
-Rerun the analysis here: [![Rerun the analysis here (Colab)](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1ThbS0ayh1q0u_45qELKpc0z-MZoVbYXp?usp=sharing)
+Rerun the analysis here: [![Rerun the analysis here (Colab)](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/17zmKJh8iHAC2tImNNSyBrwUpU0uYKefx?usp=sharing)
