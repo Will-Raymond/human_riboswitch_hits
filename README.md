@@ -34,10 +34,7 @@
 This repository contains all the final data files used for the analysis in the above manuscript.
 
 ```
-├─  alignment_matrices/
-│		├─ levdist_array_1533.npy
-│		├─ utr_hits_ldiff_mse_1533.npy
-│		├─ utr_hits_mse_1533.npy
+
 ├─  alns/
 │		├─ aln_%%ID%%_%%ENS_NORM%%.png
 ├─  data_files/
