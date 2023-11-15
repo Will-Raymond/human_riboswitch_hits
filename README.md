@@ -1,6 +1,5 @@
 
-# Positive-Unlabeled identification of potential riboswitch elements in *Homo Sapiens* mRNA 5'UTR sequences
-
+# Identification of potential riboswitch elements in *Homo Sapiens* mRNA 5'UTR sequences using Positive-Unlabeled machine learning
   
 
 ---
