@@ -8,10 +8,10 @@ Created on Thu Nov  9 13:41:30 2023
 import joblib
 import numpy as np
 
-#@title Load previously trained ensemble
+# Load previously trained ensemble
 
-model_name = "EKmodel_witheld_w_struct_features_9_26" #@param {type:"string"}
-model_norm = 'utr_proba_norm.npy'#@param {type:"string"}
+model_name = "EKmodel_witheld_w_struct_features_9_26"
+model_norm = 'utr_proba_norm.npy'
 pairs = [('SAM', 'cobalamin'), ('TPP','glycine'),('SAM','TPP'),('glycine','cobalamin'),('TPP','cobalamin'),
   ('FMN','cobalamin'),('FMN','TPP'),('FMN','SAM'),('FMN','glycine')]
 
@@ -39,3 +39,8 @@ for i in tqdm(range(len(pairs))):
 ensemble = estimators + estimators_2 + estimators_other
 #normalization vector for the outputs to the max of the training
 ensemble_norm = np.load('./%s'%model_norm)
+
+# TO USE THE ENSEMBLE where X is a feature vector
+    #  predicted_values = []
+    #  for j in range(20):
+    #     predicted_values.append(ensemble[j].predict_proba(X)/ensemble_norm[j]
