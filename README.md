@@ -81,8 +81,6 @@ This repository contains all the final data files used for the analysis in the a
 
   
 
-[Read the manuscript here]()
-
   
   
 
