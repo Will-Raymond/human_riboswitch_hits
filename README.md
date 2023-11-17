@@ -76,7 +76,7 @@ This repository contains all the final data files used for the analysis in the a
 ```
 
 
-![Read the manuscript here](./Identification%20of%20potential%20riboswitch%20elements%20in%20Homo%20Sapiens%20mRNA%205'UTR%20sequences%20using%20Positive-Unlabeled%20machine%20learning%20-%20biorxv.pdf)
+Read the manuscript [here](./Identification%20of%20potential%20riboswitch%20elements%20in%20Homo%20Sapiens%20mRNA%205'UTR%20sequences%20using%20Positive-Unlabeled%20machine%20learning%20-%20biorxv.pdf)
 
 Rerun the analysis here: [![Rerun the analysis here (Colab)](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/17zmKJh8iHAC2tImNNSyBrwUpU0uYKefx?usp=sharing)
 
