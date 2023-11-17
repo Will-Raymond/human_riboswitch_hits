@@ -5,7 +5,6 @@
 ---
 
   
-  
 
 ### William S. Raymond<sup>1</sup>, Jacob DeRoo<sup>1</sup>, Brian Munsky<sup>1,2</sup>
 
