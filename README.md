@@ -80,4 +80,4 @@ Read the manuscript [here](./Identification%20of%20potential%20riboswitch%20elem
 
 Rerun the analysis here: [![Rerun the analysis here (Colab)](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/17zmKJh8iHAC2tImNNSyBrwUpU0uYKefx?usp=sharing)
 
-Contact info: wsraymon@rams.colostate.edu
+Contact info: ```wsraymon@rams.colostate.edu```
