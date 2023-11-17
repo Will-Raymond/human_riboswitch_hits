@@ -1,0 +1,1076 @@
+#ccds	gene	gene_id	ccds_status	attribute
+CCDS12.1	SDF4	51150	Under review, update	CDS uses downstream AUG
+CCDS44.2	PRXL2B	127281	Reviewed, update pending	CDS uses downstream AUG
+CCDS54.1	AJAP1	55966	Public	Nonsense-mediated decay (NMD) candidate
+CCDS117.2	CORT	1325	Public	CDS uses downstream AUG
+CCDS192.2	AKR7L	246181	Public	Polymorphic pseudogene
+CCDS200.1	PLA2G2E	30814	Public	CDS uses downstream AUG
+CCDS225.1	EPHA8	2046	Public	Inferred exon combination
+CCDS323.1	RCC1	1104	Public	CDS uses downstream AUG
+CCDS369.2	FNDC5	252995	Public	CDS uses downstream AUG
+CCDS369.2	FNDC5	252995	Public	Non-AUG initiation codon
+CCDS380.1	CSMD2	114784	Public	Nonsense-mediated decay (NMD) candidate
+CCDS431.1	MYCBP	26292	Public	CDS uses downstream AUG
+CCDS508.1	KLF17	128209	Public	CDS uses downstream AUG
+CCDS538.1	MKNK1	8569	Reviewed, update pending	CDS uses downstream AUG
+CCDS539.1	MOB3C	148932	Under review, update	CDS uses downstream AUG
+CCDS573.1	PODN	127435	Reviewed, update pending	CDS uses downstream AUG
+CCDS801.1	GPR61	83873	Public	Nonsense-mediated decay (NMD) candidate
+CCDS871.1	SYT6	148281	Public	Nonsense-mediated decay (NMD) candidate
+CCDS891.1	CD101	9398	Public	CDS uses downstream AUG
+CCDS903.1	HSD3B1	3283	Public	CDS uses downstream AUG
+CCDS1015.1	LCE3C	353144	Public	Inferred exon combination
+CCDS1041.2	S100A5	6276	Public	CDS uses downstream AUG
+CCDS1053.2	SLC27A3	11000	Reviewed, update pending	CDS uses downstream AUG
+CCDS1066.1	ATP8B2	57198	Reviewed, update pending	CDS uses downstream AUG
+CCDS1080.1	LENEP	55891	Public	Nonsense-mediated decay (NMD) candidate
+CCDS1096.1	KRTCAP2	200185	Under review, update	CDS uses downstream AUG
+CCDS1109.1	PKLR	5313	Public	CDS uses downstream AUG
+CCDS1126.1	SSR2	6746	Public	CDS uses downstream AUG
+CCDS1146.1	GPATCH4	54865	Public	Polymorphic pseudogene
+CCDS1180.3	IFI16	3428	Public	CDS uses downstream AUG
+CCDS1184.1	FCER1A	2205	Public	CDS uses downstream AUG
+CCDS1185.1	OR10J1	26476	Reviewed, update pending	CDS uses downstream AUG
+CCDS1229.2	MPZ	4359	Public	CDS uses downstream AUG
+CCDS1387.1	CFHR5	81494	Public	CDS uses downstream AUG
+CCDS1412.1	PHLDA3	23612	Public	Nonsense-mediated decay (NMD) candidate
+CCDS1436.1	CHIT1	1118	Public	CDS uses downstream AUG
+CCDS1468.1	IL19	29949	Under review, update	CDS uses downstream AUG
+CCDS1538.1	TP53BP2	7159	Public	CDS uses downstream AUG
+CCDS1585.1	AGT	183	Under review, update	CDS uses downstream AUG
+CCDS1633.1	NLRP3	114548	Under review, update	CDS uses downstream AUG
+CCDS1785.3	GPATCH11	253635	Under review, update	CDS uses downstream AUG
+CCDS1850.1	ACYP2	98	Public	CDS uses downstream AUG
+CCDS1857.1	EFEMP1	2202	Public	CDS uses downstream AUG
+CCDS1891.2	GKN1	56287	Reviewed, update pending	CDS uses downstream AUG
+CCDS1983.2	SFTPB	6439	Reviewed, update pending	CDS uses downstream AUG
+CCDS1992.1	CD8A	925	Public	CDS uses downstream AUG
+CCDS2038.1	C2orf15	150590	Under review, update	CDS uses downstream AUG
+CCDS2039.1	LIPT1	51601	Public	CDS uses downstream AUG
+CCDS2040.1	MITD1	129531	Public	CDS uses downstream AUG
+CCDS2042.1	LYG2	254773	Public	CDS uses downstream AUG
+CCDS2070.1	FHL2	2274	Public	CDS uses downstream AUG
+CCDS2182.1	LRP1B	53353	Public	CDS uses downstream AUG
+CCDS2209.2	BAZ2B	29994	Public	Inferred exon combination
+CCDS2293.1	CALCRL	10203	Public	CDS uses downstream AUG
+CCDS2387.2	UNC80	285175	Public	Inferred exon combination
+CCDS2395.1	IKZF2	22807	Public	CDS uses downstream AUG
+CCDS2424.1	PRKAG3	53632	Public	Nonsense-mediated decay (NMD) candidate
+CCDS2430.2	CFAP65	255101	Public	Inferred exon combination
+CCDS2447.1	EPHA4	2043	Public	Nonsense-mediated decay (NMD) candidate
+CCDS2481.1	SPATA3	130560	Public	Nonsense-mediated decay (NMD) candidate
+CCDS2490.1	ALPP	250	Public	CDS uses downstream AUG
+CCDS2524.2	SCLY	51540	Reviewed, update pending	CDS uses downstream AUG
+CCDS2533.1	OTOS	150677	Public	CDS uses downstream AUG
+CCDS2568.1	SSUH2	51066	Under review, update	CDS uses downstream AUG
+CCDS2610.2	PPARG	5468	Under review, update	CDS uses downstream AUG
+CCDS2628.1	BTD	686	Reviewed, update pending	CDS uses downstream AUG
+CCDS2674.2	MYD88	4615	Reviewed, update pending	CDS uses downstream AUG
+CCDS2739.1	CCR5	1234	Public	Polymorphic pseudogene
+CCDS2762.2	CAMP	820	Reviewed, update pending	CDS uses downstream AUG
+CCDS2788.1	QARS1	5859	Public	CDS uses downstream AUG
+CCDS2800.1	BSN	8927	Public	Nonsense-mediated decay (NMD) candidate
+CCDS2804.1	INKA1	389119	Reviewed, update pending	CDS uses downstream AUG
+CCDS2833.1	TEX264	51368	Public	CDS uses downstream AUG
+CCDS3198.1	BCHE	590	Public	CDS uses downstream AUG
+CCDS3265.1	THPO	7066	Public	CDS uses downstream AUG
+CCDS3320.2	PIGX	54965	Public	Non-AUG initiation codon
+CCDS3332.1	LMLN	89782	Under review, update	CDS uses downstream AUG
+CCDS3436.1	RBPJ	3516	Under review, update	CDS uses downstream AUG
+CCDS3440.2	STIM2	57620	Public	CDS uses downstream AUG
+CCDS3440.2	STIM2	57620	Public	Non-AUG initiation codon
+CCDS3449.1	KLHL5	51088	Under review, update	CDS uses downstream AUG
+CCDS3532.1	CSN2	1447	Public	Inferred exon combination
+CCDS3536.2	ODAM	54959	Public	CDS uses downstream AUG
+CCDS3539.1	CABS1	85438	Public	Nonsense-mediated decay (NMD) candidate
+CCDS3738.1	LARP1B	55132	Public	Inferred exon combination
+CCDS3907.2	DNAJC21	134218	Public	CDS uses downstream AUG
+CCDS3936.1	C6	729	Public	CDS uses downstream AUG
+CCDS3944.1	CCL28	56477	Public	Nonsense-mediated decay (NMD) candidate
+CCDS4000.1	CCDC125	202243	Public	Inferred exon combination
+CCDS4188.1	CXCL14	9547	Reviewed, update pending	CDS uses downstream AUG
+CCDS4305.1	SLC6A7	6534	Public	CDS uses downstream AUG
+CCDS4397.1	THOC3	84321	Public	CDS uses downstream AUG
+CCDS4442.1	GRM6	2916	Public	Inferred exon combination
+CCDS4519.1	ERVFRD-1	405754	Public	Endogenous retrovirus
+CCDS4824.1	CDKN1A	1026	Public	CDS uses downstream AUG
+CCDS4855.1	NCR2	9436	Public	CDS uses downstream AUG
+CCDS4865.1	GUCA1B	2979	Public	CDS uses downstream AUG
+CCDS4907.2	VEGFA	7422	Public	Non-AUG initiation codon
+CCDS4911.1	SPATS1	221409	Public	Inferred exon combination
+CCDS4941.1	PAQR8	85315	Public	CDS uses downstream AUG
+CCDS4946.1	GSTA5	221357	Public	Inferred exon combination
+CCDS5020.3	GABRR2	2570	Public	CDS uses downstream AUG
+CCDS5060.2	SCML4	256380	Public	Inferred exon combination
+CCDS5071.1	CEP57L1	285753	Public	CDS uses downstream AUG
+CCDS5082.1	DDO	8528	Reviewed, update pending	CDS uses downstream AUG
+CCDS5083.1	DDO	8528	Reviewed, update pending	CDS uses downstream AUG
+CCDS5097.1	CCN6	8838	Reviewed, update pending	CDS uses downstream AUG
+CCDS5142.2	AKAP7	9465	Public	CDS uses downstream AUG
+CCDS5260.1	RSPH3	83861	Under review, update	CDS uses downstream AUG
+CCDS5308.2	PHF10	55274	Public	CDS uses downstream AUG
+CCDS5309.2	PHF10	55274	Public	CDS uses downstream AUG
+CCDS5355.1	C1GALT1	56913	Public	CDS uses downstream AUG
+CCDS5451.1	GPR141	353345	Public	CDS uses downstream AUG
+CCDS5453.1	SFRP4	6424	Public	CDS uses downstream AUG
+CCDS5529.1	VKORC1L1	154807	Public	CDS uses downstream AUG
+CCDS5558.1	ABHD11	83451	Under review, update	CDS uses downstream AUG
+CCDS5579.1	POR	5447	Under review, update	CDS uses downstream AUG
+CCDS5626.1	ERVW-1	30816	Public	Endogenous retrovirus
+CCDS5640.1	PON2	5445	Public	CDS uses downstream AUG
+CCDS5722.1	ORAI2	80228	Public	CDS uses downstream AUG
+CCDS5732.1	SLC26A5	375611	Public	Inferred exon combination
+CCDS5806.1	OPN1SW	611	Under review, update	CDS uses downstream AUG
+CCDS5839.1	STRA8	346673	Under review, update	CDS uses downstream AUG
+CCDS5841.1	FAM180A	389558	Public	Nonsense-mediated decay (NMD) candidate
+CCDS5855.1	TBXAS1	6916	Reviewed, update pending	CDS uses downstream AUG
+CCDS5856.1	TBXAS1	6916	Reviewed, update pending	CDS uses downstream AUG
+CCDS5874.2	TRPV6	55503	Public	Non-AUG initiation codon
+CCDS5876.2	LLCFC1	135927	Under review, update	CDS uses downstream AUG
+CCDS5925.2	WDR86	349136	Public	Inferred exon combination
+CCDS5942.1	SHH	6469	Public	CDS uses downstream AUG
+CCDS6037.1	TNFRSF10C	8794	Public	CDS uses downstream AUG
+CCDS6077.1	RBPMS	11030	Public	Nonsense-mediated decay (NMD) candidate
+CCDS6114.2	IDO2	169355	Under review, update	CDS uses downstream AUG
+CCDS6220.2	HNF4G	3174	Reviewed, update pending	CDS uses downstream AUG
+CCDS6359.2	MYC	4609	Public	Non-AUG initiation codon
+CCDS6380.1	AGO2	27161	Public	Inferred exon combination
+CCDS6385.2	LY6K	54742	Public	CDS uses downstream AUG
+CCDS6397.2	ZFP41	286128	Reviewed, update pending	CDS uses downstream AUG
+CCDS6397.2	ZFP41	286128	Reviewed, update pending	Nonsense-mediated decay (NMD) candidate
+CCDS6511.2	CDKN2A	1029	Public	Nonsense-mediated decay (NMD) candidate
+CCDS6532.1	APTX	54840	Reviewed, update pending	CDS uses downstream AUG
+CCDS6596.2	OR2S2	56656	Public	Polymorphic pseudogene
+CCDS6673.1	NAA35	60560	Public	CDS uses downstream AUG
+CCDS6694.1	IARS1	3376	Public	CDS uses downstream AUG
+CCDS6759.1	PPP3R2	5535	Reviewed, update pending	CDS uses downstream AUG
+CCDS6794.2	ALAD	210	Public	CDS uses downstream AUG
+CCDS6920.1	PTPA	5524	Public	CDS uses downstream AUG
+CCDS6933.1	ASS1	445	Public	CDS uses downstream AUG
+CCDS6936.1	QRFP	347148	Public	CDS uses downstream AUG
+CCDS6976.1	ADAMTSL2	9719	Public	CDS uses downstream AUG
+CCDS7040.2	NELFB	25920	Public	Non-AUG initiation codon
+CCDS7167.2	LYZL2	119180	Reviewed, update pending	CDS uses downstream AUG
+CCDS7193.1	ANKRD30A	91074	Reviewed, update pending	Nonsense-mediated decay (NMD) candidate
+CCDS7233.1	CHAT	1103	Public	CDS uses downstream AUG
+CCDS7466.1	ANKRD2	26287	Public	CDS uses downstream AUG
+CCDS7508.2	SFXN3	81855	Under review, update	CDS uses downstream AUG
+CCDS7620.2	FGFR2	2263	Public	CDS uses downstream AUG
+CCDS7733.1	TSPAN32	10077	Public	CDS uses downstream AUG
+CCDS7810.2	TEAD1	7003	Public	Non-AUG initiation codon
+CCDS7878.2	WT1	7490	Reviewed, update pending	Non-AUG initiation codon
+CCDS7886.1	CD59	966	Public	CDS uses downstream AUG
+CCDS7912.1	PRDM11	56981	Under review, update	CDS uses downstream AUG
+CCDS7945.1	PTPRJ	5795	Public	CDS uses downstream AUG
+CCDS8034.1	ZBTB3	79842	Reviewed, update pending	CDS uses downstream AUG
+CCDS8045.1	LGALS12	85329	Reviewed, update pending	CDS uses downstream AUG
+CCDS8061.1	NUDT22	84304	Public	CDS uses downstream AUG
+CCDS8212.1	FOLR2	2350	Public	CDS uses downstream AUG
+CCDS8279.1	FZD4	8322	Public	CDS uses downstream AUG
+CCDS8328.2	CASP5	838	Public	Inferred exon combination
+CCDS8365.2	HTR3A	3359	Reviewed, update pending	CDS uses downstream AUG
+CCDS8366.2	HTR3A	3359	Reviewed, update pending	CDS uses downstream AUG
+CCDS8421.1	MFRP	83552	Public	Nonsense-mediated decay (NMD) candidate
+CCDS8434.1	TECTA	7007	Public	Inferred exon combination
+CCDS8446.1	OR8B8	26493	Public	CDS uses downstream AUG
+CCDS8579.1	APOBEC1	339	Public	CDS uses downstream AUG
+CCDS8637.1	TAS2R14	50840	Public	CDS uses downstream AUG
+CCDS8646.1	BCL2L14	79370	Public	Nonsense-mediated decay (NMD) candidate
+CCDS8743.1	PUS7L	83448	Public	CDS uses downstream AUG
+CCDS8800.1	COX14	84987	Public	CDS uses downstream AUG
+CCDS8844.1	TNS2	23371	Public	CDS uses downstream AUG
+CCDS8897.1	PMEL	6490	Public	CDS uses downstream AUG
+CCDS8965.1	AVPR1A	552	Public	CDS uses downstream AUG
+CCDS8976.1	HELB	92797	Public	Nonsense-mediated decay (NMD) candidate
+CCDS9181.1	HRK	8739	Public	Nonsense-mediated decay (NMD) candidate
+CCDS9228.1	DIABLO	56616	Public	CDS uses downstream AUG
+CCDS9229.1	DIABLO	56616	Public	CDS uses downstream AUG
+CCDS9431.1	CCDC70	83446	Under review, update	CDS uses downstream AUG
+CCDS9437.1	CNMD	11061	Public	CDS uses downstream AUG
+CCDS9494.2	ZIC5	85416	Under review, update	CDS uses downstream AUG
+CCDS9528.1	F7	2155	Public	CDS uses downstream AUG
+CCDS9529.1	F7	2155	Public	CDS uses downstream AUG
+CCDS9585.1	CDH24	64403	Public	Nonsense-mediated decay (NMD) candidate
+CCDS9586.1	CDH24	64403	Public	Nonsense-mediated decay (NMD) candidate
+CCDS9593.1	SLC22A17	51310	Under review, update	Non-AUG initiation codon
+CCDS9594.2	SLC22A17	51310	Under review, update	Non-AUG initiation codon
+CCDS9611.1	FITM1	161247	Public	CDS uses downstream AUG
+CCDS9699.1	CDKL1	8814	Under review, update	CDS uses downstream AUG
+CCDS9724.1	TBPL2	387332	Under review, update	CDS uses downstream AUG
+CCDS9778.1	GARIN2	161142	Public	Nonsense-mediated decay (NMD) candidate
+CCDS9862.1	VIPAS39	63894	Public	CDS uses downstream AUG
+CCDS9894.2	GPR68	8111	Public	CDS uses downstream AUG
+CCDS9923.1	SERPINA10	51156	Public	CDS uses downstream AUG
+CCDS9983.2	COA8	84334	Reviewed, update pending	CDS uses downstream AUG
+CCDS10016.1	SNURF	8926	Public	Nonsense-mediated decay (NMD) candidate
+CCDS10057.2	IVD	3712	Reviewed, update pending	CDS uses downstream AUG
+CCDS10104.1	HYPK	25764	Reviewed, update pending	CDS uses downstream AUG
+CCDS10240.1	SENP8	123228	Public	CDS uses downstream AUG
+CCDS10245.2	GOLGA6B	55889	Public	Inferred exon combination
+CCDS10305.1	CHRNA3	1136	Public	CDS uses downstream AUG
+CCDS10352.2	TICRR	90381	Public	Inferred exon combination
+CCDS10396.1	SNRNP25	79622	Reviewed, update pending	CDS uses downstream AUG
+CCDS10405.1	AXIN1	8312	Public	CDS uses downstream AUG
+CCDS10406.1	AXIN1	8312	Public	CDS uses downstream AUG
+CCDS10448.1	FAHD1	81889	Under review, update	CDS uses downstream AUG
+CCDS10479.2	ZG16B	124220	Under review, update	CDS uses downstream AUG
+CCDS10506.2	SLX4	84464	Public	Inferred exon combination
+CCDS10519.1	NUDT16L1	84309	Public	CDS uses downstream AUG
+CCDS10545.1	DEXI	28955	Public	Nonsense-mediated decay (NMD) candidate
+CCDS10596.1	ZP2	7783	Public	CDS uses downstream AUG
+CCDS10624.2	TNRC6A	27327	Public	Inferred exon combination
+CCDS10637.1	SULT1A1	6817	Under review, update	CDS uses downstream AUG
+CCDS10646.1	SPNS1	83985	Public	CDS uses downstream AUG
+CCDS10678.3	SEPTIN1	1731	Under review, update	CDS uses downstream AUG
+CCDS10730.1	ABCC12	94160	Public	Inferred exon combination
+CCDS10780.1	CCL17	6361	Public	CDS uses downstream AUG
+CCDS10825.1	CES2	8824	Reviewed, update pending	CDS uses downstream AUG
+CCDS10833.2	ELMO3	79767	Reviewed, update pending	CDS uses downstream AUG
+CCDS10856.1	DPEP3	64180	Reviewed, update pending	CDS uses downstream AUG
+CCDS10927.2	CLEC3A	10143	Reviewed, update pending	CDS uses downstream AUG
+CCDS11011.1	SERPINF2	5345	Public	CDS uses downstream AUG
+CCDS11052.1	CXCL16	58191	Under review, update	CDS uses downstream AUG
+CCDS11086.1	SLC16A11	162515	Reviewed, update pending	CDS uses downstream AUG
+CCDS11094.1	ELP5	23587	Under review, update	CDS uses downstream AUG
+CCDS11095.1	ELP5	23587	Under review, update	CDS uses downstream AUG
+CCDS11251.1	ANKRD13B	124930	Public	CDS uses downstream AUG
+CCDS11256.1	SLC6A4	6532	Public	CDS uses downstream AUG
+CCDS11278.1	CCL7	6354	Public	CDS uses downstream AUG
+CCDS11280.1	CCL8	6355	Public	CDS uses downstream AUG
+CCDS11376.1	KRT28	162605	Public	CDS uses downstream AUG
+CCDS11420.1	KCNH4	23415	Public	Nonsense-mediated decay (NMD) candidate
+CCDS11446.1	G6PC1	2538	Public	CDS uses downstream AUG
+CCDS11552.2	SLC35B1	10237	Reviewed, update pending	CDS uses downstream AUG
+CCDS11697.1	DNAI2	64446	Public	Nonsense-mediated decay (NMD) candidate
+CCDS11700.2	CD300LB	124599	Public	CDS uses downstream AUG
+CCDS11702.1	CD300E	342510	Public	CDS uses downstream AUG
+CCDS11736.1	CDK3	1018	Public	CDS uses downstream AUG
+CCDS11754.1	TK1	7083	Public	CDS uses downstream AUG
+CCDS11763.1	ENPP7	339221	Public	CDS uses downstream AUG
+CCDS11834.1	TGIF1	7050	Under review, update	CDS uses downstream AUG
+CCDS11881.1	CABYR	26256	Public	Nonsense-mediated decay (NMD) candidate
+CCDS11882.1	CABYR	26256	Public	Nonsense-mediated decay (NMD) candidate
+CCDS11894.1	DSC1	1823	Public	Inferred exon combination
+CCDS11926.2	EPG5	57724	Public	Inferred exon combination
+CCDS11929.2	LOXHD1	125336	Public	Inferred exon combination
+CCDS11995.1	DSEL	92126	Reviewed, update pending	CDS uses downstream AUG
+CCDS12032.1	BSG	682	Under review, update	CDS uses downstream AUG
+CCDS12062.1	PWWP3A	84939	Reviewed, update pending	CDS uses downstream AUG
+CCDS12300.2	PODNL1	79883	Public	CDS uses downstream AUG
+CCDS12334.1	OR10H3	26532	Public	CDS uses downstream AUG
+CCDS12353.1	USHBP1	83878	Public	Inferred exon combination
+CCDS12407.1	LPAR2	9170	Under review, update	CDS uses downstream AUG
+CCDS12470.1	UPK1A	11045	Public	CDS uses downstream AUG
+CCDS12485.2	ALKBH6	84964	Under review, update	CDS uses downstream AUG
+CCDS12534.2	ZFP36	7538	Reviewed, update pending	CDS uses downstream AUG
+CCDS12611.1	PSG3	5671	Public	CDS uses downstream AUG
+CCDS12614.2	PSG11	5680	Public	CDS uses downstream AUG
+CCDS12615.2	PSG11	5680	Public	CDS uses downstream AUG
+CCDS12679.1	NOVA2	4858	Public	CDS uses downstream AUG
+CCDS12690.1	STRN4	29888	Public	Nonsense-mediated decay (NMD) candidate
+CCDS12733.1	FUT1	2523	Public	CDS uses downstream AUG
+CCDS12763.1	PTH2	113091	Public	CDS uses downstream AUG
+CCDS12782.1	PTOV1	53635	Public	Nonsense-mediated decay (NMD) candidate
+CCDS12790.2	SIGLEC11	114132	Public	CDS uses downstream AUG
+CCDS12823.2	KLK14	43847	Reviewed, update pending	CDS uses downstream AUG
+CCDS12833.1	SIGLEC12	89858	Public	Polymorphic pseudogene
+CCDS12886.1	LILRB2	10288	Public	CDS uses downstream AUG
+CCDS12901.1	LILRA1	11024	Public	CDS uses downstream AUG
+CCDS13148.1	THBD	7056	Public	CDS uses downstream AUG
+CCDS13165.2	CST7	8530	Public	CDS uses downstream AUG
+CCDS13183.1	HM13	81502	Public	Nonsense-mediated decay (NMD) candidate
+CCDS13203.1	C20orf203	284805	Public	Nonsense-mediated decay (NMD) candidate
+CCDS13212.1	BPIFB3	359710	Under review, update	CDS uses downstream AUG
+CCDS13213.2	BPIFB4	149954	Public	CDS uses downstream AUG
+CCDS13213.2	BPIFB4	149954	Public	Inferred exon combination
+CCDS13232.1	ASIP	434	Public	CDS uses downstream AUG
+CCDS13303.1	BPI	671	Reviewed, update pending	CDS uses downstream AUG
+CCDS13320.1	SGK2	10110	Under review, update	CDS uses downstream AUG
+CCDS13449.2	MC3R	4159	Public	CDS uses downstream AUG
+CCDS13471.1	GNAS	2778	Public	Nonsense-mediated decay (NMD) candidate
+CCDS13473.2	NELFCD	51497	Reviewed, update pending	CDS uses downstream AUG
+CCDS13564.1	LIPI	149998	Under review, update	CDS uses downstream AUG
+CCDS13636.1	KCNE1	3753	Public	CDS uses downstream AUG
+CCDS13667.1	B3GALT5	10317	Public	Inferred exon combination
+CCDS13676.1	PRDM15	63977	Under review, update	CDS uses downstream AUG
+CCDS13802.2	GGTLC2	91227	Public	CDS uses downstream AUG
+CCDS13805.1	RAB36	9609	Under review, update	CDS uses downstream AUG
+CCDS13841.1	CRYBA4	1413	Public	CDS uses downstream AUG
+CCDS13941.1	TMPRSS6	164656	Under review, update	CDS uses downstream AUG
+CCDS14040.1	CYB5R3	1727	Public	CDS uses downstream AUG
+CCDS14124.1	MXRA5	25878	Public	CDS uses downstream AUG
+CCDS14127.1	STS	412	Reviewed, update pending	CDS uses downstream AUG
+CCDS14173.1	AP1S2	8905	Public	CDS uses downstream AUG
+CCDS14256.1	NYX	60506	Under review, update	CDS uses downstream AUG
+CCDS14364.1	PFKFB1	5207	Public	CDS uses downstream AUG
+CCDS14384.3	HEPH	9843	Under review, update	CDS uses downstream AUG
+CCDS14461.1	PCDH11X	27328	Public	CDS uses downstream AUG
+CCDS14476.2	XKRX	402415	Public	CDS uses downstream AUG
+CCDS14653.1	MMGT1	93380	Public	CDS uses downstream AUG
+CCDS14800.1	BPY2	9083	Public	Nonsense-mediated decay (NMD) candidate
+CCDS30553.1	SDF4	51150	Under review, update	CDS uses downstream AUG
+CCDS30578.1	CA6	765	Public	CDS uses downstream AUG
+CCDS30694.2	SZT2	23334	Public	Inferred exon combination
+CCDS30705.1	MKNK1	8569	Reviewed, update pending	CDS uses downstream AUG
+CCDS30862.1	KPRP	448834	Public	Inferred exon combination
+CCDS30904.1	OR6K6	128371	Under review, update	CDS uses downstream AUG
+CCDS30982.1	NFASC	23114	Public	CDS uses downstream AUG
+CCDS31013.1	PLXNA2	5362	Public	CDS uses downstream AUG
+CCDS31062.1	LYST	1130	Public	Inferred exon combination
+CCDS31102.1	OR2AK2	391191	Under review, update	CDS uses downstream AUG
+CCDS31116.1	OR2T2	401992	Public	CDS uses downstream AUG
+CCDS31124.1	OR2T27	403239	Public	CDS uses downstream AUG
+CCDS31174.1	LYZL1	84569	Reviewed, update pending	CDS uses downstream AUG
+CCDS31238.1	PTEN	5728	Public	CDS uses downstream AUG
+CCDS31298.1	FGFR2	2263	Public	CDS uses downstream AUG
+CCDS31340.1	TRPM5	29850	Public	CDS uses downstream AUG
+CCDS31361.1	OR51F2	119694	Reviewed, update pending	CDS uses downstream AUG
+CCDS31381.1	OR51Q1	390061	Public	Polymorphic pseudogene
+CCDS31386.1	OR52H1	390067	Under review, update	CDS uses downstream AUG
+CCDS31405.1	OR56A1	120796	Under review, update	CDS uses downstream AUG
+CCDS31413.1	OR2AG2	338755	Public	CDS uses downstream AUG
+CCDS31414.1	OR2AG1	144125	Public	Polymorphic pseudogene
+CCDS31428.1	EIF4G2	1982	Public	Non-AUG initiation codon
+CCDS31487.1	OR4X1	390113	Public	Polymorphic pseudogene
+CCDS31489.1	OR4C3	256144	Reviewed, update pending	CDS uses downstream AUG
+CCDS31516.1	OR5AS1	219447	Public	CDS uses downstream AUG
+CCDS31523.1	OR5T2	219464	Under review, update	CDS uses downstream AUG
+CCDS31539.1	LRRC55	219527	Reviewed, update pending	CDS uses downstream AUG
+CCDS31541.1	OR6Q1	219952	Public	Polymorphic pseudogene
+CCDS31542.1	OR9I1	219954	Public	CDS uses downstream AUG
+CCDS31606.1	SPDYC	387778	Under review, update	CDS uses downstream AUG
+CCDS31674.1	POU2AF2	341032	Reviewed, update pending	Inferred exon combination
+CCDS31701.1	OR10S1	219873	Under review, update	CDS uses downstream AUG
+CCDS31710.1	OR8B4	283162	Public	Polymorphic pseudogene
+CCDS31712.1	OR8A1	390275	Reviewed, update pending	CDS uses downstream AUG
+CCDS31724.1	GLB1L2	89944	Public	Nonsense-mediated decay (NMD) candidate
+CCDS31729.1	TEAD4	7004	Public	Non-AUG initiation codon
+CCDS31730.1	TEAD4	7004	Public	Non-AUG initiation codon
+CCDS31804.1	ACVRL1	94	Public	CDS uses downstream AUG
+CCDS31814.1	OR9K2	441639	Under review, update	Inferred exon combination
+CCDS31826.2	OR6C68	403284	Public	Inferred exon combination
+CCDS31894.2	ASCL4	121549	Under review, update	CDS uses downstream AUG
+CCDS31999.1	IPO5	3843	Reviewed, update pending	CDS uses downstream AUG
+CCDS32030.1	OR4K17	390436	Under review, update	CDS uses downstream AUG
+CCDS32037.1	RNASE12	493901	Public	CDS uses downstream AUG
+CCDS32042.1	OR5AU1	390445	Reviewed, update pending	CDS uses downstream AUG
+CCDS32046.1	OR10G3	26533	Public	CDS uses downstream AUG
+CCDS32075.1	DMAC2L	27109	Reviewed, update pending	CDS uses downstream AUG
+CCDS32076.1	DMAC2L	27109	Reviewed, update pending	CDS uses downstream AUG
+CCDS32111.1	ADAM20	8748	Reviewed, update pending	CDS uses downstream AUG
+CCDS32120.1	LIN52	91750	Reviewed, update pending	CDS uses downstream AUG
+CCDS32367.1	FAHD1	81889	Under review, update	CDS uses downstream AUG
+CCDS32432.1	SLX1A	548593	Public	CDS uses downstream AUG
+CCDS32495.1	SLC38A8	146167	Public	Inferred exon combination
+CCDS32578.1	MPRIP	23164	Public	CDS uses downstream AUG
+CCDS32609.1	LRRC37B	114659	Public	CDS uses downstream AUG
+CCDS32665.1	ITGA2B	3674	Public	CDS uses downstream AUG
+CCDS32680.2	MYCBPAP	84073	Reviewed, update pending	CDS uses downstream AUG
+CCDS32812.2	SLC25A52	147407	Reviewed, update pending	CDS uses downstream AUG
+CCDS32816.1	FHOD3	80206	Public	Inferred exon combination
+CCDS32854.1	OR4F17	81099	Public	CDS uses downstream AUG
+CCDS32896.1	OR1M1	125963	Public	CDS uses downstream AUG
+CCDS32905.2	FDX2	112812	Reviewed, update pending	CDS uses downstream AUG
+CCDS32937.1	OR1I1	126370	Public	CDS uses downstream AUG
+CCDS32989.1	SCGB2B2	284402	Public	CDS uses downstream AUG
+CCDS33104.1	CACNG8	59283	Public	Non-AUG initiation codon
+CCDS33265.1	POU3F3	5455	Public	Inferred exon combination
+CCDS33337.1	TTN	7273	Public	Inferred exon combination
+CCDS33351.2	ANKAR	150709	Public	Inferred exon combination
+CCDS33375.1	PECR	55825	Public	CDS uses downstream AUG
+CCDS33418.1	DUSP28	285193	Public	Nonsense-mediated decay (NMD) candidate
+CCDS33423.1	ANO7	50636	Reviewed, update pending	CDS uses downstream AUG
+CCDS33457.1	DEFB124	245937	Public	CDS uses downstream AUG
+CCDS33460.1	HCK	3055	Public	Non-AUG initiation codon
+CCDS33603.2	PI4KA	5297	Public	CDS uses downstream AUG
+CCDS33617.1	GSTT2B	653689	Public	Polymorphic pseudogene
+CCDS33646.1	DDX17	10521	Public	Non-AUG initiation codon
+CCDS33647.1	NPTXR	23467	Public	Non-AUG initiation codon
+CCDS33704.1	NUP210	23225	Public	Inferred exon combination
+CCDS33723.1	ZCWPW2	152098	Public	CDS uses downstream AUG
+CCDS33800.1	OR5H6	79295	Reviewed, update pending	CDS uses downstream AUG
+CCDS33800.1	OR5H6	79295	Reviewed, update pending	Polymorphic pseudogene
+CCDS33801.1	OR5H2	79310	Under review, update	CDS uses downstream AUG
+CCDS33847.2	PLXNA1	5361	Public	CDS uses downstream AUG
+CCDS33974.1	KLHL5	51088	Under review, update	CDS uses downstream AUG
+CCDS34003.1	ANKRD17	26057	Public	Inferred exon combination
+CCDS34004.1	ANKRD17	26057	Public	Inferred exon combination
+CCDS34034.1	ADH7	131	Under review, update	CDS uses downstream AUG
+CCDS34059.1	FGF2	2247	Public	Non-AUG initiation codon
+CCDS34124.2	PLEKHG4B	153478	Public	Inferred exon combination
+CCDS34144.1	DNAJC21	134218	Public	CDS uses downstream AUG
+CCDS34146.2	CPLANE1	65250	Public	Inferred exon combination
+CCDS34349.1	H1-6	3010	Public	CDS uses downstream AUG
+CCDS34364.1	OR10C1	442194	Public	Polymorphic pseudogene
+CCDS34413.1	HSPA1L	3305	Public	CDS uses downstream AUG
+CCDS34457.1	VEGFA	7422	Public	Non-AUG initiation codon
+CCDS34458.1	VEGFA	7422	Public	Non-AUG initiation codon
+CCDS34476.1	DEFB112	245915	Reviewed, update pending	CDS uses downstream AUG
+CCDS34486.2	COX7A2	1347	Under review, update	CDS uses downstream AUG
+CCDS34602.1	ICA1	3382	Public	CDS uses downstream AUG
+CCDS34616.2	NT5C3A	51251	Public	CDS uses downstream AUG
+CCDS34620.2	POU6F2	11281	Reviewed, withdrawal pending	Inferred exon combination
+CCDS34737.1	MDFIC	29969	Public	Non-AUG initiation codon
+CCDS34875.1	RBPMS	11030	Public	Nonsense-mediated decay (NMD) candidate
+CCDS34946.1	TRAPPC9	83696	Under review, update	CDS uses downstream AUG
+CCDS34950.1	ARC	23237	Public	Nonsense-mediated decay (NMD) candidate
+CCDS34999.1	TUSC1	286319	Under review, update	CDS uses downstream AUG
+CCDS35004.1	BAG1	573	Public	Non-AUG initiation codon
+CCDS35072.1	ERCC6L2	375748	Reviewed, update pending	CDS uses downstream AUG
+CCDS35077.2	CCDC180	100499483	Under review, update	CDS uses downstream AUG
+CCDS35085.1	CYLC2	1539	Public	Nonsense-mediated decay (NMD) candidate
+CCDS35089.1	OR13C3	138803	Under review, update	CDS uses downstream AUG
+CCDS35123.1	OR1N2	138882	Reviewed, update pending	CDS uses downstream AUG
+CCDS35362.1	H2BW1	158983	Under review, update	CDS uses downstream AUG
+CCDS35500.2	ZNF550	162972	Public	Nonsense-mediated decay (NMD) candidate
+CCDS41224.2	MIB2	142678	Under review, update	CDS uses downstream AUG
+CCDS41238.1	HES3	390992	Public	CDS uses downstream AUG
+CCDS41240.1	PLEKHG5	57449	Under review, update	CDS uses downstream AUG
+CCDS41241.1	PLEKHG5	57449	Under review, update	CDS uses downstream AUG
+CCDS41258.2	PRAMEF18	391003	Public	Inferred exon combination
+CCDS41265.1	PRAMEF20	645425	Public	Inferred exon combination
+CCDS41282.1	SELENON	57190	Public	Contains selenocysteine
+CCDS41283.1	SELENON	57190	Public	Contains selenocysteine
+CCDS41289.1	TRNP1	388610	Public	Nonsense-mediated decay (NMD) candidate
+CCDS41295.1	RCC1	1104	Public	CDS uses downstream AUG
+CCDS41320.1	MUTYH	4595	Under review, update	CDS uses downstream AUG
+CCDS41332.3	OSBPL9	114883	Public	CDS uses downstream AUG
+CCDS41333.2	OSBPL9	114883	Public	CDS uses downstream AUG
+CCDS41339.1	DIO1	1733	Public	Contains selenocysteine
+CCDS41340.1	DIO1	1733	Public	Contains selenocysteine
+CCDS41350.1	LRRIQ3	127255	Public	Inferred exon combination
+CCDS41356.2	CCDC18	343099	Public	Inferred exon combination
+CCDS41414.2	RHBG	57127	Public	Polymorphic pseudogene
+CCDS41481.1	OR1C1	26188	Public	CDS uses downstream AUG
+CCDS41618.1	EIF4G2	1982	Public	Non-AUG initiation codon
+CCDS41757.2	PRB2	653247	Public	Inferred exon combination
+CCDS41815.1	NAV3	89795	Public	Inferred exon combination
+CCDS41859.1	TMEM132B	114795	Public	Inferred exon combination
+CCDS41905.1	DAOA	267012	Public	Nonsense-mediated decay (NMD) candidate
+CCDS41964.1	GPX2	2877	Public	Contains selenocysteine
+CCDS41965.1	MAX	4149	Public	Nonsense-mediated decay (NMD) candidate
+CCDS41982.1	SERPINA9	327657	Reviewed, update pending	CDS uses downstream AUG
+CCDS41983.1	SERPINA9	327657	Reviewed, update pending	CDS uses downstream AUG
+CCDS41992.2	DIO3	1735	Public	Contains selenocysteine
+CCDS41995.1	BAG5	9529	Under review, update	CDS uses downstream AUG
+CCDS42016.1	EIF2AK4	440275	Public	Inferred exon combination
+CCDS42022.1	CCDC32	90416	Under review, update	CDS uses downstream AUG
+CCDS42068.1	CFAP161	161502	Public	CDS uses downstream AUG
+CCDS42086.1	LRRK1	79705	Public	Inferred exon combination
+CCDS42100.1	MSRB1	51734	Public	Contains selenocysteine
+CCDS42102.1	NPW	283869	Public	Non-AUG initiation codon
+CCDS42116.2	C16orf89	146556	Public	CDS uses downstream AUG
+CCDS42150.1	SEPHS2	22928	Public	Contains selenocysteine
+CCDS42174.3	CES4A	283848	Public	CDS uses downstream AUG
+CCDS42176.1	NOL3	8996	Public	CDS uses downstream AUG
+CCDS42228.1	DPH1	1801	Reviewed, update pending	CDS uses downstream AUG
+CCDS42233.1	OR3A2	4995	Under review, update	CDS uses downstream AUG
+CCDS42265.1	TBC1D26	353149	Public	Nonsense-mediated decay (NMD) candidate
+CCDS42268.1	MPRIP	23164	Public	CDS uses downstream AUG
+CCDS42364.2	C17orf67	339210	Public	CDS uses downstream AUG
+CCDS42378.1	GPRC5C	55890	Reviewed, update pending	CDS uses downstream AUG
+CCDS42382.1	PRCD	768206	Public	Nonsense-mediated decay (NMD) candidate
+CCDS42457.1	GPX4	2879	Public	Contains selenocysteine
+CCDS42519.1	CPAMD8	27151	Reviewed, update pending	CDS uses downstream AUG
+CCDS42542.1	C19orf12	83636	Under review, update	CDS uses downstream AUG
+CCDS42575.1	BCAM	4059	Public	Nonsense-mediated decay (NMD) candidate
+CCDS42581.1	STRN4	29888	Public	Nonsense-mediated decay (NMD) candidate
+CCDS42612.1	LILRB2	10288	Public	CDS uses downstream AUG
+CCDS42614.1	LILRB1	10859	Public	CDS uses downstream AUG
+CCDS42615.1	LILRB1	10859	Public	CDS uses downstream AUG
+CCDS42616.1	LILRB1	10859	Public	CDS uses downstream AUG
+CCDS42617.1	LILRB1	10859	Public	CDS uses downstream AUG
+CCDS42630.1	COX6B2	125965	Public	Nonsense-mediated decay (NMD) candidate
+CCDS42642.1	ZNF418	147686	Public	Nonsense-mediated decay (NMD) candidate
+CCDS42751.1	SMPD4	55627	Under review, update	CDS uses downstream AUG
+CCDS42803.1	CTLA4	1493	Public	Inferred exon combination
+CCDS42824.1	SPEG	10290	Public	Inferred exon combination
+CCDS42837.1	OR6B3	150681	Public	CDS uses downstream AUG
+CCDS42863.1	TTLL9	164395	Public	Inferred exon combination
+CCDS42869.1	MYH7B	57644	Under review, update	CDS uses downstream AUG
+CCDS42981.1	TXNRD2	10587	Public	Contains selenocysteine
+CCDS42981.1	TXNRD2	10587	Public	Nonsense-mediated decay (NMD) candidate
+CCDS43003.1	SELENOM	140606	Public	Contains selenocysteine
+CCDS43027.1	SMC1B	27127	Public	Inferred exon combination
+CCDS43034.1	SELENOO	83642	Public	Contains selenocysteine
+CCDS43091.1	GPX1	2876	Public	Contains selenocysteine
+CCDS43113.2	CRYBG3	131544	Public	Inferred exon combination
+CCDS43136.1	NR1I2	8856	Public	Non-AUG initiation codon
+CCDS43193.2	CEP19	84984	Reviewed, update pending	CDS uses downstream AUG
+CCDS43226.1	CNGA1	1259	Under review, update	CDS uses downstream AUG
+CCDS43311.1	SELENOP	6414	Public	Contains selenocysteine
+CCDS43330.1	FAM169A	26049	Public	CDS uses downstream AUG
+CCDS43353.1	FAM170A	340069	Public	Nonsense-mediated decay (NMD) candidate
+CCDS43376.1	HMHB1	57824	Public	Non-AUG initiation codon
+CCDS43389.1	GPX3	2878	Public	Contains selenocysteine
+CCDS43432.1	GPX6	257202	Public	Contains selenocysteine
+CCDS43467.2	RUNX2	860	Public	Inferred exon combination
+CCDS43501.1	TBC1D32	221322	Public	Inferred exon combination
+CCDS43517.1	OPRM1	4988	Public	CDS uses downstream AUG
+CCDS43530.1	KIF25	3834	Public	Inferred exon combination
+CCDS43667.1	OR6B1	135946	Public	CDS uses downstream AUG
+CCDS43669.1	OR2A25	392138	Public	CDS uses downstream AUG
+CCDS43808.2	SPATA31A1	647060	Reviewed, update pending	CDS uses downstream AUG
+CCDS43827.1	CBWD6	644019	Public	Inferred exon combination
+CCDS43869.1	RGS3	5998	Under review, update	CDS uses downstream AUG
+CCDS43883.1	SWI5	375757	Under review, update	Non-AUG initiation codon
+CCDS43896.1	CEL	1056	Reviewed, update pending	CDS uses downstream AUG
+CCDS44029.1	BPY2B	442867	Public	Nonsense-mediated decay (NMD) candidate
+CCDS44030.1	BPY2C	442868	Public	Nonsense-mediated decay (NMD) candidate
+CCDS44134.1	MKNK1	8569	Reviewed, update pending	CDS uses downstream AUG
+CCDS44145.1	OSBPL9	114883	Public	CDS uses downstream AUG
+CCDS44185.1	FNDC7	163479	Public	CDS uses downstream AUG
+CCDS44202.1	ZNF697	90874	Public	CDS uses downstream AUG
+CCDS44240.1	PKLR	5313	Public	CDS uses downstream AUG
+CCDS44245.1	GPATCH4	54865	Public	Polymorphic pseudogene
+CCDS44257.1	TSTD1	100131187	Public	CDS uses downstream AUG
+CCDS44258.1	TSTD1	100131187	Public	CDS uses downstream AUG
+CCDS44288.1	PRG4	10216	Public	Inferred exon combination
+CCDS44308.1	CR1	1378	Public	CDS uses downstream AUG
+CCDS44309.1	CR1	1378	Public	CDS uses downstream AUG
+CCDS44346.1	NLRP3	114548	Under review, update	CDS uses downstream AUG
+CCDS44347.1	NLRP3	114548	Under review, update	CDS uses downstream AUG
+CCDS44400.1	PCDH15	65217	Public	Inferred exon combination
+CCDS44401.1	PCDH15	65217	Public	Inferred exon combination
+CCDS44403.1	PCDH15	65217	Public	Inferred exon combination
+CCDS44404.1	PCDH15	65217	Public	Inferred exon combination
+CCDS44429.1	CDH23	64072	Public	CDS uses downstream AUG
+CCDS44468.1	ANKRD2	26287	Public	CDS uses downstream AUG
+CCDS44485.1	FGFR2	2263	Public	CDS uses downstream AUG
+CCDS44486.1	FGFR2	2263	Public	CDS uses downstream AUG
+CCDS44487.1	FGFR2	2263	Public	CDS uses downstream AUG
+CCDS44488.1	FGFR2	2263	Public	CDS uses downstream AUG
+CCDS44489.1	FGFR2	2263	Public	CDS uses downstream AUG
+CCDS44494.1	JAKMIP3	282973	Public	Nonsense-mediated decay (NMD) candidate
+CCDS44513.1	MUC6	4588	Public	CDS uses downstream AUG
+CCDS44513.1	MUC6	4588	Public	Inferred exon combination
+CCDS44515.2	MUC5B	727897	Public	Inferred exon combination
+CCDS44528.1	OR52N4	390072	Public	Polymorphic pseudogene
+CCDS44532.1	DNHD1	144132	Public	Inferred exon combination
+CCDS44539.1	IRAG1	10335	Public	Non-AUG initiation codon
+CCDS44556.1	MUC15	143662	Public	CDS uses downstream AUG
+CCDS44557.1	MUC15	143662	Public	CDS uses downstream AUG
+CCDS44561.1	WT1	7490	Reviewed, update pending	Non-AUG initiation codon
+CCDS44562.1	WT1	7490	Reviewed, update pending	Non-AUG initiation codon
+CCDS44565.2	KIAA1549L	25758	Reviewed, update pending	Inferred exon combination
+CCDS44596.1	PTPRJ	5795	Public	CDS uses downstream AUG
+CCDS44602.1	SELENOH	280636	Public	Contains selenocysteine
+CCDS44629.1	NXF1	10482	Public	Nonsense-mediated decay (NMD) candidate
+CCDS44633.1	LGALS12	85329	Reviewed, update pending	CDS uses downstream AUG
+CCDS44636.1	ZFTA	65998	Public	Inferred exon combination
+CCDS44640.1	NUDT22	84304	Public	CDS uses downstream AUG
+CCDS44685.2	KLHL35	283212	Public	CDS uses downstream AUG
+CCDS44704.1	UBTFL1	642623	Public	Inferred exon combination
+CCDS44718.1	CASP5	838	Public	Inferred exon combination
+CCDS44720.1	CASP5	838	Public	Inferred exon combination
+CCDS44732.1	PLET1	349633	Public	Inferred exon combination
+CCDS44808.1	PLEKHG6	55200	Under review, update	CDS uses downstream AUG
+CCDS44821.1	PTPN6	5777	Public	Nonsense-mediated decay (NMD) candidate
+CCDS44878.1	FAM186A	121006	Public	Inferred exon combination
+CCDS44923.1	APOF	319	Public	CDS uses downstream AUG
+CCDS45001.1	LRRC43	254050	Public	Inferred exon combination
+CCDS45019.1	GTF3A	2971	Public	Non-AUG initiation codon
+CCDS45022.1	MTUS2	23281	Reviewed, update pending	CDS uses downstream AUG
+CCDS45051.1	CNMD	11061	Public	CDS uses downstream AUG
+CCDS45102.1	DMAC2L	27109	Reviewed, update pending	CDS uses downstream AUG
+CCDS45133.1	DPF3	8110	Public	Nonsense-mediated decay (NMD) candidate
+CCDS45146.1	DIO2	1734	Public	Contains selenocysteine
+CCDS45158.1	TMEM251	26175	Reviewed, update pending	CDS uses downstream AUG
+CCDS45177.1	AHNAK2	113146	Public	Inferred exon combination
+CCDS45184.1	GOLGA6L6	727832	Public	Inferred exon combination
+CCDS45364.1	RAB11FIP3	9727	Reviewed, update pending	CDS uses downstream AUG
+CCDS45380.1	FAHD1	81889	Under review, update	CDS uses downstream AUG
+CCDS45381.2	HS3ST6	64711	Public	CDS uses downstream AUG
+CCDS45396.1	NAA60	79903	Public	Nonsense-mediated decay (NMD) candidate
+CCDS45404.2	C16orf89	146556	Public	CDS uses downstream AUG
+CCDS45417.2	SHISA9	729993	Public	CDS uses downstream AUG
+CCDS45418.2	SHISA9	729993	Public	CDS uses downstream AUG
+CCDS45524.1	HP	3240	Public	CDS uses downstream AUG
+CCDS45525.1	HP	3240	Public	CDS uses downstream AUG
+CCDS45537.1	USP10	9100	Public	CDS uses downstream AUG
+CCDS45584.1	ZMYND15	84225	Public	CDS uses downstream AUG
+CCDS45605.1	TP53	7157	Public	Nonsense-mediated decay (NMD) candidate
+CCDS45606.1	TP53	7157	Public	Nonsense-mediated decay (NMD) candidate
+CCDS45634.2	SEBOX	645832	Public	Inferred exon combination
+CCDS45638.1	SEZ6	124925	Public	Inferred exon combination
+CCDS45664.1	ARL5C	390790	Public	Inferred exon combination
+CCDS45743.1	SEPTIN4	5414	Public	Nonsense-mediated decay (NMD) candidate
+CCDS45754.1	TANC2	26115	Public	Inferred exon combination
+CCDS45769.1	SDK2	54549	Public	Inferred exon combination
+CCDS45925.1	ANKRD24	170961	Public	Inferred exon combination
+CCDS45929.1	ARRDC5	645432	Reviewed, update pending	CDS uses downstream AUG
+CCDS45942.1	MBD3L5	284428	Public	Inferred exon combination
+CCDS45946.1	ARHGEF18	23370	Reviewed, update pending	CDS uses downstream AUG
+CCDS46020.1	CERS1	10715	Public	Nonsense-mediated decay (NMD) candidate
+CCDS46143.1	PRR12	57479	Public	Inferred exon combination
+CCDS46150.1	SIGLEC11	114132	Public	CDS uses downstream AUG
+CCDS46202.1	GALP	85569	Public	Nonsense-mediated decay (NMD) candidate
+CCDS46227.1	ATAD2B	54454	Public	Inferred exon combination
+CCDS46240.1	SELENOI	85465	Public	Contains selenocysteine
+CCDS46262.1	MORN2	729967	Under review, update	Non-AUG initiation codon
+CCDS46286.1	EML6	400954	Public	Inferred exon combination
+CCDS46405.1	MYO7B	4648	Public	Inferred exon combination
+CCDS46442.1	SCN7A	6332	Public	Inferred exon combination
+CCDS46452.1	SP3	6670	Public	Non-AUG initiation codon
+CCDS46504.1	UNC80	285175	Public	Inferred exon combination
+CCDS46505.1	CPS1	1373	Reviewed, update pending	CDS uses downstream AUG
+CCDS46554.1	RBM44	375316	Under review, update	CDS uses downstream AUG
+CCDS46562.1	SNED1	25992	Public	Inferred exon combination
+CCDS46563.1	ANO7	50636	Reviewed, update pending	CDS uses downstream AUG
+CCDS46567.1	C20orf202	400831	Under review, update	CDS uses downstream AUG
+CCDS46582.1	DZANK1	55184	Public	Inferred exon combination
+CCDS46659.1	MICAL3	57553	Public	Inferred exon combination
+CCDS46706.1	DDX17	10521	Public	Non-AUG initiation codon
+CCDS46775.1	RARB	5915	Public	CDS uses downstream AUG
+CCDS46836.3	MANF	7873	Reviewed, update pending	CDS uses downstream AUG
+CCDS46839.1	PARP3	10039	Under review, update	CDS uses downstream AUG
+CCDS46880.1	ABI3BP	25890	Under review, update	CDS uses downstream AUG
+CCDS46911.1	COL6A6	131873	Public	CDS uses downstream AUG
+CCDS46936.1	SELENOT	51714	Public	Contains selenocysteine
+CCDS46988.1	LMLN	89782	Under review, update	CDS uses downstream AUG
+CCDS47009.1	PSAPL1	768239	Public	Polymorphic pseudogene
+CCDS47036.1	CCDC149	91050	Under review, update	CDS uses downstream AUG
+CCDS47050.1	CNGA1	1259	Reviewed, update pending	CDS uses downstream AUG
+CCDS47061.1	PAICS	10606	Public	CDS uses downstream AUG
+CCDS47121.1	AIMP1	9255	Reviewed, update pending	CDS uses downstream AUG
+CCDS47205.1	MOCS2	4338	Public	Nonsense-mediated decay (NMD) candidate
+CCDS47209.1	IL6ST	3572	Public	Nonsense-mediated decay (NMD) candidate
+CCDS47215.1	ZSWIM6	57688	Public	Inferred exon combination
+CCDS47240.1	DHFR	1719	Public	CDS uses downstream AUG
+CCDS47259.1	PRDM6	93166	Public	Inferred exon combination
+CCDS47281.1	PCDHA6	56142	Public	CDS uses downstream AUG
+CCDS47282.1	PCDHA6	56142	Public	CDS uses downstream AUG
+CCDS47285.1	PCDHA12	56137	Public	CDS uses downstream AUG
+CCDS47398.2	POU5F1	5460	Public	Non-AUG initiation codon
+CCDS47413.1	TCP11	6954	Reviewed, update pending	CDS uses downstream AUG
+CCDS47414.1	TEAD3	7005	Public	Non-AUG initiation codon
+CCDS47432.1	VEGFA	7422	Public	Non-AUG initiation codon
+CCDS47433.1	VEGFA	7422	Public	Non-AUG initiation codon
+CCDS47434.1	VEGFA	7422	Public	Non-AUG initiation codon
+CCDS47435.1	VEGFA	7422	Public	Non-AUG initiation codon
+CCDS47507.1	OPRM1	4988	Public	CDS uses downstream AUG
+CCDS47508.1	OPRM1	4988	Public	CDS uses downstream AUG
+CCDS47552.1	PRPS1L1	221823	Public	Non-AUG initiation codon
+CCDS47576.1	C7orf25	79020	Under review, update	CDS uses downstream AUG
+CCDS47595.1	ERV3-1	2086	Public	Endogenous retrovirus
+CCDS47607.1	ABHD11	83451	Under review, update	CDS uses downstream AUG
+CCDS47608.1	ABHD11	83451	Under review, update	CDS uses downstream AUG
+CCDS47632.1	ELAPOR2	222223	Public	Inferred exon combination
+CCDS47644.1	PON2	5445	Public	CDS uses downstream AUG
+CCDS47663.2	ZAN	7455	Public	Polymorphic pseudogene
+CCDS47664.2	ZAN	7455	Public	Polymorphic pseudogene
+CCDS47733.1	CASP2	835	Public	Nonsense-mediated decay (NMD) candidate
+CCDS47741.1	ZNF862	643641	Public	Inferred exon combination
+CCDS47742.1	ATP6V0E2	155066	Under review, update	CDS uses downstream AUG
+CCDS47749.2	ASB10	136371	Public	CDS uses downstream AUG
+CCDS47826.2	R3HCC1	203069	Public	Non-AUG initiation codon
+CCDS47966.1	FBXO10	26267	Public	CDS uses downstream AUG
+CCDS47980.1	C9orf57	138240	Reviewed, update pending	CDS uses downstream AUG
+CCDS47982.1	PRUNE2	158471	Public	Inferred exon combination
+CCDS48133.1	HEPH	9843	Under review, update	CDS uses downstream AUG
+CCDS48161.1	CT47B1	643311	Public	Inferred exon combination
+CCDS48167.1	AIFM1	9131	Public	Nonsense-mediated decay (NMD) candidate
+CCDS53261.1	MIB2	142678	Under review, update	CDS uses downstream AUG
+CCDS53262.1	MIB2	142678	Under review, update	CDS uses downstream AUG
+CCDS53263.1	MIB2	142678	Under review, update	CDS uses downstream AUG
+CCDS53320.1	DIO1	1733	Public	Contains selenocysteine
+CCDS53361.1	MINDY1	55793	Under review, update	CDS uses downstream AUG
+CCDS53368.1	RIIAD1	284485	Public	Nonsense-mediated decay (NMD) candidate
+CCDS53400.1	TSTD1	100131187	Public	CDS uses downstream AUG
+CCDS53414.1	FCGR2B	2213	Public	Inferred exon combination
+CCDS53427.1	SELL	6402	Reviewed, update pending	CDS uses downstream AUG
+CCDS53429.1	MROH9	80133	Public	Inferred exon combination
+CCDS53455.1	IGFN1	91156	Public	Inferred exon combination
+CCDS53460.1	NFASC	23114	Public	CDS uses downstream AUG
+CCDS53461.1	NFASC	23114	Public	CDS uses downstream AUG
+CCDS53462.1	NFASC	23114	Public	CDS uses downstream AUG
+CCDS53542.1	DUSP13	51207	Public	Nonsense-mediated decay (NMD) candidate
+CCDS53581.1	PLEKHS1	79949	Public	Inferred exon combination
+CCDS53584.1	FGFR2	2263	Public	CDS uses downstream AUG
+CCDS53605.1	SOX6	55553	Reviewed, update pending	CDS uses downstream AUG
+CCDS53618.1	EXT2	2132	Under review, update	CDS uses downstream AUG
+CCDS53648.1	LGALS12	85329	Reviewed, update pending	CDS uses downstream AUG
+CCDS53663.1	ACTN3	89	Public	Polymorphic pseudogene
+CCDS53677.1	KRTAP5-9	3846	Public	CDS uses downstream AUG
+CCDS53820.1	TXNRD1	7296	Public	Contains selenocysteine
+CCDS53821.1	TXNRD1	7296	Public	Contains selenocysteine
+CCDS53823.1	TXNRD1	7296	Public	Contains selenocysteine
+CCDS53826.1	MYO1H	283446	Under review, update	Inferred exon combination
+CCDS53867.1	HTR2A	3356	Under review, update	CDS uses downstream AUG
+CCDS53880.1	DAOA	267012	Public	Nonsense-mediated decay (NMD) candidate
+CCDS53930.1	IVD	3712	Reviewed, update pending	CDS uses downstream AUG
+CCDS53935.1	STARD9	57519	Public	Inferred exon combination
+CCDS53964.1	CHRNA3	1136	Public	CDS uses downstream AUG
+CCDS53979.1	SELENOS	55829	Public	Contains selenocysteine
+CCDS54068.1	GP1BA	2811	Public	CDS uses downstream AUG
+CCDS54266.1	SELENOV	348303	Public	Contains selenocysteine
+CCDS54284.1	SAE1	10055	Public	CDS uses downstream AUG
+CCDS54285.1	SAE1	10055	Public	CDS uses downstream AUG
+CCDS54407.1	NEB	4703	Public	Inferred exon combination
+CCDS54422.1	TTN	7273	Public	Inferred exon combination
+CCDS54423.1	TTN	7273	Public	Inferred exon combination
+CCDS54424.1	TTN	7273	Public	Inferred exon combination
+CCDS54453.1	HCK	3055	Public	Non-AUG initiation codon
+CCDS54455.1	HCK	3055	Public	CDS uses downstream AUG
+CCDS54456.1	HCK	3055	Public	CDS uses downstream AUG
+CCDS54518.1	SEC14L6	730005	Public	CDS uses downstream AUG
+CCDS54565.1	MYD88	4615	Reviewed, update pending	CDS uses downstream AUG
+CCDS54566.1	MYD88	4615	Reviewed, update pending	CDS uses downstream AUG
+CCDS54567.1	MYD88	4615	Reviewed, update pending	CDS uses downstream AUG
+CCDS54568.1	MYD88	4615	Reviewed, update pending	CDS uses downstream AUG
+CCDS54573.1	TMEM158	25907	Public	Polymorphic pseudogene
+CCDS54582.1	GPX1	2876	Public	Contains selenocysteine
+CCDS54597.1	SELENOK	58515	Public	Contains selenocysteine
+CCDS54617.1	GABRR3	200959	Public	Inferred exon combination
+CCDS54617.1	GABRR3	200959	Public	Polymorphic pseudogene
+CCDS54627.1	NR1I2	8856	Public	Non-AUG initiation codon
+CCDS54693.1	THPO	7066	Public	CDS uses downstream AUG
+CCDS54701.1	PIGX	54965	Public	Non-AUG initiation codon
+CCDS54707.1	C4orf48	401115	Under review, update	CDS uses downstream AUG
+CCDS54751.1	STIM2	57620	Public	CDS uses downstream AUG
+CCDS54751.1	STIM2	57620	Public	Non-AUG initiation codon
+CCDS54752.1	STIM2	57620	Public	CDS uses downstream AUG
+CCDS54752.1	STIM2	57620	Public	Non-AUG initiation codon
+CCDS54754.1	DTHD1	401124	Reviewed, update pending	Inferred exon combination
+CCDS54766.1	YIPF7	285525	Under review, update	CDS uses downstream AUG
+CCDS54771.1	FRAS1	80144	Public	Inferred exon combination
+CCDS54840.1	TTC23L	153657	Public	Nonsense-mediated decay (NMD) candidate
+CCDS54889.1	FAM170A	340069	Public	Nonsense-mediated decay (NMD) candidate
+CCDS54954.1	FAM193B	54540	Public	Inferred exon combination
+CCDS55007.1	VEGFA	7422	Public	Non-AUG initiation codon
+CCDS55069.1	OPRM1	4988	Public	CDS uses downstream AUG
+CCDS55070.1	OPRM1	4988	Public	CDS uses downstream AUG
+CCDS55125.1	CALCR	799	Reviewed, update pending	CDS uses downstream AUG
+CCDS55126.1	PEG10	23089	Public	CDS uses downstream AUG
+CCDS55139.1	MUC12	10071	Public	CDS uses downstream AUG
+CCDS55139.1	MUC12	10071	Public	Inferred exon combination
+CCDS55174.1	TBXAS1	6916	Reviewed, update pending	CDS uses downstream AUG
+CCDS55181.1	ATP6V0E2	155066	Under review, update	CDS uses downstream AUG
+CCDS55189.1	CSMD1	64478	Public	Inferred exon combination
+CCDS55228.1	IKBKB	3551	Under review, update	CDS uses downstream AUG
+CCDS55301.1	BAG1	573	Public	CDS uses downstream AUG
+CCDS55310.1	GNE	10020	Under review, update	CDS uses downstream AUG
+CCDS55446.1	RTL5	340526	Public	Nonsense-mediated decay (NMD) candidate
+CCDS55468.1	H2BW2	286436	Reviewed, update pending	CDS uses downstream AUG
+CCDS55479.1	KLHL13	90293	Under review, update	CDS uses downstream AUG
+CCDS55493.1	MBNL3	55796	Under review, update	CDS uses downstream AUG
+CCDS55494.1	MBNL3	55796	Under review, update	CDS uses downstream AUG
+CCDS55564.1	PRXL2B	127281	Reviewed, update pending	CDS uses downstream AUG
+CCDS55565.1	TTC34	100287898	Reviewed, update pending	Inferred exon combination
+CCDS55568.1	TP73	7161	Public	Inferred exon combination
+CCDS55598.1	OSBPL9	114883	Public	CDS uses downstream AUG
+CCDS55602.1	PODN	127435	Reviewed, update pending	CDS uses downstream AUG
+CCDS55847.1	PTPRR	5801	Public	CDS uses downstream AUG
+CCDS55849.1	TBC1D15	64786	Under review, update	CDS uses downstream AUG
+CCDS55954.1	MTA1	9112	Public	Nonsense-mediated decay (NMD) candidate
+CCDS55962.1	PLA2G4E	123745	Public	Inferred exon combination
+CCDS56026.1	SLFN12L	100506736	Under review, update	CDS uses downstream AUG
+CCDS56117.1	TMEM247	388946	Public	polyA required for stop codon
+CCDS56131.1	BCL2L11	10018	Public	Nonsense-mediated decay (NMD) candidate
+CCDS56132.1	BCL2L11	10018	Public	Nonsense-mediated decay (NMD) candidate
+CCDS56133.1	BCL2L11	10018	Public	Nonsense-mediated decay (NMD) candidate
+CCDS56134.1	BCL2L11	10018	Public	Nonsense-mediated decay (NMD) candidate
+CCDS56135.1	BCL2L11	10018	Public	Nonsense-mediated decay (NMD) candidate
+CCDS56136.1	BCL2L11	10018	Public	Nonsense-mediated decay (NMD) candidate
+CCDS56286.1	MLF1	4291	Under review, update	CDS uses downstream AUG
+CCDS56411.1	DDR1	780	Under review, update	CDS uses downstream AUG
+CCDS56428.1	NCR2	9436	Public	CDS uses downstream AUG
+CCDS56429.1	NCR2	9436	Public	CDS uses downstream AUG
+CCDS56447.1	MCM9	254394	Public	CDS uses downstream AUG
+CCDS56565.1	CDKN2A	1029	Public	Nonsense-mediated decay (NMD) candidate
+CCDS56568.1	APTX	54840	Reviewed, update pending	CDS uses downstream AUG
+CCDS57969.1	PLEKHG5	57449	Under review, update	CDS uses downstream AUG
+CCDS57970.1	CA6	765	Public	CDS uses downstream AUG
+CCDS57971.1	CA6	765	Public	CDS uses downstream AUG
+CCDS58028.1	OAZ3	51686	Public	Ribosomal slippage (translational frameshift)
+CCDS58039.1	IFI16	3428	Public	CDS uses downstream AUG
+CCDS58049.1	RGSL1	353299	Public	Nonsense-mediated decay (NMD) candidate
+CCDS58057.1	CHIT1	1118	Public	CDS uses downstream AUG
+CCDS58077.1	ZNF248	57209	Public	Nonsense-mediated decay (NMD) candidate
+CCDS58101.1	CFAP46	54777	Public	Inferred exon combination
+CCDS58274.1	TXNRD1	7296	Public	Contains selenocysteine
+CCDS58299.1	ACOD1	730249	Public	Inferred exon combination
+CCDS58372.1	OAZ2	4947	Public	Ribosomal slippage (translational frameshift)
+CCDS58532.1	KSR1	8844	Public	Inferred exon combination
+CCDS58589.1	DNAI2	64446	Public	Nonsense-mediated decay (NMD) candidate
+CCDS58639.1	OAZ1	4946	Public	Ribosomal slippage (translational frameshift)
+CCDS58924.1	LARP7	51574	Under review, update	CDS uses downstream AUG
+CCDS58949.1	KIF2A	3796	Under review, update	CDS uses downstream AUG
+CCDS58964.1	SNCAIP	9627	Public	CDS uses downstream AUG
+CCDS59018.1	TCP11	6954	Reviewed, update pending	CDS uses downstream AUG
+CCDS59024.1	ANKRD66	100287718	Under review, update	CDS uses downstream AUG
+CCDS59050.1	ITPRID1	223075	Under review, update	CDS uses downstream AUG
+CCDS59114.1	LY6K	54742	Public	CDS uses downstream AUG
+CCDS59162.1	DCAF8L2	347442	Public	Inferred exon combination
+CCDS59170.1	ARMCX4	100131755	Public	CDS uses downstream AUG
+CCDS59199.1	PPIAL4D	645142	Public	Inferred exon combination
+CCDS59202.1	ASCL5	647219	Public	Inferred exon combination
+CCDS59204.1	OBSCN	84033	Public	Inferred exon combination
+CCDS59225.2	OTOG	340990	Public	CDS uses downstream AUG
+CCDS59225.2	OTOG	340990	Public	Inferred exon combination
+CCDS59242.1	DAOA	267012	Public	Nonsense-mediated decay (NMD) candidate
+CCDS59248.1	POTEB2	100287399	Public	Inferred exon combination
+CCDS59252.1	GOLGA8O	728047	Public	Inferred exon combination
+CCDS59262.1	NPIPA3	642778	Public	Inferred exon combination
+CCDS59263.1	NPIPA2	642799	Public	Inferred exon combination
+CCDS59291.1	G6PC1	2538	Public	CDS uses downstream AUG
+CCDS59355.1	RTBDN	83546	Reviewed, update pending	CDS uses downstream AUG
+CCDS59360.1	C19orf67	646457	Public	Inferred exon combination
+CCDS59402.1	SELENOW	6415	Public	CDS uses downstream AUG
+CCDS59402.1	SELENOW	6415	Public	Contains selenocysteine
+CCDS59416.1	SIGLEC12	89858	Public	Polymorphic pseudogene
+CCDS59419.1	ERVV-1	147664	Public	Endogenous retrovirus
+CCDS59420.1	ERVV-2	100271846	Public	Endogenous retrovirus
+CCDS59435.1	TTN	7273	Public	Inferred exon combination
+CCDS59965.1	TP73	7161	Public	Inferred exon combination
+CCDS60080.1	A3GALT2	127550	Public	Inferred exon combination
+CCDS60082.1	CSMD2	114784	Public	Nonsense-mediated decay (NMD) candidate
+CCDS60396.1	MDM4	4194	Public	Nonsense-mediated decay (NMD) candidate
+CCDS60538.1	JMJD1C	221037	Public	Inferred exon combination
+CCDS60547.1	CCAR1	55749	Public	Inferred exon combination
+CCDS60929.1	TRIM77	390231	Public	Inferred exon combination
+CCDS60945.1	YAP1	10413	Public	Inferred exon combination
+CCDS61109.1	CCNT1	904	Public	Nonsense-mediated decay (NMD) candidate
+CCDS61403.1	PPP1R3E	90673	Public	Nonsense-mediated decay (NMD) candidate
+CCDS61495.1	DPF3	8110	Public	Nonsense-mediated decay (NMD) candidate
+CCDS61496.1	DPF3	8110	Public	Nonsense-mediated decay (NMD) candidate
+CCDS61574.1	GOLGA8J	653073	Public	Inferred exon combination
+CCDS61575.1	GOLGA8R	101059918	Public	Inferred exon combination
+CCDS61576.1	GOLGA8H	728498	Public	Inferred exon combination
+CCDS61999.1	PKD1L2	114780	Public	Polymorphic pseudogene
+CCDS62640.1	UPK1A	11045	Public	CDS uses downstream AUG
+CCDS62802.1	LILRA1	11024	Public	CDS uses downstream AUG
+CCDS62803.1	LILRB1	10859	Public	CDS uses downstream AUG
+CCDS62877.1	ATRAID	51374	Public	CDS uses downstream AUG
+CCDS63395.1	ADA2	51816	Public	Inferred exon combination
+CCDS63563.1	BTD	686	Reviewed, update pending	CDS uses downstream AUG
+CCDS63564.1	BTD	686	Reviewed, update pending	CDS uses downstream AUG
+CCDS63633.1	QARS1	5859	Public	CDS uses downstream AUG
+CCDS64066.1	MGAT4D	152586	Public	Inferred exon combination
+CCDS64595.1	ICA1	3382	Public	CDS uses downstream AUG
+CCDS64663.1	VKORC1L1	154807	Public	CDS uses downstream AUG
+CCDS65020.1	IZUMO3	100129669	Public	Inferred exon combination
+CCDS65197.1	TMEM210	100505993	Public	Inferred exon combination
+CCDS65277.1	HEPH	9843	Under review, update	CDS uses downstream AUG
+CCDS66191.1	CCDC90B	60492	Under review, update	CDS uses downstream AUG
+CCDS67439.1	ANKRD62	342850	Public	Inferred exon combination
+CCDS69299.1	IKZF1	10320	Public	Inferred exon combination
+CCDS72690.1	PRXL2B	127281	Reviewed, update pending	CDS uses downstream AUG
+CCDS72691.1	PRXL2B	127281	Reviewed, update pending	CDS uses downstream AUG
+CCDS72856.1	NBPF20	100288142	Public	Inferred exon combination
+CCDS72928.1	KCNN3	3782	Public	Inferred exon combination
+CCDS73007.1	MDM4	4194	Public	Nonsense-mediated decay (NMD) candidate
+CCDS73134.1	PCDH15	65217	Public	Inferred exon combination
+CCDS73135.1	PCDH15	65217	Public	Inferred exon combination
+CCDS73136.1	PCDH15	65217	Public	Inferred exon combination
+CCDS73137.1	PCDH15	65217	Public	Inferred exon combination
+CCDS73138.1	PCDH15	65217	Public	Inferred exon combination
+CCDS73210.1	FGFR2	2263	Public	CDS uses downstream AUG
+CCDS73251.1	OVCH2	341277	Public	CDS uses downstream AUG
+CCDS73287.1	TRIM64C	646754	Public	Inferred exon combination
+CCDS73308.1	SLC22A24	283238	Public	Inferred exon combination
+CCDS73363.1	TRIM64	120146	Public	Inferred exon combination
+CCDS73376.1	ALKBH8	91801	Under review, update	CDS uses downstream AUG
+CCDS73407.1	OR8G1	26494	Public	Polymorphic pseudogene
+CCDS73433.1	PEX5	5830	Under review, update	CDS uses downstream AUG
+CCDS73501.1	PTPRQ	374462	Public	Inferred exon combination
+CCDS73583.1	BORA	79866	Reviewed, update pending	CDS uses downstream AUG
+CCDS73602.1	F7	2155	Public	CDS uses downstream AUG
+CCDS73609.1	POTEM	641455	Public	Inferred exon combination
+CCDS73628.1	GPR33	2856	Public	Polymorphic pseudogene
+CCDS73699.1	GOLGA6L1	283767	Public	Inferred exon combination
+CCDS73774.1	GOLGA6L4	643707	Public	Inferred exon combination
+CCDS73853.1	CLN3	1201	Public	Nonsense-mediated decay (NMD) candidate
+CCDS73909.1	COG4	25839	Reviewed, update pending	CDS uses downstream AUG
+CCDS73963.1	TP53	7157	Public	CDS uses downstream AUG
+CCDS73964.1	TP53	7157	Public	CDS uses downstream AUG
+CCDS73964.1	TP53	7157	Public	Nonsense-mediated decay (NMD) candidate
+CCDS73965.1	TP53	7157	Public	CDS uses downstream AUG
+CCDS73965.1	TP53	7157	Public	Nonsense-mediated decay (NMD) candidate
+CCDS73967.1	TP53	7157	Public	Nonsense-mediated decay (NMD) candidate
+CCDS73968.1	TP53	7157	Public	Nonsense-mediated decay (NMD) candidate
+CCDS73969.1	TP53	7157	Public	CDS uses downstream AUG
+CCDS73970.1	TP53	7157	Public	CDS uses downstream AUG
+CCDS73970.1	TP53	7157	Public	Nonsense-mediated decay (NMD) candidate
+CCDS73971.1	TP53	7157	Public	CDS uses downstream AUG
+CCDS73971.1	TP53	7157	Public	Nonsense-mediated decay (NMD) candidate
+CCDS73996.1	FBXW10B	374286	Public	Inferred exon combination
+CCDS74039.1	TBC1D3I	102724862	Public	Inferred exon combination
+CCDS74042.1	TBC1D3K	101060351	Public	Inferred exon combination
+CCDS74141.1	KCNJ16	3773	Under review, update	CDS uses downstream AUG
+CCDS74173.1	BAHCC1	57597	Under review, update	Inferred exon combination
+CCDS74187.1	CLUL1	27098	Under review, update	CDS uses downstream AUG
+CCDS74276.1	PRR36	80164	Public	Inferred exon combination
+CCDS74385.1	PINLYP	390940	Reviewed, update pending	CDS uses downstream AUG
+CCDS74446.1	TSEN34	79042	Under review, update	CDS uses downstream AUG
+CCDS74457.1	SBK3	100130827	Public	Inferred exon combination
+CCDS74542.1	NEURL3	93082	Public	Inferred exon combination
+CCDS74557.1	SH3RF3	344558	Public	Inferred exon combination
+CCDS74560.1	BCL2L11	10018	Public	Nonsense-mediated decay (NMD) candidate
+CCDS74610.1	TTN	7273	Public	Inferred exon combination
+CCDS74631.2	KIAA2012	100652824	Public	Inferred exon combination
+CCDS74750.1	PTK6	5753	Public	Nonsense-mediated decay (NMD) candidate
+CCDS74780.1	KRTAP7-1	337878	Public	Polymorphic pseudogene
+CCDS74795.1	B3GALT5	10317	Public	Inferred exon combination
+CCDS74796.1	MX1	4599	Public	Inferred exon combination
+CCDS74808.1	POTEH	23784	Public	Inferred exon combination
+CCDS74861.1	CBY1	25776	Under review, update	CDS uses downstream AUG
+CCDS74865.1	MRTFA	57591	Reviewed, update pending	Non-AUG initiation codon
+CCDS74866.1	MRTFA	57591	Reviewed, update pending	Non-AUG initiation codon
+CCDS74991.1	CD86	942	Public	Inferred exon combination
+CCDS75047.1	SERPINI2	5276	Under review, update	CDS uses downstream AUG
+CCDS75092.1	CFAP99	402160	Public	Inferred exon combination
+CCDS75169.1	MTTP	4547	Under review, update	CDS uses downstream AUG
+CCDS75327.1	PCDHA12	56137	Public	CDS uses downstream AUG
+CCDS75425.1	EHMT2	10919	Public	CDS uses downstream AUG
+CCDS75447.1	DNAH8	1769	Public	Inferred exon combination
+CCDS75520.1	TAAR9	134860	Public	Polymorphic pseudogene
+CCDS75563.1	ZNF316	100131017	Public	Inferred exon combination
+CCDS75577.1	ITPRID1	223075	Under review, update	CDS uses downstream AUG
+CCDS75597.1	IKZF1	10320	Public	Inferred exon combination
+CCDS75615.1	ABHD11	83451	Under review, update	CDS uses downstream AUG
+CCDS75616.1	ELN	2006	Public	Inferred exon combination
+CCDS75637.1	PEG10	23089	Public	Non-AUG initiation codon
+CCDS75829.1	DNAI1	27019	Public	Inferred exon combination
+CCDS75932.1	COL5A1	1289	Public	Inferred exon combination
+CCDS75949.1	ARSL	415	Reviewed, update pending	CDS uses downstream AUG
+CCDS75958.1	AP1S2	8905	Public	CDS uses downstream AUG
+CCDS75965.1	DMD	1756	Public	CDS uses downstream AUG
+CCDS76006.1	FRMPD3	84443	Public	Inferred exon combination
+CCDS76062.1	DKC1	1736	Public	Nonsense-mediated decay (NMD) candidate
+CCDS76109.1	PRAMEF14	729528	Public	Inferred exon combination
+CCDS76177.1	SELENOF	9403	Public	Contains selenocysteine
+CCDS76178.1	SELENOF	9403	Public	Contains selenocysteine
+CCDS76180.1	CCDC18	343099	Public	Inferred exon combination
+CCDS76201.1	PPIAL4E	730262	Public	Inferred exon combination
+CCDS76206.1	NBPF10	100132406	Public	Inferred exon combination
+CCDS76216.1	OAZ3	51686	Public	Ribosomal slippage (translational frameshift)
+CCDS76271.1	RNF187	149603	Public	Non-AUG initiation codon
+CCDS76369.1	MUC5AC	4586	Public	Inferred exon combination
+CCDS76390.1	OTOG	340990	Public	CDS uses downstream AUG
+CCDS76390.1	OTOG	340990	Public	Inferred exon combination
+CCDS76439.1	ACTN3	89	Public	Polymorphic pseudogene
+CCDS76577.1	MYRFL	196446	Public	Inferred exon combination
+CCDS76588.1	CFAP54	144535	Public	Inferred exon combination
+CCDS76897.1	NPIPB15	440348	Public	Inferred exon combination
+CCDS77130.1	TSPAN10	83882	Under review, update	CDS uses downstream AUG
+CCDS77196.1	SERPINB11	89778	Public	Polymorphic pseudogene
+CCDS77214.1	OAZ1	4946	Public	Ribosomal slippage (translational frameshift)
+CCDS77433.1	FOXI3	344167	Public	CDS uses downstream AUG
+CCDS77438.1	FER1L5	90342	Public	Inferred exon combination
+CCDS77654.1	LRRC74B	400891	Public	Inferred exon combination
+CCDS77810.1	TXNRD3	114112	Public	Contains selenocysteine
+CCDS77810.1	TXNRD3	114112	Public	Non-AUG initiation codon
+CCDS77811.1	TXNRD3	114112	Public	Contains selenocysteine
+CCDS77811.1	TXNRD3	114112	Public	Non-AUG initiation codon
+CCDS77867.1	THPO	7066	Public	CDS uses downstream AUG
+CCDS77925.1	UGT2A1	10941	Public	Inferred exon combination
+CCDS77990.1	DUX4	100288687	Public	Nonsense-mediated decay (NMD) candidate
+CCDS78004.1	SLC1A3	6507	Public	Inferred exon combination
+CCDS78029.1	DHFR	1719	Public	CDS uses downstream AUG
+CCDS78126.1	BTNL2	56244	Public	Inferred exon combination
+CCDS78262.1	MUC3A	4584	Public	Inferred exon combination
+CCDS78264.1	SH2B2	10603	Under review, update	CDS uses downstream AUG
+CCDS78281.1	MGAM2	93432	Public	Inferred exon combination
+CCDS78288.1	IQCA1L	392843	Public	Inferred exon combination
+CCDS78299.1	USP17L4	645402	Public	Inferred exon combination
+CCDS78300.1	USP17L8	392188	Public	Inferred exon combination
+CCDS78301.1	USP17L3	645836	Public	Inferred exon combination
+CCDS78317.1	R3HCC1	203069	Public	Non-AUG initiation codon
+CCDS78400.1	SPATA31A3	727830	Public	Inferred exon combination
+CCDS81378.1	OAZ3	51686	Public	Non-AUG initiation codon
+CCDS81378.1	OAZ3	51686	Public	Ribosomal slippage (translational frameshift)
+CCDS81411.1	PRG4	10216	Public	Inferred exon combination
+CCDS81472.1	CDH23	64072	Public	CDS uses downstream AUG
+CCDS81473.1	CDH23	64072	Public	CDS uses downstream AUG
+CCDS81515.1	FGFR2	2263	Public	CDS uses downstream AUG
+CCDS81615.1	IZUMO1R	390243	Public	CDS uses downstream AUG
+CCDS81644.1	CHEK1	1111	Under review, update	CDS uses downstream AUG
+CCDS81705.1	ARHGAP9	64333	Reviewed, update pending	CDS uses downstream AUG
+CCDS81889.1	BNIP2	663	Under review, update	CDS uses downstream AUG
+CCDS81937.1	NAA60	79903	Public	Nonsense-mediated decay (NMD) candidate
+CCDS81938.1	NAA60	79903	Public	Nonsense-mediated decay (NMD) candidate
+CCDS81939.1	NAA60	79903	Public	Nonsense-mediated decay (NMD) candidate
+CCDS81941.1	NAA60	79903	Public	Nonsense-mediated decay (NMD) candidate
+CCDS81953.1	CLEC19A	728276	Public	Inferred exon combination
+CCDS82010.1	HP	3240	Public	CDS uses downstream AUG
+CCDS82072.1	GSG1L2	644070	Public	Inferred exon combination
+CCDS82096.1	RAB34	83871	Public	Nonsense-mediated decay (NMD) candidate
+CCDS82409.1	ZNF418	147686	Public	Nonsense-mediated decay (NMD) candidate
+CCDS82410.1	ZNF418	147686	Public	Nonsense-mediated decay (NMD) candidate
+CCDS82515.1	THSD7B	80731	Public	Inferred exon combination
+CCDS82764.1	FAM240A	100132146	Reviewed, update pending	CDS uses downstream AUG
+CCDS82854.1	AGTR1	185	Under review, withdrawal	CDS uses downstream AUG
+CCDS82855.1	AGTR1	185	Under review, withdrawal	CDS uses downstream AUG
+CCDS82855.1	AGTR1	185	Under review, withdrawal	Inferred exon combination
+CCDS82914.1	CCDC149	91050	Under review, update	CDS uses downstream AUG
+CCDS82942.1	GIMD1	100507096	Public	CDS uses downstream AUG
+CCDS83022.1	CCDC192	728586	Under review, update	CDS uses downstream AUG
+CCDS83141.1	SOD2	6648	Public	CDS uses downstream AUG
+CCDS83464.1	CFAP47	286464	Public	Inferred exon combination
+CCDS83488.1	TEX13C	100129520	Public	Inferred exon combination
+CCDS83509.1	OPN1MW3	101060233	Public	Inferred exon combination
+CCDS85927.1	PRAMEF13	400736	Public	Inferred exon combination
+CCDS85928.1	PRAMEF33	645382	Public	Inferred exon combination
+CCDS85967.1	KLF18	105378952	Public	Inferred exon combination
+CCDS85971.1	TMEM275	105378696	Public	Inferred exon combination
+CCDS85993.1	SPATA1	100505741	Reviewed, update pending	CDS uses downstream AUG
+CCDS86062.1	VN1R5	317705	Public	Polymorphic pseudogene
+CCDS86081.1	CCDC7	79741	Public	Inferred exon combination
+CCDS86081.1	CCDC7	79741	Public	Nonsense-mediated decay (NMD) candidate
+CCDS86083.1	ZNF248	57209	Public	Nonsense-mediated decay (NMD) candidate
+CCDS86084.1	ZNF487	642819	Under review, update	CDS uses downstream AUG
+CCDS86100.1	CDH23	64072	Public	CDS uses downstream AUG
+CCDS86133.1	ANKRD2	26287	Public	CDS uses downstream AUG
+CCDS86134.1	ANKRD2	26287	Public	CDS uses downstream AUG
+CCDS86173.1	OR52E1	79296	Public	Polymorphic pseudogene
+CCDS86201.1	OR4C5	79346	Public	Polymorphic pseudogene
+CCDS86202.1	OR4C45	403257	Public	Polymorphic pseudogene
+CCDS86204.1	GLYATL1B	100287520	Public	Inferred exon combination
+CCDS86232.1	AAMDC	28971	Under review, update	CDS uses downstream AUG
+CCDS86367.1	OR4Q2	390432	Candidate	Polymorphic pseudogene
+CCDS86368.1	OR11H7	390441	Public	Polymorphic pseudogene
+CCDS86371.1	OR6J1	79549	Public	Polymorphic pseudogene
+CCDS86397.1	LRRC9	341883	Public	Inferred exon combination
+CCDS86402.1	CCDC196	440184	Public	Inferred exon combination
+CCDS86437.1	GOLGA8F	100132565	Under review, update	CDS uses downstream AUG
+CCDS86506.1	NPIPA5	100288332	Public	Inferred exon combination
+CCDS86591.1	SLFN12L	100506736	Under review, update	CDS uses downstream AUG
+CCDS86642.1	TK1	7083	Public	CDS uses downstream AUG
+CCDS86643.1	TK1	7083	Public	CDS uses downstream AUG
+CCDS86647.1	PVALEF	388428	Public	Inferred exon combination
+CCDS86657.1	TUBB8B	260334	Public	Inferred exon combination
+CCDS86703.1	ELOF1	84337	Under review, update	CDS uses downstream AUG
+CCDS86824.1	MFSD2B	388931	Public	Inferred exon combination
+CCDS86862.1	C2orf92	728537	Public	Inferred exon combination
+CCDS86924.1	EPHA4	2043	Public	Nonsense-mediated decay (NMD) candidate
+CCDS86996.1	GGTLC3	728226	Public	Inferred exon combination
+CCDS86998.1	TXNRD2	10587	Public	Contains selenocysteine
+CCDS86998.1	TXNRD2	10587	Public	Nonsense-mediated decay (NMD) candidate
+CCDS86999.1	TXNRD2	10587	Public	Contains selenocysteine
+CCDS86999.1	TXNRD2	10587	Public	Nonsense-mediated decay (NMD) candidate
+CCDS87001.1	TXNRD2	10587	Public	Contains selenocysteine
+CCDS87010.1	GSTT2B	653689	Public	Polymorphic pseudogene
+CCDS87011.1	GSTT4	25774	Public	CDS uses downstream AUG
+CCDS87046.1	PPARG	5468	Under review, update	CDS uses downstream AUG
+CCDS87052.1	BTD	686	Under review, update	CDS uses downstream AUG
+CCDS87077.1	GPX1	2876	Public	Contains selenocysteine
+CCDS87078.1	GPX1	2876	Public	Contains selenocysteine
+CCDS87208.1	FAM90A26	100287045	Public	Inferred exon combination
+CCDS87294.1	DNAJC21	134218	Public	CDS uses downstream AUG
+CCDS87367.1	ATXN1	6310	Public	Nonsense-mediated decay (NMD) candidate
+CCDS87377.1	OR2J1	442185	Public	Polymorphic pseudogene
+CCDS87378.1	OR12D1	26530	Candidate	Polymorphic pseudogene
+CCDS87384.1	EHMT2	10919	Public	CDS uses downstream AUG
+CCDS87458.1	SYNE1	23345	Public	Inferred exon combination
+CCDS87503.1	GRB10	2887	Reviewed, update pending	CDS uses downstream AUG
+CCDS87513.1	SPDYE16	102723555	Public	Inferred exon combination
+CCDS87558.1	OR10AC1	392133	Candidate	Polymorphic pseudogene
+CCDS87572.1	DLGAP2	9228	Public	Inferred exon combination
+CCDS87593.1	TEX15	56154	Public	Inferred exon combination
+CCDS87627.1	MYC	4609	Public	Non-AUG initiation codon
+CCDS87751.1	NBDY	550643	Public	Nonsense-mediated decay (NMD) candidate
+CCDS87755.1	AR	367	Public	Nonsense-mediated decay (NMD) candidate
+CCDS87758.1	LOC101059915	101059915	Public	Inferred exon combination
+CCDS87773.1	TEX13D	100132015	Public	Inferred exon combination
+CCDS87780.1	SMIM10L2B	644596	Public	Nonsense-mediated decay (NMD) candidate
