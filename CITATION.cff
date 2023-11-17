@@ -1,0 +1,65 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: human_riboswitch_hits
+message: >-
+  If you use this dataset, please cite it using the metadata
+  from this file.
+type: dataset
+authors:
+  - given-names: William
+    family-names: Raymond
+    email: wsraymon@rams.colostate.edu
+    affiliation: Colorado State University
+    orcid: 'https://orcid.org/0000-0002-3155-7499'
+repository-code: 'https://github.com/Will-Raymond/human_riboswitch_hits'
+repository: >-
+  https://github.com/Will-Raymond/human_riboswitch_hits_gallery
+abstract: >-
+  Riboswitches are a class of non-coding RNA structures that
+  interact with target ligands to cause a conformational
+  change that can then execute some regulatory purpose
+  within the cell. Riboswitches are ubiquitous and well
+  characterized in bacteria, with additional examples also
+  being found in fungi, plants, and yeast. To date, no
+  purely RNA-small molecule riboswitch has been discovered
+  in  \textit{Homo Sapiens}. Several analogous
+  riboswitch-like mechanisms have been described within the
+  \textit{H. Sapiens} translatome within the past decade,
+  prompting the question: Is there a \textit{H. Sapiens}
+  riboswitch dependent on only small molecule ligands? In
+  this work, we trained positive-unlabeled machine learning
+  classifiers on known riboswitch sequences and apply the
+  classifiers to \textit{H. Sapiens} mRNA 5' untranslated
+  region (UTR) sequences found in the UTR database, UTRdb,
+  in the hope of identifying a set of mRNAs to investigate
+  for riboswitch functionality. 67,683 riboswitch sequences
+  were obtained from RNAcentral and sorted for ligand type
+  and used as positive examples and 48,031 5'UTR sequences
+  were used as unlabeled, unknown examples.
+
+  Positive examples were sorted by ligand, and 20
+  positive-unlabeled classifiers were trained on sequence
+  and secondary structure features while withholding
+  specific ligand classes. Cross validation was then
+  performed on the withheld ligand sets to obtain a
+  validation accuracy range of 75\%-99\%. The joint sets of
+  5'UTRs identified as potential riboswitches by the 20
+  classifiers were then analyzed. 1533 sequences were
+  identified as a riboswitch by one or more classifier(s)
+  and 436 of the \textit{H. Sapiens} 5'UTRs were labeled as
+  harboring potential riboswitch elements by all 20
+  classifiers. These 436 sequences were mapped back to the
+  most similar riboswitches within the positive data and
+  examined. An online database of identified and ranked
+  5'UTRs, their features, and their most similar matches to
+  known riboswitches, is provided to guide future
+  experimental efforts to identify \textit{H. Sapiens}
+  riboswitches.
+keywords:
+  - Positive-Unlabeled Learning
+  - Riboswitch
+  - UTR
+  - Bioinformatics
+license: MIT
