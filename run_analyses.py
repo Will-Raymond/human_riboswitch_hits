@@ -1,0 +1,1475 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Jul 11 12:52:00 2024
+
+@author: Dr. William Raymond
+"""
+###############################################################################
+# Description
+###############################################################################
+
+###############################################################################
+# Imports
+###############################################################################
+
+import os
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+from matplotlib.colors import ListedColormap
+from matplotlib.colors import LogNorm
+import numpy as np
+import pandas as pd
+import json
+
+from sklearn import mixture
+from pulearn import ElkanotoPuClassifier, BaggingPuClassifier
+from sklearn.svm import SVC
+from joblib import dump, load
+from tqdm import tqdm
+
+from rs_functions import * #functions to do feature extraction and other things
+
+import pulearn
+print('Using PUlearn version:')
+print(pulearn.__version__)
+
+###############################################################################
+# Sanatize data
+###############################################################################
+print('______________________________________')
+print('Loading and sanatizing data files....')
+
+
+# Get data files
+# first we have the UTR data file, UTR data file is built from "make_initial_UTR_csv.py"
+# Using the 5UTRaspic.Hum.fasta
+# most important headers: GENE	ID	SEQ	CCDS_ID	STARTPLUS25	NUPACK_25	NUPACK_25_MFE
+# Gene - uniprot Gene ID
+# ID - original UTRdb 1.0 ID sequence, defunct
+# SEQ - Cleaned sequence
+# CCDS_ID - CCDS_id for the 25 nucleotides added to the 5'UTR
+# STARTPLUS25 - sequence of the 5'UTR + 25 nt
+# NUPACK_25 - nupack MFE dot structure for 100 foldings of the dot structure
+# NUPACK_25_MFE - energy of the MFE structure
+fname = './data_files/5primeUTR_final_db_3.csv'
+UTR_db = pd.read_csv(fname)
+print('UTR data file loaded: %s'%fname)
+
+# Riboswitch data file
+# ID - ID within RNA central
+# DESC - Text description scraped from this given entry
+# EUKARYOTIC - 1 or 0 is this a eukaryotic sequence
+# LIGAND - Ligand scraped for this given entry
+# SEQ - Sequence of the entry
+# NUPACK_DOT - NUPACK dot structure of 100 foldings
+# NUPACK_MFE - NUPACK mfe of the structure of 100 foldings
+# Kmers aaa.... kmer counts for each triplet
+fname = './data_files/RS_final_with_euk2.csv'
+RS_db = pd.read_csv(fname)
+print('RS data file loaded: %s'%fname)
+
+## We have to apply some patches to the UTR data file to remove 3'UTR sequences and duplicate IDs
+## since some UTRs have multiple isoforms and UTRdb didnt handle this
+
+# remove 3prime sequences
+UTR_db = UTR_db[['3' != x[0] for x in  UTR_db['ID']]]
+
+# rename duplicate ids to ID-N
+ids_to_update = {}
+
+ids = UTR_db['ID'].values.tolist()
+for i in range(len(UTR_db)):
+  if ids.count(UTR_db['ID'].iloc[i]) > 1:
+    if UTR_db['ID'].iloc[i] not in ids_to_update.keys():
+      ids_to_update[UTR_db['ID'].iloc[i]] = [i,]
+    else:
+      ids_to_update[UTR_db['ID'].iloc[i]] =  ids_to_update[UTR_db['ID'].iloc[i]] +  [i,]
+for id in ids_to_update.keys():
+ for i in range(len(ids_to_update[id])):
+  UTR_db.iloc[ids_to_update[id][i],4] = id + '-' + str(i)
+
+## patch out a typo space in guanidine
+for i in range(len(RS_db)):
+  if RS_db.iloc[i,2] == 'guanidine ':
+    RS_db.iloc[i,2] = 'guanidine'
+
+## patch to combine adocobalamin with cobalamin since these are very similar
+for i in range(len(RS_db)):
+  if RS_db.iloc[i,2] == 'adocbl':
+    RS_db.iloc[i,2] = 'cobalamin'
+    
+print('Riboswitch database size:' + str(RS_db.shape))
+print('UTR database size:' + str(UTR_db.shape))
+
+
+
+
+###############################################################################
+# FEATURE EXTRACTION 
+###############################################################################
+# This block generates X_RS and X_UTR for 74 features used for the machine learning ensembles
+
+include_mfe = True 
+include_3mer = True 
+include_dot = True 
+include_gc = True 
+be = BEARencoder(); # Custom bear encoder for counting the dot structural features.
+
+ccds_length = 'STARTPLUS25' #select the start plus 25 sequences to use
+#max_mfe = np.min([np.min(UTR_db['NUPACK_25_MFE']), np.min(RS_df['NUPACK_MFE'])])
+
+print('Using:')
+print(ccds_length)
+
+#########################
+# UTRs
+#########################
+print('processing UTRs......')
+X_UTR = np.zeros([len(UTR_db),66+8])
+dot_UTR = []
+ids_UTR = []
+k = 0
+
+# get the size first X_UTR
+X_utr_size = 0
+for i in range(len(UTR_db)):
+  if not pd.isna(UTR_db[ccds_length].iloc[i]):
+    if len(clean_seq(UTR_db[ccds_length].iloc[i])) > 25:
+      X_utr_size+=1
+
+# fill up the X_UTR with extracted features
+X_UTR =np.zeros([X_utr_size, 66+8])
+
+for i in tqdm(range(len(UTR_db))):
+  if not pd.isna(UTR_db[ccds_length].iloc[i]):
+    seq = clean_seq(UTR_db[ccds_length].iloc[i])
+    if len(seq) > 25:
+      kmerf = kmer_freq(seq)
+      X_UTR[k,:64] = kmerf/np.sum(kmerf)
+      X_UTR[k,64] = UTR_db['NUPACK_25_MFE'].iloc[i]
+      X_UTR[k,65] = get_gc(seq)
+      ids_UTR.append(UTR_db['ID'].iloc[i])
+      dot_UTR.append(UTR_db['NUPACK_25'].iloc[i])
+      X_UTR[k,-8:] = be.annoated_feature_vector(UTR_db['NUPACK_25'].iloc[i], encode_stems_per_bp=True)
+      k+=1
+
+
+
+#########################
+# RS full
+#########################
+print('processing all RS......')
+full_RS_df = RS_db
+print(len(full_RS_df))
+
+X_RS_full = np.zeros([len(full_RS_df),66+8])
+dot_RS_full = []
+ids_RS_full = []
+k = 0
+
+# get the size first X_RS
+X_RS_size = 0
+for i in range(len(full_RS_df)):
+  seq = clean_seq(full_RS_df['SEQ'].iloc[i])
+  if len(seq) > 25:
+    X_RS_size+=1
+
+X_RS_full = np.zeros([X_RS_size, 66+8])
+
+# fill up the X_UTR with extracted features
+for i in tqdm(range(len(full_RS_df))):
+  seq = clean_seq(full_RS_df['SEQ'].iloc[i])
+  if len(seq) > 25:
+    seq = clean_seq(full_RS_df['SEQ'].iloc[i])
+    kmerf = kmer_freq(seq)
+    X_RS_full[k,:64] = kmerf/np.sum(kmerf)
+    X_RS_full[k,64] = full_RS_df['NUPACK_MFE'].iloc[i]
+    X_RS_full[k,65] = get_gc(seq)
+    ids_RS_full.append(full_RS_df['ID'].iloc[i])
+    dot_RS_full.append(full_RS_df['NUPACK_DOT'].iloc[i])
+    X_RS_full[k,-8:] = be.annoated_feature_vector(full_RS_df['NUPACK_DOT'].iloc[i], encode_stems_per_bp=True)
+    k+=1
+
+
+# Get the maximum values (minimum for mfe) across thte dataset to normalize against
+max_mfe = min(np.min(X_RS_full[:,64]),np.min(X_UTR[:,64]))
+X_RS_full[:,64] = X_RS_full[:,64]/max_mfe
+X_UTR[:,64] = X_UTR[:,64]/max_mfe
+max_ubs = np.max([np.max(X_UTR[:,66]),np.max(X_RS_full[:,66])])
+max_bs = np.max([np.max(X_UTR[:,67]),np.max(X_RS_full[:,67])])
+max_ill = np.max([np.max(X_UTR[:,68]),np.max(X_RS_full[:,68])])
+max_ilr = np.max([np.max(X_UTR[:,69]),np.max(X_RS_full[:,69])])
+max_lp = np.max([np.max(X_UTR[:,70]),np.max(X_RS_full[:,70])])
+max_lb = np.max([np.max(X_UTR[:,71]),np.max(X_RS_full[:,71])])
+max_rb = np.max([np.max(X_UTR[:,72]),np.max(X_RS_full[:,72])])
+
+# normalize both data sets by their largest values
+X_UTR[:,66] = X_UTR[:,66]/max_ubs
+X_UTR[:,67] = X_UTR[:,67]/max_bs
+X_UTR[:,68] = X_UTR[:,68]/max_ill
+X_UTR[:,69] = X_UTR[:,69]/max_ilr
+X_UTR[:,70] = X_UTR[:,70]/max_lp
+X_UTR[:,71] = X_UTR[:,71]/max_lb
+X_UTR[:,72] = X_UTR[:,72]/max_rb
+
+X_RS_full[:,66] = X_RS_full[:,66]/max_ubs
+X_RS_full[:,67] = X_RS_full[:,67]/max_bs
+X_RS_full[:,68] = X_RS_full[:,68]/max_ill
+X_RS_full[:,69] = X_RS_full[:,69]/max_ilr
+X_RS_full[:,70] = X_RS_full[:,70]/max_lp
+X_RS_full[:,71] = X_RS_full[:,71]/max_lb
+X_RS_full[:,72] = X_RS_full[:,72]/max_rb
+
+
+
+#########################
+# RS ligand specific
+#########################
+
+# now we will split up the X_RS by ligand type for structural cross validation
+
+print('Generating RS Ligand DFs......')
+def make_ligand_df(df, ligand):
+  witheld_df =  RS_db[RS_db['LIGAND'] ==ligand]
+  X_witheld = np.zeros([len(witheld_df),66+8])
+  dot_witheld = []
+  ids_witheld = []
+  k = 0
+  for i in tqdm(range(len(witheld_df))):
+    seq = clean_seq(witheld_df['SEQ'].iloc[i])
+    if len(seq) > 25:
+      if i == 0:
+        X_witheld = np.zeros([1,66+8])
+      else:
+        X_witheld = np.vstack( [X_witheld, np.zeros([1,66+8]) ])
+
+      seq = clean_seq(witheld_df['SEQ'].iloc[i])
+      kmerf = kmer_freq(seq)
+      X_witheld[k,:64] = kmerf/np.sum(kmerf)
+      X_witheld[k,64] = witheld_df['NUPACK_MFE'].iloc[i]/max_mfe
+      X_witheld[k,65] = get_gc(seq)
+      ids_witheld.append(witheld_df['ID'].iloc[i])
+      dot_witheld.append(witheld_df['NUPACK_DOT'].iloc[i])
+      X_witheld[k,-8:] = be.annoated_feature_vector(witheld_df['NUPACK_DOT'].iloc[i], encode_stems_per_bp=True)
+
+
+      X_witheld[k,66] = X_witheld[k,66]/max_ubs
+      X_witheld[k,67] = X_witheld[k,67]/max_bs
+      X_witheld[k,68] = X_witheld[k,68]/max_ill
+      X_witheld[k,69] = X_witheld[k,69]/max_ilr
+      X_witheld[k,70] = X_witheld[k,70]/max_lp
+      X_witheld[k,71] = X_witheld[k,71]/max_lb
+      X_witheld[k,72] = X_witheld[k,72]/max_rb
+
+      k+=1
+  return X_witheld, ids_witheld, dot_witheld
+
+set(RS_db['LIGAND'])
+witheld_ligands = ['cobalamin', 'guanidine', 'TPP','SAM','glycine','FMN','purine','lysine','fluoride','zmp-ztp',]
+
+RS_df = RS_db[~RS_db['LIGAND'].isin( witheld_ligands)]
+print(len(RS_df))
+
+ligand_dfs = []
+for i in range(len(witheld_ligands)):
+  print('making %s....'%witheld_ligands[i])
+  ligand_dfs.append(make_ligand_df(RS_db, witheld_ligands[i]))
+
+X_RS = np.zeros([len(RS_df),66+8])
+dot_RS = []
+ids_RS = []
+k = 0
+
+X_RS_size = 0
+for i in range(len(RS_df)):
+  seq = clean_seq(RS_df['SEQ'].iloc[i])
+  if len(seq) > 25:
+    X_RS_size+=1
+
+X_RS = np.zeros([X_RS_size, 66+8])
+
+for i in tqdm(range(len(RS_df))):
+  seq = clean_seq(RS_df['SEQ'].iloc[i])
+  if len(seq) > 25:
+
+    seq = clean_seq(RS_df['SEQ'].iloc[i])
+    kmerf = kmer_freq(seq)
+    X_RS[k,:64] = kmerf/np.sum(kmerf)
+    X_RS[k,64] = RS_df['NUPACK_MFE'].iloc[i]/max_mfe
+    X_RS[k,65] = get_gc(seq)
+    ids_RS.append(RS_df['ID'].iloc[i])
+    dot_RS.append(RS_df['NUPACK_DOT'].iloc[i])
+    X_RS[k,-8:] = be.annoated_feature_vector(RS_df['NUPACK_DOT'].iloc[i], encode_stems_per_bp=True)
+
+    X_RS[k,66] = X_RS[k,66]/max_ubs
+    X_RS[k,67] = X_RS[k,67]/max_bs
+    X_RS[k,68] = X_RS[k,68]/max_ill
+    X_RS[k,69] = X_RS[k,69]/max_ilr
+    X_RS[k,70] = X_RS[k,70]/max_lp
+    X_RS[k,71] = X_RS[k,71]/max_lb
+    X_RS[k,72] = X_RS[k,72]/max_rb
+
+    k+=1
+    
+save_feature_sets = False
+if save_feature_sets:
+    maxes = np.array([max_mfe, max_ubs, max_bs, max_ill, max_ilr, max_lp, max_lb, max_rb])
+    np.save('feature_maxes.npy', maxes)
+    np.save('X_UTR.npy',X_UTR)
+    np.save('X_RS.npy',X_RS_full)
+
+###############################################################################
+# FEATURE PLOTS
+# Plots of various aspects of the X_UTR and X_RS we just constructed
+###############################################################################
+
+
+#@title plotting options
+from cycler import cycler
+########################################
+dark = False
+if not dark:
+    colors = ['#ef476f', '#073b4c','#06d6a0','#7400b8','#073b4c', '#118ab2',]
+else:
+    plt.style.use('dark_background')
+    plt.rcParams.update({'axes.facecolor'      : '#131313'  ,
+'figure.facecolor' : '#131313' ,
+'figure.edgecolor' : '#131313' ,
+'savefig.facecolor' : '#131313'  ,
+'savefig.edgecolor' :'#131313'})
+
+
+    colors = ['#118ab2','#57ffcd', '#ff479d', '#ffe869','#ff8c00','#04756f']
+
+font = {
+        'weight' : 'bold',
+        'size'   : 12}
+
+save = False
+
+plt.rcParams.update({'font.size': 12, 'font.weight':'bold' }   )
+plt.rcParams.update({'axes.prop_cycle':cycler(color=colors)})
+
+plt.rcParams.update({'axes.prop_cycle':cycler(color=colors)})
+plt.rcParams.update({'axes.prop_cycle':cycler(color=colors)})
+
+
+plt.rcParams.update({'xtick.major.width'   : 2.8 })
+plt.rcParams.update({'xtick.labelsize'   : 12 })
+
+
+
+plt.rcParams.update({'ytick.major.width'   : 2.8 })
+plt.rcParams.update({'ytick.labelsize'   : 12})
+
+plt.rcParams.update({'axes.titleweight'   : 'bold'})
+plt.rcParams.update({'axes.titlesize'   : 10})
+plt.rcParams.update({'axes.labelweight'   : 'bold'})
+plt.rcParams.update({'axes.labelsize'   : 12})
+
+plt.rcParams.update({'axes.linewidth':2.8})
+plt.rcParams.update({'axes.labelpad':8})
+plt.rcParams.update({'axes.titlepad':10})
+plt.rcParams.update({'figure.dpi':120})
+
+
+
+###############################################################################
+#   Pie Chart of ligand representation
+##############################################################################
+
+amino_acids = ['arginine','histidine','lysine','aspartate','glutamine','serine','threonine','asparagine','cystine','glycine','proline',
+               'alanine','valine','isoleucine','leucine','methionine','phenylalanine','tyrosine','tryptophan']
+aa = False
+
+ligand_list = RS_db[RS_db['ID'].isin(ids_RS_full)]['LIGAND'].values.tolist()
+
+count_list = ligand_list
+ligand_names = list(set(count_list))
+counts = np.array([count_list.count(x) for x in ligand_names])
+idx = np.argsort(counts)[::-1]
+
+sorted_counts = counts[idx]
+sorted_names = [ligand_names[i] for i in idx.tolist()]
+explode = [0.02]*len(sorted_names)
+sub1 = sorted_counts/np.sum(sorted_counts) < .01
+colors = cm.Spectral_r(np.linspace(.05,.95,len(sorted_names)))
+
+plt.figure(dpi=300)
+_,f,t = plt.pie(sorted_counts, labels = sorted_names, explode = explode, autopct='%1.1f%%',
+        shadow=False, startangle=90, colors=colors, labeldistance =1.05, pctdistance=.53, textprops={'fontsize': 7})
+
+missing_labels = []
+subsum = 0
+for i in range(len( t)):
+    txt = t[i]
+    label = f[i]
+
+    if float(txt._text[:-1]) < 2:
+        txt.set_visible(False)
+        label.set_visible(False)
+        missing_labels.append(label._text)
+        subsum += float(txt._text[:-1])
+
+
+centre_circle = plt.Circle((0,0),0.70,fc='white')
+fig = plt.gcf()
+fig.gca().add_artist(centre_circle)
+
+plt.text(0.17,.4,'16.9%',color='r', size=7)
+s = (.74/.4185)
+xx,yy = .614,.88
+plt.plot([xx,yy], [xx/s,yy/s],'r',alpha=.5)
+plt.plot([0,0], [.71,1.01],'r',alpha=.5)
+
+plt.text(.6,1,'Other (33 types)',color='r')
+plt.text(.7,.85,'<2% each',color='r')
+
+plt.text(1.1,-1.1,'N = %0.0f'%len(count_list))
+plt.title('RS ligand representation')
+
+
+###############################################################################
+# Length distribution of the X_RS and X_UTR
+###############################################################################
+nbins = 40
+UTR_lens = np.array([len(x) for x in dot_UTR])
+RS_lens = np.array([len(x) for x in dot_RS_full])
+x,bins = np.histogram(RS_lens, bins=nbins)
+x2,_ = np.histogram(UTR_lens,bins=bins)
+plt.hist(RS_lens, bins=bins, density=True, alpha=1, histtype='step', lw=3)
+plt.hist(UTR_lens,bins=bins, density=True, alpha=1, histtype='step', lw=3)
+plt.xlim([0,325])
+plt.xlabel('Length (NT)')
+plt.ylabel('Probability')
+plt.legend(['RS   n=%s'%str(len(RS_lens)),'UTR n=%s'%str(len(UTR_lens))], loc='upper left')
+plt.title('Length distributions')
+
+
+###############################################################################
+# Sequence comparison plot of the 3-mers
+###############################################################################
+plt.errorbar(np.linspace(0,63,64),np.mean(X_RS[:,:64],axis=0), yerr=np.std(X_RS[:,:64],axis=0),ls='', marker='o', capsize=1)
+plt.errorbar(np.linspace(0,63,64),np.mean(X_UTR[:,:64],axis=0), yerr=np.std(X_UTR[:,:64],axis=0),ls='', marker='o',  capsize=1)
+plt.title('3-mer distribution comparisons')
+plt.legend(['RS','UTR'])
+
+plt.figure()
+plt.errorbar(np.linspace(0,9,10),np.mean(X_RS[:,-10:],axis=0), yerr=np.std(X_RS[:,-10:],axis=0),ls='', marker='o',  capsize=1)
+plt.errorbar(np.linspace(0,9,10),np.mean(X_UTR[:,-10:],axis=0), yerr=np.std(X_UTR[:,-10:],axis=0),ls='', marker='o', capsize=1)
+plt.title('Other feature distribution comparisons')
+plt.legend(['RS','UTR'])
+
+
+###############################################################################
+# KS distances of the X_RS and X_UTR
+###############################################################################
+from scipy.stats import ks_2samp
+
+kses = [ks_2samp(X_RS[:,i], X_UTR[:,i])[0] for i in range(66+8)]
+plt.figure()
+plt.bar(np.linspace(0,65+8,66+8),kses)
+plt.ylabel('KS distance')
+plt.xlabel('Feature')
+
+###############################################################################
+# PCA of the X_RS and X_UTR
+###############################################################################
+from sklearn.decomposition import PCA
+pca = PCA(n_components=2)
+p = pca.fit(np.vstack([X_UTR, X_RS]))
+print(pca.explained_variance_ratio_)
+p = pca.fit(np.vstack([X_UTR, X_RS_full]))
+x_utr_t = p.transform(X_UTR)
+x_rs_t = p.transform(X_RS_full)
+plt.figure()
+plt.scatter(x_utr_t[:,0], x_utr_t[:,1], s=5,alpha=.2)
+plt.scatter(x_rs_t[:,0], x_rs_t[:,1],s=5, alpha=.2)
+plt.legend(['UTR','RS'])
+plt.xlabel(f'PC1 ({pca.explained_variance_ratio_[0]*100:.3f}%)')
+plt.ylabel(f'PC2 ({pca.explained_variance_ratio_[1]*100:.3f}%)')
+
+1/0
+
+
+
+###############################################################################
+# TRAIN CLASSIFIER ENSEMBLE
+###############################################################################
+
+# The ensemble is trained in 3 parts: The "Other" set first (ligands with <2% representation)
+# single drop out ligands second, double drop out ligands last.
+
+# OPTIONS:
+retrain  = False #retrain the ensemble
+save  = False  #save the ensemble after retraining
+model_name = "EKmodel_witheld_w_struct_features_9_26" #name for the model files, they will add "_ligand" to the end for each
+
+# Train the "Other" classifier
+# preallocate the accuracies, and predicted outputs of the training / validation
+witheld_acc_other = []
+RS_acc_other = []
+UTR_acc_other = []
+predicted_RSs_other = []
+predicted_withelds_other = []
+predicted_UTRs_other = []
+estimators_other = []
+
+for i in tqdm(range(1)):
+
+  witheld_ligands[:i]
+  X = np.vstack([X_UTR,] + [x[0] for x in ligand_dfs]) 
+  X_witheld = X_RS
+
+  if retrain:
+    svc = SVC(C=10, kernel='rbf', gamma=0.4, probability=True)
+    pu_estimator = ElkanotoPuClassifier(estimator=svc, hold_out_ratio=0.2)
+    y = np.zeros(len(X))
+    y[len(X_UTR):] = 1
+    pu_estimator.fit(X, y)
+  else:
+    pu_estimator =load('./elkanoto_models/%s_%s.joblib'%(model_name, 'other'))
+
+
+  X_t = np.vstack([ X_RS, ] + [x[0] for x in ligand_dfs]  )
+
+  predicted_RS_other = pu_estimator.predict_proba(X_t)
+  predicted_witheld_other = pu_estimator.predict_proba(X_witheld)
+  predicted_UTR_other = pu_estimator.predict_proba(X_UTR)
+
+  UTR_acc_other.append( np.sum((predicted_UTR_other[:,1] < .5))/len(X_UTR) )
+  RS_acc_other.append( np.sum((predicted_RS_other[:,1] > .5))/len(X_t) )
+  witheld_acc_other.append( np.sum((predicted_witheld_other[:,1] > .5))/len(X_witheld)  )
+
+  predicted_RSs_other.append(predicted_RS_other)
+  predicted_withelds_other.append(predicted_witheld_other)
+  predicted_UTRs_other.append(predicted_UTR_other)
+  if retrain:
+    if save:
+      dump(pu_estimator,'./elkanoto_models/%s_%s.joblib'%(model_name, 'other'))
+  estimators_other.append(pu_estimator)
+
+# Single drop out classifiers
+witheld_acc = []
+RS_acc = []
+UTR_acc = []
+
+predicted_RSs = []
+predicted_withelds = []
+predicted_UTRs = []
+estimators = []
+
+for i in tqdm(range(len(witheld_ligands))):
+
+  witheld_ligands[:i]
+  X = np.vstack([X_UTR, X_RS, ] + [x[0] for x in ligand_dfs[:i]] + [x[0] for x in ligand_dfs[i+1:]] )
+
+  X_witheld = ligand_dfs[i][0]
+
+  if retrain:
+    svc = SVC(C=10, kernel='rbf', gamma=0.4, probability=True)
+    pu_estimator = ElkanotoPuClassifier(estimator=svc, hold_out_ratio=0.2)
+    y = np.zeros(len(X))
+    y[len(X_UTR):] = 1
+    pu_estimator.fit(X, y)
+  else:
+    pu_estimator =load('./elkanoto_models/%s_%s.joblib'%(model_name, witheld_ligands[i]))
+
+
+  X_t = np.vstack([ X_RS, ] + [x[0] for x in ligand_dfs[:i]] + [x[0] for x in ligand_dfs[i+1:]] )
+
+  predicted_RS = pu_estimator.predict_proba(X_t)
+  predicted_witheld = pu_estimator.predict_proba(X_witheld)
+  predicted_UTR = pu_estimator.predict_proba(X_UTR)
+
+  UTR_acc.append( np.sum((predicted_UTR[:,1] < .5))/len(X_UTR) )
+  RS_acc.append( np.sum((predicted_RS[:,1] > .5))/len(X_t) )
+  witheld_acc.append( np.sum((predicted_witheld[:,1] > .5))/len(X_witheld)  )
+
+  predicted_RSs.append(predicted_RS)
+  predicted_withelds.append(predicted_witheld)
+  predicted_UTRs.append(predicted_UTR)
+  if retrain:
+    if save:
+      dump(pu_estimator,'./elkanoto_models/%s_%s.joblib'%(model_name, witheld_ligands[i]))
+  estimators.append(pu_estimator)
+
+
+# Double drop out ligands
+
+pairs = [('SAM', 'cobalamin'), ('TPP','glycine'),('SAM','TPP'),('glycine','cobalamin'),('TPP','cobalamin'),
+  ('FMN','cobalamin'),('FMN','TPP'),('FMN','SAM'),('FMN','glycine')]
+
+
+witheld_acc_2 = []
+RS_acc_2 = []
+UTR_acc_2 = []
+predicted_RSs_2 = []
+predicted_withelds_2 = []
+predicted_UTRs_2 = []
+estimators_2 = []
+
+
+for i in tqdm(range(len(pairs))):
+  witheld_1 = pairs[i][0]
+  witheld_2 = pairs[i][1]
+
+  ind_1 = witheld_ligands.index(witheld_1)
+  ind_2 = witheld_ligands.index(witheld_2)
+
+
+
+  witheld_ligands[:i]
+  X = np.vstack([X_UTR, X_RS, ] + [ligand_dfs[i][0] for i in range(len(ligand_dfs)) if i not in [ind_1,ind_2]])
+
+  X_witheld = np.vstack([ligand_dfs[ind_1][0], ligand_dfs[ind_2][0]])
+
+  if retrain:
+    svc = SVC(C=10, kernel='rbf', gamma=0.4, probability=True)
+    pu_estimator = ElkanotoPuClassifier(estimator=svc, hold_out_ratio=0.2)
+    y = np.zeros(len(X))
+    y[len(X_UTR):] = 1
+    pu_estimator.fit(X, y)
+  else:
+    pu_estimator =load('./elkanoto_models/%s_%s_%s.joblib'%(model_name,witheld_1, witheld_2))
+
+  X_t = np.vstack([ X_RS, ] + [ligand_dfs[i][0] for i in range(len(ligand_dfs)) if i not in [ind_1,ind_2]])
+
+  predicted_RS_2 = pu_estimator.predict_proba(X_t)
+  predicted_witheld_2 = pu_estimator.predict_proba(X_witheld)
+  predicted_UTR_2 = pu_estimator.predict_proba(X_UTR)
+
+  UTR_acc_2.append( np.sum((predicted_UTR_2[:,1] < .5))/len(X_UTR) )
+  RS_acc_2.append( np.sum((predicted_RS_2[:,1] > .5))/len(X_t) )
+  witheld_acc_2.append( np.sum((predicted_witheld_2[:,1] > .5))/len(X_witheld)  )
+
+  predicted_RSs_2.append(predicted_RS_2)
+  predicted_withelds_2.append(predicted_witheld_2)
+  predicted_UTRs_2.append(predicted_UTR_2)
+  if retrain:
+    if save:
+      dump(pu_estimator,'./elkanoto_models/%s_%s_%s.joblib'%(model_name,witheld_1, witheld_2))
+  estimators_2.append(pu_estimator)
+
+
+
+#combine the ensemble classifiers into a list
+ensemble = estimators + estimators_2 + estimators_other
+
+ensemble = estimators + predicted_RS_2 + estimators_other
+ensemble = estimators + predicted_witheld_2 + estimators_other
+ensemble = estimators + predicted_UTR_2 + estimators_other
+ensemble = estimators + UTR_acc_2 + estimators_other
+ensemble = estimators + RS_acc_2 + estimators_other
+ensemble = estimators + witheld_acc_2 + estimators_other
+
+#normalization vector for the outputs to the max of the training
+#ensemble_norm = np.load('./%s'%model_norm)
+
+redo_importance = False
+if redo_importance:
+    #PERMUTATION IMPORTANCE
+    from sklearn.inspection import permutation_importance
+    
+    rs = []
+    X = np.vstack([X_RS_full[:5000], X_UTR[:5000]])
+    y = np.zeros(len(X))
+    y[len(X_UTR[:5000]):] = 1
+    for i in range(len(ensemble)):
+        print(i)
+        rs.append(permutation_importance(ensemble[i], X, y,
+                                   n_repeats=10,
+                                   random_state=0))
+else:
+    importances = np.load('importances.npy')
+
+
+
+#plt.boxplot(r.importances.T, vert=False, showfliers=False); plt.xlabel('accuracy loss'); plt.ylabel('feature')
+plt.figure(figsize=(5,10), dpi=300); #plt.boxplot(r.importances.T, vert=False, showfliers=False); plt.xlabel('accuracy loss'); plt.ylabel('feature'); plt.yticks(rotation=90, fontsize=6); plt.grid(True)
+import itertools
+#importances = np.array([x.importances.T for x in rs])
+plt.figure(figsize=(5,10),dpi=300);
+from matplotlib import cm
+for i in range(20):
+    plt.boxplot(importances[i], vert=False, showfliers=False, boxprops={'alpha':.8, 'color':cm.viridis(i/20)},
+                capprops={'alpha':.8, 'color':cm.viridis(i/40)},
+                whiskerprops={'alpha':.8, 'color':cm.viridis(i/40)},
+                medianprops={'alpha':.8, 'color':cm.viridis(i/40)},
+                meanprops={'alpha':.8, 'color':cm.viridis(i/40)},
+                ); 
+plt.xlabel('accuracy loss'); plt.ylabel('feature'); plt.yticks(rotation=90, fontsize=6); plt.grid(True)
+
+
+ls = ['',] + [''.join(x) for x in itertools.product(['a','c','u','g'], repeat=3)] + ['GC%', 'M=FE', 'UBS', 'BS', 'LL','RL','L','RB','LB','%UP']
+
+
+ax = plt.gca()
+ax.set_yticks([x for x in range(75)])
+ax.set_yticklabels(ls)
+ax.yaxis.set_tick_params(rotation=0)
+
+
+
+plt.figure(figsize=(5,10),dpi=300);
+from matplotlib import cm
+
+i=0
+plt.boxplot(importances.reshape(200,74), vert=False, showfliers=False, boxprops={'alpha':1, 'color':cm.viridis(i/20)},
+            capprops={'alpha':1, 'color':cm.viridis(i/20)},
+            whiskerprops={'alpha':1, 'color':cm.viridis(i/20)},
+            medianprops={'alpha':1, 'color':cm.viridis(i/20)},
+            meanprops={'alpha':1, 'color':cm.viridis(i/20)},
+            ); 
+plt.xlabel('accuracy loss'); plt.ylabel('feature'); plt.yticks(rotation=90, fontsize=6); plt.grid(True)
+
+
+ls = ['',] + [''.join(x) for x in itertools.product(['a','c','u','g'], repeat=3)] + ['GC%', 'M=FE', 'UBS', 'BS', 'LL','RL','L','RB','LB','%UP']
+
+
+ax = plt.gca()
+ax.set_yticks([x for x in range(75)])
+ax.set_yticklabels(ls)
+ax.yaxis.set_tick_params(rotation=0)
+
+
+
+
+plt.figure(figsize=(5,13),dpi=300);
+from matplotlib import cm
+
+i=0
+plt.boxplot(importances.reshape(200,74), vert=False, showfliers=False, boxprops={'alpha':1, 'color':cm.viridis(i/20), 'label':'_nolegend_'},
+            capprops={'alpha':1, 'color':cm.viridis(i/20), 'label':'_nolegend_'},
+            whiskerprops={'alpha':1, 'color':cm.viridis(i/20), 'label':'_nolegend_'},
+            medianprops={'alpha':1, 'color':cm.viridis(i/20), 'label':'_nolegend_'},
+            meanprops={'alpha':1, 'color':cm.viridis(i/20), 'label':'_nolegend_'},
+            ); 
+
+colors = ['#ef476f', '#073b4c','#06d6a0','#7400b8','#073b4c', '#118ab2',]
+for i in range(74):
+    plt.scatter(np.mean(importances,axis=1)[:,i], [i+1]*20, marker='o', color=colors[0], s=4)
+plt.xlabel('accuracy loss'); plt.ylabel('feature'); plt.yticks(rotation=90, fontsize=6); plt.grid(True)
+
+
+ls = ['',] + [''.join(x) for x in itertools.product(['a','c','u','g'], repeat=3)] + ['GC%', 'MFE', 'UBS', 'BS', 'LL','RL','L','RB','LB','%UP']
+
+
+ax = plt.gca()
+ax.set_yticks([x for x in range(75)])
+ax.set_yticklabels(ls, fontsize=9)
+ax.yaxis.set_tick_params(rotation=0)
+plt.title('Feature importance across the final ensemble')
+plt.legend(['single classifier mean (n=10)'],  loc='lower left')
+plt.plot([0,0],[1,74],'k-',lw=1)
+plt.savefig('./SIfigure2.png')
+
+
+
+import random
+random.seed(42)
+def generate_key():
+    STR_KEY_GEN = 'augc'
+    return ''.join(random.choice(STR_KEY_GEN) for _ in range(600))
+
+rand_30 = [generate_key() for i in range(60000)]
+
+h,xx = np.histogram(RS_lens, bins = np.max(RS_lens), density=True);
+cdf = np.cumsum(h*np.diff(xx))
+rand_lens = []
+for i in range(60000):
+    rand_lens.append(np.where(np.random.rand() > cdf)[0][-1] + 25)
+plt.hist(lens,bins = 100, density=True, alpha=.4)
+plt.hist(RS_lens, bins=100, density=True, alpha=.4)
+
+RAND_RS_features = []
+for i in range(len(rand_30)):
+  mfe,hr = get_mfe_nupack(rand_30[i][:rand_lens[i]])
+  RAND_RS_features.append([rand_30[i][:rand_lens[i]], str(mfe[0][0]), mfe[0][1]])
+
+X_RAND =np.zeros([len(rand_30), 66+8])
+k = 0
+for i in range(len(rand_30)):
+  seq = clean_seq(rand_30[i])
+  if len(seq) > 25:
+
+    #seq = clean_seq(RS_df['SEQ'].iloc[i])
+    kmerf = kmer_freq(seq)
+    X_RAND[k,:64] = kmerf/np.sum(kmerf)
+    X_RAND[k,64] = RAND_RS_features[i][-1]/max_mfe
+    X_RAND[k,65] = get_gc(seq)
+    #ds_RS.append(RS_df['ID'].iloc[i])
+    #dot_RS.append(RS_df['NUPACK_DOT'].iloc[i])
+    X_RAND[k,-8:] = be.annoated_feature_vector(RAND_RS_features[i][-2])
+
+    X_RAND[k,66] = X_RAND[k,66]/max_ubs
+    X_RAND[k,67] = X_RAND[k,67]/max_bs
+    X_RAND[k,68] = X_RAND[k,68]/max_ill
+    X_RAND[k,69] = X_RAND[k,69]/max_ilr
+    X_RAND[k,70] = X_RAND[k,70]/max_lp
+    X_RAND[k,71] = X_RAND[k,71]/max_lb
+    X_RAND[k,72] = X_RAND[k,72]/max_rb
+
+    k+=1
+
+reload_X_RAND = True
+if reload_X_RAND:
+    X_RAND = np.load('./X_RAND.npy')
+predicted_rand = np.zeros([len(X_RAND), 20])
+ensemble = estimators + estimators_2 + estimators_other
+for j in range(20):
+  predicted_rand[:,j] = ensemble[j].predict_proba(X_RAND)[:,1]
+
+plt.plot(np.sum(predicted_rand > .5, axis =1)/20,'o')
+
+
+###############################################################################
+# 20 fold k cross validation without structural holdouts
+###############################################################################
+import sklearn
+save = True
+retrain = True
+model_name = 'EKmodel_witheld_20kfcv_2'
+
+X = np.vstack([X_UTR, X_RS_full,])
+y = np.zeros(len(X))
+y[len(X_UTR):] = 1
+kf = sklearn.model_selection.KFold(n_splits=20, shuffle=True, random_state=42)
+
+X_RAND = np.load('./X_RAND.npy')
+X_EXONS = np.load('./X_EXONS.npy')
+
+ensemble_2 = []
+witheld_RS_acc_2 = []
+for i, (train_index, test_index) in enumerate(kf.split(X,y)):
+    print(i)
+    X_train, X_test, y_train, y_test = X[train_index], X[test_index], y[train_index], y[test_index]
+    if retrain:
+        svc = SVC(C=15, kernel='rbf', gamma=0.2, probability=True)
+        pu_estimator = ElkanotoPuClassifier(estimator=svc, hold_out_ratio=0.2)
+        pu_estimator.fit(X_train, y_train)
+        if save:
+          dump(pu_estimator,'./elkanoto_models/%s_%s.joblib'%(model_name,i))
+    else:
+        svc = SVC(C=10, kernel='rbf', gamma=0.4, probability=True)
+        pu_estimator = ElkanotoPuClassifier(estimator=svc, hold_out_ratio=0.2)
+        pu_estimator =load('./elkanoto_models/%s_%s.joblib'%(model_name,str(i)))
+        
+    predicted_RS = pu_estimator.predict_proba(X_test[y_test==1])
+    witheld_RS_acc_2.append(np.sum(predicted_RS > .5 )/ (len(X_test[y_test==1])))
+    print(np.sum(predicted_RS > .5 )/ (len(X_test[y_test==1])))
+    ensemble_2.append(pu_estimator)
+
+kf = sklearn.model_selection.KFold(n_splits=20, shuffle=True, random_state=42)
+train_ens2_acc = []
+test_ens2_acc = []
+found_UTR_ens2 = []
+random_ens2_acc = []
+structured_ens2_acc = []
+
+rands_2 = []
+exons_2 = []
+
+
+for i, (train_index, test_index) in enumerate(kf.split(X,y)):
+
+    X_train, X_test, y_train, y_test = X[train_index], X[test_index], y[train_index], y[test_index]
+    
+    p = ensemble_2[i].predict_proba((X_test[y_test==1]))
+    t = ensemble_2[i].predict_proba((X_train[y_train==1]))
+    u = ensemble_2[i].predict_proba(X_UTR)
+    r =   ensemble_2[i].predict_proba(X_RAND)       
+    ex =   ensemble_2[i].predict_proba(X_EXONS)                  
+
+    rands_2.append(r)
+    exons_2.append(ex)
+    test_ens2_acc.append(np.sum(p[:,1] > .5 )/ (len(X_test[y_test==1])))
+    train_ens2_acc.append(np.sum(t[:,1] > .5 )/ (len(X_train[y_train==1])))
+    found_UTR_ens2.append(np.sum(u[:,1] > .5 )/ (len(X_UTR)))
+    random_ens2_acc.append(np.sum(r[:,1] > .5 )/ (len(X_RAND)))
+    structured_ens2_acc.append(np.sum(ex[:,1] > .5 )/ (len(X_EXONS)))
+    
+    
+train_ens_acc = []
+test_ens_acc = []
+found_UTR_ens = []
+
+random_ens_acc = []
+structured_ens_acc = []
+for i in range(len(ensemble)):
+    r =   ensemble[i].predict_proba(X_RAND)       
+    ex =   ensemble[i].predict_proba(X_EXONS)      
+    random_ens_acc.append(np.sum(r[:,1] > .5 )/ (len(X_RAND)))
+    structured_ens_acc.append(np.sum(ex[:,1] > .5 )/ (len(X_EXONS)))
+
+
+data = np.array([RS_acc + RS_acc_2 + RS_acc_other,
+                      witheld_acc + witheld_acc_2 + witheld_acc_other, 
+                      UTR_acc + UTR_acc_2 + UTR_acc_other,
+                      random_ens_acc,
+                      structured_ens_acc])
+
+data[2,:] = 1 - data[2,:]
+plt.matshow(data)
+ax = plt.gca()
+for (i, j), z in np.ndenumerate(data):
+    ax.text(j, i, '{:0.3f}'.format(z), ha='center', va='center')
+ax.set_xticks([x for x in range(20)])
+ax.set_xticklabels([x for x in range(20)])
+ax.set_yticklabels(['','Train', 'Test', 'UTR', 'RAND', 'EXON'])
+
+data = np.array([train_ens2_acc,
+                      test_ens2_acc, 
+                      found_UTR_ens2,
+                      random_ens2_acc,
+                      structured_ens2_acc])
+
+plt.figure()
+plt.matshow(data)
+
+ax = plt.gca()
+for (i, j), z in np.ndenumerate(data):
+    ax.text(j, i, '{:0.3f}'.format(z), ha='center', va='center')
+ax.set_xticks([x for x in range(20)])
+ax.set_xticklabels([x for x in range(20)])
+ax.set_yticklabels(['', 'Train', 'Test', 'UTR', 'RAND', 'EXON'])
+
+testens=[]
+for i in range(len(ensemble)):
+
+    ex =   ensemble[i].predict_proba(X_EXONS)      
+
+    testens.append(np.sum(ex[:,1] > .95 )/ (len(X_EXONS)))
+
+
+
+
+
+
+
+
+1/0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from sklearn.decomposition import PCA
+pca = PCA(n_components=2)
+#p = pca.fit(np.vstack([X_UTR, X_RS, X_RAND, X_EXONS]))
+
+p = pca.fit(np.vstack([X_UTR, X_RS_full])) # X_RAND, X_EXONS]))
+print(pca.explained_variance_ratio_)
+x_utr_t = p.transform(X_UTR)
+x_rs_t = p.transform(X_RS_full)
+x_rand_t = p.transform(X_RAND)
+x_exon_t = p.transform(X_EXONS)
+plt.figure()
+plt.scatter(x_utr_t[:,0], x_utr_t[:,1], s=5,alpha=.2)
+plt.scatter(x_rs_t[:,0], x_rs_t[:,1],s=5, alpha=.2)
+#plt.scatter(x_rand_t[:,0], x_rand_t[:,1],s=5, alpha=.2)
+#plt.scatter(x_exon_t[:,0], x_exon_t[:,1],s=5, alpha=.2)
+plt.legend(['UTR','RS'])#, 'RAND', 'EXON'])
+plt.xlabel(f'PC1 ({pca.explained_variance_ratio_[0]*100:.3f}%)')
+plt.ylabel(f'PC2 ({pca.explained_variance_ratio_[1]*100:.3f}%)')
+
+
+with open('./final_set.json', 'r') as f:
+    UTR_hit_list = json.load(f)
+    
+    
+x_hits = x_utr_t[[ids_UTR.index(x) for x in ids_UTR if x not in UTR_hit_list]]
+thresh = .25
+fx = lambda t: (np.sum((x_utr_t[:,0] > t) == 1) + np.sum((x_rs_t[:,0] <= t) == 1)) / (len(x_utr_t) + len(x_rs_t))
+y = []
+for t in np.linspace(-.25,5,1000):
+    y.append(fx(t))
+
+
+thresh = np.linspace(-.25,5,1000)[np.argmax(y)]
+
+x,bins = np.histogram(x_utr_t[:,0], bins=30);
+plt.stairs(x,edges=bins, lw=2, fill=False, color=colors[0]);
+plt.stairs(x,edges=bins, lw=2, fill=True, alpha=.1, color=colors[0],label='_nolegend_');
+x,_ = np.histogram(x_rs_t[:,0], bins=bins)
+plt.stairs(x,edges=bins, lw=2, color=colors[1]);
+x,_ = np.histogram(x_utr_t[[ids_UTR.index(x) for x in UTR_hit_list]][:,0], bins=bins)
+plt.stairs(x,edges=bins, lw=2, alpha=1, color=colors[2]);
+plt.stairs(x,edges=bins, lw=2, fill=True, alpha=.1,  color=colors[2], label='_nolegend_');
+
+x,_ = np.histogram(x_hits[:,0], bins=bins)
+#plt.stairs(x,edges=bins, lw=2, ls='--', color=colors[3]);
+plt.plot([thresh, thresh], [0,10000000], 'k--')
+
+plt.legend(['UTR', 'RS', '436'], bbox_to_anchor=(1.25, 1.05))
+plt.xlabel(f'PC1 ({pca.explained_variance_ratio_[0]*100:.3f}%)')
+ax = plt.gca()
+ax.set_yscale('log')
+plt.xlim([-.8, 1.4])
+plt.ylim([1e0, 1e5])
+plt.text(1, 10**4.5, 'UTR: ' + f'{np.sum((x_utr_t[:,0] > thresh) == 1)/len(x_utr_t)*100:.3f}'+ '%', color='k', size=7  )
+plt.text(-.75, 10**4.5, 'UTR: ' +  f'{np.sum((x_utr_t[:,0] > thresh) == 0)/len(x_utr_t)*100:.3f}' +'%' , color='k',size=7  )
+
+plt.text(1, 10**4.2, 'RS: ' +  f'{np.sum((x_rs_t[:,0] > thresh) == 1)/len(x_rs_t)*100:.3f}'+ '%', color='k',size=7  )
+plt.text(-.75, 10**4.2, 'RS: ' + f'{np.sum((x_rs_t[:,0] > thresh) == 0)/len(x_rs_t)*100:.3f}' +'%' , color='k',size=7  )
+
+
+plt.text(-.4, 10**.5, f'{436/len(x_utr_t)*100:.3f}'+ '% of UTRs', color=colors[2],size=7  )
+plt.text(-.4, 10**2.3, f'{(1-436/len(x_utr_t))*100:.3f}' +'% of UTRs' , color=colors[0],size=7  )
+plt.title('PCA separation of UTR and RS datasets')
+plt.savefig('pca_2.svg')
+
+plt.figure()
+x,bins = np.histogram(x_utr_t[:,0], bins=30);
+plt.stairs(x,edges=bins, lw=2);
+x,_ = np.histogram(x_rs_t[:,0], bins=bins)
+plt.stairs(x,edges=bins, lw=2);
+x,_ = np.histogram(x_utr_t[[ids_UTR.index(x) for x in UTR_hit_list]][:,0], bins=bins)
+plt.stairs(x,edges=bins, lw=2);
+
+x,_ = np.histogram(x_utr_t[[ids_UTR.index(x) for x in ids_UTR if x not in UTR_hit_list]][:,0], bins=bins)
+plt.stairs(x,edges=bins, lw=2, ls='--');
+
+plt.legend(['UTR', 'RS', '436', 'UTR-436'])
+plt.xlabel(f'PC1 ({pca.explained_variance_ratio_[0]*100:.3f}%)')
+ax = plt.gca()
+plt.plot([thresh, thresh], [0,10000], 'k--')
+
+
+plt.figure()
+x,bins = np.histogram(x_utr_t[:,0], bins=30);
+plt.stairs(x/np.sum(x),edges=bins, lw=2);
+x,_ = np.histogram(x_rs_t[:,0], bins=bins)
+plt.stairs(x/np.sum(x),edges=bins, lw=2);
+x,_ = np.histogram(x_utr_t[[ids_UTR.index(x) for x in UTR_hit_list]][:,0], bins=bins)
+plt.stairs(x/np.sum(x),edges=bins, lw=2);
+
+x,_ = np.histogram(x_utr_t[[ids_UTR.index(x) for x in ids_UTR if x not in UTR_hit_list]][:,0], bins=bins)
+plt.stairs(x/np.sum(x),edges=bins, lw=2, ls='--');
+
+plt.legend(['UTR', 'RS', '436', 'UTR-436'])
+plt.xlabel(f'PC1 ({pca.explained_variance_ratio_[0]*100:.3f}%)')
+ax = plt.gca()
+plt.plot([thresh, thresh], [0,.2], 'k--')
+
+
+###############################################################################
+# RETRAIN ENSEMBLE WITH RANDOM AND EXONS
+###############################################################################
+X_RAND = np.load('./X_RAND.npy')
+X_EXONS = np.load('./X_EXONS.npy')
+
+witheld_ligands = ['cobalamin', 'guanidine', 'TPP','SAM','glycine','FMN','purine','lysine','fluoride','zmp-ztp',]
+
+pairs = [(x,) for x in witheld_ligands] + [('SAM', 'cobalamin'), ('TPP','glycine'),('SAM','TPP'),('glycine','cobalamin'),('TPP','cobalamin'),
+  ('FMN','cobalamin'),('FMN','TPP'),('FMN','SAM'),('FMN','glycine'), ('other',)]
+
+
+#@title single drop out of <2% ligands
+witheld_acc = []
+RS_acc = []
+RS_all_acc = []
+UTR_acc = []
+Exon_acc = []
+Rand_acc = []
+
+
+predicted_RSs = []
+predicted_withelds = []
+predicted_UTRs = []
+predicted_Exons = []
+predicted_rands = []
+predicted_RSs_all = []
+
+estimators= []
+
+retrain  = False #@param {type:"boolean"}
+save  = False #@param {type:"boolean"}
+model_name = "EKmodel_witheld_w_exon_rand" #@param {type:"string"}
+
+
+for i in tqdm(range(20)):
+
+  if pairs[i][0] != 'other':
+      if len(pairs[i]) == 1:
+          X = np.vstack([X_UTR, X_RAND, X_EXONS, X_RS, ] + [x[0] for x in ligand_dfs[:i]] + [x[0] for x in ligand_dfs[i+1:]] )
+          X_witheld = ligand_dfs[i][0]
+          X_t = np.vstack([ X_RS, ] + [x[0] for x in ligand_dfs[:i]] + [x[0] for x in ligand_dfs[i+1:]] )
+          name =  pairs[i][0]
+      else:
+          witheld_1 = pairs[i][0]
+          witheld_2 = pairs[i][1]
+
+          ind_1 = witheld_ligands.index(witheld_1)
+          ind_2 = witheld_ligands.index(witheld_2)
+
+          X = np.vstack([X_UTR, X_RAND, X_EXONS, X_RS,] + [ligand_dfs[i][0] for i in range(len(ligand_dfs)) if i not in [ind_1,ind_2]])
+          X_witheld = np.vstack([ligand_dfs[ind_1][0], ligand_dfs[ind_2][0]])
+          X_t = np.vstack([ X_RS, ] + [ligand_dfs[i][0] for i in range(len(ligand_dfs)) if i not in [ind_1,ind_2]])
+          name = witheld_1 + '_' + witheld_2
+  else:
+      X = np.vstack([X_UTR, X_RAND, X_EXONS,] + [x[0] for x in ligand_dfs]  )
+      X_witheld = X_RS
+      X_t = np.vstack([ X_RS, ] + [x[0] for x in ligand_dfs]  )
+      name = 'other'
+        
+  print('___________________________')
+  print('Training:')
+  print(pairs[i])
+  print('X shape: ')
+  print(X.shape)
+  print('X_witheld:')
+  print(X_witheld.shape)
+
+    
+
+  if retrain:
+    svc = SVC(C=10, kernel='rbf', gamma=0.4, probability=True)
+    pu_estimator = ElkanotoPuClassifier(estimator=svc, hold_out_ratio=0.2)
+    y = np.zeros(len(X))
+    y[len(X_UTR)+len(X_RAND)+len(X_EXONS):] = 1
+    pu_estimator.fit(X, y)
+  else:
+    pu_estimator =load('./elkanoto_models/%s_%s.joblib'%(model_name, name))
+
+
+  predicted_RS = pu_estimator.predict_proba(X_t)
+  predicted_witheld= pu_estimator.predict_proba(X_witheld)
+  predicted_UTR = pu_estimator.predict_proba(X_UTR)
+  predicted_RAND = pu_estimator.predict_proba(X_RAND)
+  predicted_EXON = pu_estimator.predict_proba(X_EXONS)
+  predicted_RS_all = pu_estimator.predict_proba(X_RS_full)
+
+  UTR_acc.append( np.sum((predicted_UTR[:,1] < .5))/len(X_UTR) )
+  RS_acc.append( np.sum((predicted_RS[:,1] > .5))/len(X_t) )
+  witheld_acc.append( np.sum((predicted_witheld[:,1] > .5))/len(X_witheld)  )
+  Rand_acc.append(np.sum((predicted_RAND[:,1] > .5))/len(X_RAND)  )
+  Exon_acc.append(np.sum((predicted_EXON[:,1] > .5))/len(X_EXONS)  )
+  RS_all_acc.append(np.sum((predicted_RS_all[:,1] > .5))/len(predicted_RS_all)  )
+  
+  print('UTR accuracy:')
+  print( np.sum((predicted_UTR[:,1] < .5))/len(X_UTR) )
+  print('RS accuracy:')
+  print(np.sum((predicted_RS[:,1] > .5))/len(X_t) )
+  print('Witheld accuracy:')
+  print( np.sum((predicted_witheld[:,1] > .5))/len(X_witheld))
+  print('Rand accuracy:')
+  print(np.sum((predicted_RAND[:,1] > .5))/len(X_RAND) )
+  print('Exon accuracy:')
+  print(np.sum((predicted_EXON[:,1] > .5))/len(X_EXONS) )
+  
+  predicted_RSs.append(predicted_RS)
+  predicted_withelds.append(predicted_witheld)
+  predicted_UTRs.append(predicted_UTR)
+  predicted_Exons.append(predicted_EXON)
+  predicted_rands.append(predicted_RAND)
+  predicted_RSs_all.append(predicted_RS_all)
+  if retrain:
+    if save:
+      dump(pu_estimator,'./elkanoto_models/%s_%s.joblib'%(model_name, name))
+  estimators.append(pu_estimator)
+
+
+witheld_acc = []
+RS_acc = []
+UTR_acc = []
+Exon_acc = []
+Rand_acc = []
+
+t = .5
+for i in range(20):
+    UTR_acc.append( np.sum((predicted_UTRs[i][:,1] < t))/len(X_UTR) )
+    RS_acc.append( np.sum((predicted_RSs[i][:,1] > t))/len(predicted_RSs[i][:,1]) )
+    witheld_acc.append( np.sum((predicted_withelds[i][:,1] > t))/len(predicted_withelds[i][:,1])  )
+    Rand_acc.append(np.sum((predicted_rands[i][:,1] > t))/len(X_RAND)  )
+    Exon_acc.append(np.sum((predicted_Exons[i][:,1] > t))/len(X_EXONS)  )
+    
+
+mat = np.array([RS_acc, witheld_acc, UTR_acc, Rand_acc, Exon_acc])
+mat[2, :] = 1 -  mat[2,:]
+
+
+fig, ax = plt.subplots()
+# Using matshow here just because it sets the ticks up nicely. imshow is faster.
+ax.matshow(mat, cmap='summer', vmax=1)
+ax.set_yticklabels(['', 'RS training', 'RS witheld', 'UTR', 'RAND', 'EXON'], size=5)
+for (i, j), z in np.ndenumerate(mat):
+    ax.text(j, i, '{:0.1f}'.format(z*100), ha='center', va='center', size=5)
+ax.set_xticks([x for x in range(20)])
+ax.set_xticklabels(['-'.join(x) for x in pairs] , size=5, rotation=90, )
+plt.savefig('ensemble2_5.svg')
+
+
+
+
+
+witheld_acc = []
+RS_acc = []
+UTR_acc = []
+Exon_acc = []
+Rand_acc = []
+RS_all_acc = []
+
+t = .5
+for i in range(20):
+    UTR_acc.append( np.sum((predicted_UTRs[i][:,1] < t))/len(X_UTR) )
+    RS_acc.append( np.sum((predicted_RSs[i][:,1] > t))/len(predicted_RSs[i][:,1]) )
+    witheld_acc.append( np.sum((predicted_withelds[i][:,1] > t))/len(predicted_withelds[i][:,1])  )
+    Rand_acc.append(np.sum((predicted_rands[i][:,1] > t))/len(X_RAND)  )
+    Exon_acc.append(np.sum((predicted_Exons[i][:,1] > t))/len(X_EXONS)  )
+    RS_all_acc.append(np.sum((predicted_RS_all[:,1] > t))/len(predicted_RS_all)  )
+
+witheld_acc_2 = []
+RS_acc_2 = []
+UTR_acc_2 = []
+Exon_acc_2 = []
+Rand_acc_2 = []
+RS_all_acc_2 = []
+t = .95
+for i in range(20):
+    UTR_acc_2.append( np.sum((predicted_UTRs[i][:,1] < t))/len(X_UTR) )
+    RS_acc_2.append( np.sum((predicted_RSs[i][:,1] > t))/len(predicted_RSs[i][:,1]) )
+    witheld_acc_2.append( np.sum((predicted_withelds[i][:,1] > t))/len(predicted_withelds[i][:,1])  )
+    Rand_acc_2.append(np.sum((predicted_rands[i][:,1] > t))/len(X_RAND)  )
+    Exon_acc_2.append(np.sum((predicted_Exons[i][:,1] > t))/len(X_EXONS)  )
+    
+    RS_all_acc_2.append(np.sum((predicted_RS_all[:,1] > t))/len(predicted_RS_all)  )
+    
+from matplotlib.colors import LinearSegmentedColormap
+cmap = LinearSegmentedColormap.from_list('blank', [(1,1,1), (1,1,1)], N=2)
+
+fig, ax = plt.subplots()
+mat = np.array([[len(X_RS_full), len(X_UTR), len(X_EXONS), len(X_RAND)],
+               [np.mean(RS_all_acc), 1-np.mean(UTR_acc), np.mean(Exon_acc), np.mean(Rand_acc)],
+               [int(x) for x in [np.mean(RS_all_acc)*len(X_RS_full), (1-np.mean(UTR_acc))*len(X_UTR), len(X_EXONS)*np.mean(Exon_acc), len(X_RAND)*np.mean(Rand_acc)]],
+               [np.mean(RS_all_acc_2), 1-np.mean(UTR_acc_2), np.mean(Exon_acc_2), np.mean(Rand_acc_2)], 
+               [int(x) for x in [np.mean(RS_all_acc_2)*len(X_RS_full), (1-np.mean(UTR_acc_2))*len(X_UTR), len(X_EXONS)*np.mean(Exon_acc_2), len(X_RAND)*np.mean(Rand_acc_2)]]])
+
+ax.matshow(mat, cmap=cmap, vmax=1, aspect = .3)
+ax.set_xticklabels(['', 'RS', 'UTR', 'EXON', 'RAND'], size=5)
+for (i, j), z in np.ndenumerate(mat):
+    if i == 0:
+        ax.text(j, i, '{}'.format(int(z)), ha='center', va='center', size=10)
+    if i in [1,3]:
+        ax.text(j, i, '{:0.3f}'.format(z*100) + '%', ha='center', va='center', size=10)
+    if i in [2,4]:
+        ax.text(j, i, '{}'.format(int(z)), ha='center', va='center', size=10)
+ax.set_xticks(np.arange(-.5,4,1), minor=True)
+ax.set_yticks(np.arange(-.5,5,1), minor=True)
+ax.grid(which='minor')
+
+plt.savefig('fpr.svg')
+        
+        
+        
+
+plt.boxplot(np.array([RS_acc, witheld_acc, [1-x for x in UTR_acc], Exon_acc, Rand_acc]).T  , vert=True, showfliers=True, boxprops={'alpha':.8, 'color':cm.viridis(i/20)},
+            capprops={'alpha':.8, 'color':cm.viridis(i/40)},
+            whiskerprops={'alpha':.8, 'color':cm.viridis(i/40)},
+            medianprops={'alpha':.8, 'color':cm.viridis(i/40)},
+            meanprops={'alpha':.8, 'color':cm.viridis(i/40)},
+            ); 
+
+ens1_utrs = [ids_UTR.index(x) for x in ids_UTR if x in UTR_hit_list]
+ens2_utrs = []
+for i in range(20):
+   ens2_utrs.append((np.where(predicted_UTRs[i][:,1] > t)[0]).tolist())
+ens2_utrs = set.intersection(*[set(x) for x in ens2_utrs])
+print(len(ens1_utrs))
+print(len(ens2_utrs))
+print(len(set(ens1_utrs).intersection(ens2_utrs)))
+
+#ax.set_xticks([x for x in range(20)])
+#ax.set_xticklabels(['-'.join(x) for x in pairs] , size=5, rotation=90, )
+#plt.savefig('ensemble2_5.svg')
+
+
+eukaryote_list = ['TPP-specific','Phaeoacremonium','TPP-specific riboswitch from Arabidopsis','Paracoccidioides','Ophiocordyceps','Hyphopichia','Neonectria','Fibulorhizoctonia','Beta vulgaris', 'Caenorhabditis','Cinara','Seminavis', 'Thalictrum','Drosophila', 'Olea', 'Salix', 'Hymenolepis','Bathymodiolus','Steinernema','Zymoseptoria', 'Serpula', 'Rhizophagus', 'Dichanthelium', 'Gaeumannomyces','Yarrowia', 'Amazona','Ipomoea','Helianthus','Taphrina','Emergomyces','Picea', 'Fibroporia','Picea','Malassezia','Arthrobotrys', 'Poa','Lupinus','Tuber', 'Magnaporthe','Thielavia','Arthroderma',  'Lawsonia','Geomyces', 'Aedes','Debaryomyces','Hyaloperonospora', 'Theobroma','Acyrthosiphon', 'Komagataella', 'Solanum','Populus','Xylona','Podospora', 'Setaria',  'Leucosporidiella', 'Ricinus','Rhodnius','Brugia', 'Scheffersomyces', 'Microbotryum', 'Spathaspora', 'Anopheles', 'Chlamydomonas','Volvox','Zea', 'Coprinopsis', 'Wickerhamomyces', 'Myceliophthora', 'Pythium','Exidia', 'Byssochlamys','Madurella','Micromonas', 'Chaetomium','Meyerozyma','Botrytis', 'Setosphaeria', 'Daedalea','Prunus','Calocera', 'Fomitiporia', 'Lichtheimia','Brachypodium', 'Physcomitrella','Scedosporium','Pachysolen', 'Dactylellina','Grosmannia','Cajanus','Trichophyton', 'Perkinsus', 'Phaeodactylum','Piloderma', 'Jatropha',  'Pleurotus', 'Fragilariopsis', 'Fragilariopsis', 'Morus','Cyphellophora', 'Protochlamydia','Galerina', 'Kuraishia','Dothistroma','Capsicum', 'Heterobasidion', 'Lipomyces', 'Pyrenophora','Selaginella', 'Selaginella','Sphaeroforma', 'Nitzschia', 'Lucilia','Plasmopara','Babjeviella', 'Cyberlindnera', 'Reticulomyxa', 'Drechmeria', 'Pochonia', 'Coccomyxa','Escovopsis', 'Baudoinia','Escovopsis','Serendipita','Valsa','Parasitella','Cylindrobasidium', 'Ascoidea', 'Mortierella','Wallemia', 'Moniliophthora', 'Agaricus','Neurospora', 'Nasonia','Ciona','Ajellomyces','Phaeosphaeria','Ogataea','Rhinocladiella','Polyangium','Pyronema','Laccaria','Capsella','Gymnopus','Hypocrea','Hyphodontia','Rosa','Guillardia','Diplodia','Didymella','Paxillus','Clonorchis','Kwoniella','Claviceps','Hordeum','Stachybotrys','Neofusicoccum', 'Gossypium','Rasamsonia','Sphaerulina','Dichomitus','Punica','Eutrema','Suillus', 'Rosellinia', 'Diaporthe', 'Torrubiella', 'Nadsonia','fungal', 'Ochroconis','Toxocara', 'Coniosporium','Tortispora', 'Phaseolus','Verticillium', 'Klebsormidium', 'Glarea', 'Pneumocystis', 'Aphanomyces','Phytophthora','Cucumis','Parastrongyloides','Botryosphaeria','Rhizopogon','Chroococcidiopsis','Vitis','Emmonsia','Oidiodendron', 'Metschnikowia', 'Microdochium','Mimulus','Kribbella','Saitoella','Acremonium','Brassica','Eutypa', 'Trichoderma', 'Tolypocladium','Pisolithus','Protomyces','Monoraphidium','Citrus','Lobosporangium','Leucoagaricus','Pestalotiopsis','Schwartzia','Ananas', 'Fonsecaea','Paraphaeosphaeria','Stagonospora', 'Leptonema','Phialophora','Talaromyces','Citreicella','Penicilliopsis','Pyrenochaeta','Purpureocillium','Cladophialophora','Basidiobolus','Uncinocarpus','Neolecta','Thalassiosira','Coccidioides','Rhynchosporium','Fistulifera','Daucus','arabidopsis','aspergillus', 'Zostera','Aschersonia','Eucalyptus','Beauveria','Stemphylium',
+                  'Sclerotinia','Penicillium','Marchantia','Pseudocercospora','Amborella','Mucor','Triticum',
+                  'Corchorus','Colletotrichum','Cephalotus','Spinacia','Phialocephala','Absidia','Coniochaeta',
+                  'Gibberella','Oryza','Capronia','Candida','Lasallia','Rachicladosporium','Nectria','Phycomyces',
+                  'Rhizopus','Neosartorya','Fusarium','Exophiala','Metarhizium','Leersia','Brettanomyces','Marssonina',
+                  'Mycosphaerella','Rhizoclosmatium','Lentinula','Glossina','Cicer','Thiomicrospira','Rhizoctonia','Blastomonas', 'Arabis',
+                  'Macleaya','Kordiimonas','Gonium','Aureobasidium','Cordyceps','Ustilaginoidea','Saprolegnia','Choanephora','Hirsutella',
+                  'Trachymyrmex','Musa','Pichia','Isaria','Alternaria','Sporothrix','Alternaria','Acidomyces','Medicago',
+                  'Phaeomoniella','Hortaea','Hammondia','Macrophomina','Vigna','Clohesyomyces','Ophiostoma','Symbiodinium','Bipolaris']
+
+elist = [y.lower() for y in eukaryote_list]
+
+remove_list = ['[Polyangium]','[Polyangium] brachysporum','candidate division KSB1','Syntrophotalea','Longilinea','Histophilus','Weeksella','Marinoscillum','Osedax symbiont','Plautia stali symbiont','Stappia','proteobacterium','Methanosalsum','artificial','Sediminimonas','spirochete','Oceanivirga', 'Nautella', 'Salibaculum', 'Kandeliimicrobium', 'Cribrihabitans', 'Pontibaca', 'Endomicrobium', 'Flavimaricola','Litorimicrobium','Lachnoanaerobaculum','Desulfatiglans','Tranquillimonas','Hyella','Kyrpidia','Citreimonas', 'Gracilimonas', 'Kordia', 'Kordia', 'Brevefilum', 'Brevefilum','Georgfuchsia', 'Wolbachia', 'Vannielia','Pleomorphomonas','Tabrizicola', 'Planktotalea', 'Albidovulum', 'Jhaorihella', 'Salinihabitans', 'Micropruina', 'Ammonifex', 'Tabrizicola', 'Meinhardsimonia', 'Pelagimonas', 'Bieblia', 'Roseicitreum', 'Poseidonocella', 'Limimaricola', 'Pontivivens','Holophaga', 'Ascidiaceihabitans', 'Holophaga', 'Romboutsia', 'Petrocella', 'Mameliella', 'Nioella', 'Oceaniglobus','Brevirhabdus', 'Romboutsia',  'Roseibaca', 'Yoonia', 'Thalassobium', 'Singulisphaera', 'Wolinella', 'Plasmodium', 'Mariprofundus', 'Thiorhodospira', 'Elusimicrobium','Kouleothrix', 'Sulfuritalea', 'Thermogutta', 'Hydrocarboniphaga', 'Singulisphaera','Alcanivorax', 'Alcanivorax', 'Desulfobacca', 'Sorangium', 'Paludisphaera', 'Sorangium', 'Alcanivorax', 'Planctomyces', 'Advenella', 'Cycloclasticus','Allochromatium', 'Thermobaculum', 'Pelotomaculum', 'Rhodomicrobium', 'Intestinimonas','Ectothiorhodospira','Magnetospira', 'Pedosphaera', 'Microterricola', 'Schleiferia', 'Phaeospirillum',  'Halomicronema', 'Sinomicrobium','Soonwooa','Methylomagnum','Verrucomicrobium', 'Yonghaparkia', 'Crinalium','Kozakia','Streptacidiphilus','Alkanindiges', 'Simkania', 'Streptacidiphilus', 'Methyloprofundus','Tangfeifania','Syntrophaceticus', 'Sunxiuqinia','Trichodesmium', 'Thermovirga', 'Methylorubrum', 'Methylorubrum', 'Microcystis', 'Clostridioides','Sneathiella', 'Gallionella','Hirschia', 'Stackebrandtia', 'Stackebrandtia','Dechlorosoma', 'Leptothrix', 'Nodularia', 'Sulfurihydrogenibium', 'Sideroxydans', 'Planktothrix', 'Scardovia', 'Aminomonas', 'Plesiocystis', 'Aromatoleum','Petrimonas', 'Microscilla', 'Scardovia', 'Mesotoga',  'Citromicrobium', 'Maricaulis', 'Dickeya', 'Sagittula', 'Microscilla''Petrimonas', 'Clostridiales', 'Pusillimonas','Thiocapsa','Alicycliphilus','Herpetosiphon','Synechocystis','Boseongicola', 'Chloroherpeton', 'Raphidiopsis','Polymorphum', 'Filifactor', 'Lautropia', 'Reinekea', 'Roseibium', 'Thalassiobium','Shigella', 'Ketogulonicigenium','Couchioplanes', 'Orenia','Zhouia','Thiohalocapsa','Fulvimarina', 'Zobellia', 'Kiritimatiella','Halothermothrix', 'Bulleidia', 'Confluentimicrobium', 'Saccharicrinis','Ethanoligenens', 'Bilophila', 'Catenulispora', 'Robiginitalea', 'Verrucosispora','Crocosphaera', 'Methylocella','Oscillochloris','Luteitalea', 'Dictyoglomus', 'Roseisalinus','Marvinbryantia', 'Gillisia', 'Pelistega', 'Hahella', 'Saccharophagus', 'Coraliomargarita', 'Actinosynnema','Abiotrophia', 'Eikenella', 'Morganella', 'Tolumonas','Sebaldella', 'Parvimonas', 'Truepera', 'Methylacidiphilum','Lacunisphaera', 'Desulfobacula', 'Ferrimicrobium', 'Acetohalobium', 'Halorhodospira','Serpens','Salinisphaera', 'Tannerella', 'Dokdonella', 'Jonquetella', 'Oligotropha','Thermobifida', 'Kingella','Thioalkalimicrobium', 'Haliangium', 'Hydrogenivirga', 'Stigmatella', 'Runella', 'Microcoleus','Pseudohaliea', 'Desulfocapsa', 'Agarivorans','Elstera','Rhodospirillum', 'Flexistipes', 'Palleronia','Desertifilum', 'Arthrospira', 'Granulicatella','Thermomonospora', 'Marichromatium', 'Thermus','Bizionia', 'Anaerofustis', 'Limnoraphis', 'Anaerophaga', 'Beijerinckia','Tepidicaulis','Rahnella', 'Aequorivita','Fimbriimonas', 'Thermodesulfobium','Crenothrix', 'Thermosinus','Brucella','Desulfarculus', 'Roseiflexus','Fischerella', 'Intrasporangium', 'Rickettsiella', 'Mesoplasma', 'Photorhabdus', 'Segniliparus', 'Cyanothece','Syntrophus', 'Desulfobulbus', 'Syntrophothermus','Oligella', 'Inquilinus', 'Thermomicrobium','Methylotenera', 'Methylomicrobium','Edwardsiella', 'Marinithermus','Starkeya', 'Maliponia', 'Marinithermus''Edwardsiella','Enhygromyxa','Acidithrix','Rhodoplanes', 'Labilithrix','Frischella', 'Isoptericola','Tamlana','Slackia', 'Bermanella', 'Jonesia', 'Pelodictyon', 'Methanocorpusculum', 'Lacinutrix', 'Thermincola', 'Cylindrospermum', 'Mumia', 'Tamlana''Thermosipho', 'Thermotoga', 'Desulfurispirillum','Shuttleworthia', 'Thermobispora','Parvularcula', 'Thermosipho','Catonella', 'Hylemonella', 'Acaryochloris', 'Picrophilus', 'Chelativorans', 'Mahella','Delftia', 'Parvibaculum',  'Prochlorothrix', 'Dechloromonas', 'Propionimicrobium', 'Ventosimonas','Desulfotignum', 'Alcaligenes', 'Thiocystis', 'Hyalangium', 'Sarcina','Halothece', 'Atopobium', 'Halothece' 'Marinitoga','Mucinivorans','synthetic','Gemella', 'Achromatium', 'Marinitoga','Elizabethkingia','Desulfatitalea','Salinispira','Nitrospina', 'Varibaculum','Hassallia','Sedimenticola', 'Thermoanaerobaculum', 'Plesiomonas','Gardnerella', 'Dehalococcoides','Haloplasma', 'Johnsonella', 'Desulfohalobium', 'Veillonella', 'Succinatimonas','Cellulophaga', 'Desmospora', 'Beutenbergia','Idiomarina','Cytophaga','Acetonema', 'Kosmotoga', 'Thermoplasma','Oceanicella', 'Desulfonatronospira', 'Desulfatibacillum','bacillum','Trueperella','Rothia', 'Zymomonas', 'Rothia', 'Salinispora','Propionispora', 'Thalassolituus', 'Pelagibaca', 'Anaeroglobus','Collimonas','Chamaesiphon', 'Robinsoniella','Chania','Eggerthia','Phycisphaera', 'Dethiosulfatarculus', 'Cyanobium', 'Scytonema','Agreia', 'Lacimicrobium', 'Bellilinea','Psychromonas', 'Barnesiella', 'Pelagicola', 'Thiolapillus', 'Oleiphilus', 'Methyloversatilis', 'Oleispira','Thalassomonas','Tistrella', 'Leminorella', 'Tateyamaria', 'Turicella', 'Rivularia','Chthonomonas','Psychroflexus','Archangium','Rhodonellum', 'Asticcacaulis', 'Stanieria', 'Lentimicrobium', 'Kaistia', 'Leisingera', 'Spiroplasma', 'Nitritalea', 'Marmoricola', 'Christensenella', 'Defluviimonas', 'Desulfuromonas','Desulfomicrobium','Caldithrix','Basilea', 'Lasius','Balneola', 'Phormidesmis', 'Fulvivirga', 'Halioglobus', 'Fervidicella','Ideonella', 'Yangia', 'Buttiauxella','Beggiatoa','Adlercreutzia', 'Moellerella', 'Proteus', 'Gallaecimonas','Mannheimia', 'Formosa','Marinactinospora', 'Aestuariivita', 'Marinactinospora','Salmonella', 'Anaerolinea', 'Pragia', 'Alloactinosynnema', 'Alkaliphilus', 'Atopostipes', 'Collinsella', 'Methylibium', 'Oceanicaulis', 'Bibersteinia', 'Methylophilus', 'Bhargavaea','Saprospira', 'Ottowia', 'Kandleria','Gynuella', 'Oceanibulbus','Actinopolyspora', 'Flammeovirga','Brochothrix', 'Pseudogulbenkiania', 'Acetomicrobium','Desulfamplus', 'Phlebia', 'Finegoldia', 'Caldicellulosiruptor', 'Desulfocarbo', 'Fimbriiglobus', 'Candidimonas', 'Malonomonas', 'Azonexus', 'Prosthecomicrobium', 'Megamonas', 'Mangrovimonas','Wohlfahrtiimonas', 'Geofilum','Austwickia', 'Caldisericum', 'Joostella','Alistipes', 'Pleurocapsa','Dysgonomonas', 'Magnetospirillum','Desulfonispora', 'Desulfonispora', 'archaeon', 'Desulfacinum', 'Bartonella', 'Chondromyces', 'Carboxydocella', 'Fibrella', 'Dubosiella', 'Xuhuaishuia','Neptunomonas','Thermanaerothrix', 'Lechevalieria', 'Brachyspira', 'Thiomonas', 'Hafnia', 'Enterorhabdus','Acholeplasma', 'Tatlockia','Escherichia','Sutterella','Sharpea', 'Izhakiella', 'Sulfurovum', 'Saccharopolyspora', 'Dyella','Tenacibaculum','Flagellimonas', 'Jeongeupia','Oceanospirillum','Yersinia','Oceanimonas','Halotalea', 'Catenovulum', 'Kutzneria', 'Snodgrassella', 'Thermoplasmatales', 'Subdoligranulum','Kineosphaera','Thiohalorhabdus', 'Ralstonia', 'Fervidicola', 'Actinobaculum', 'Oceanibaculum','Nonlabens', 'Acidiphilium', 'Eggerthella', 'Salipiger', 'Thermovenabulum', 'Salipiger', 'Sandarakinotalea','Chloroflexus', 'Cupriavidus', 'Xylanimonas', 'Calothrix', 'Megasphaera', 'Thioploca','Leclercia', 'Vitreoscilla', 'Reichenbachiella', 'Sulfurivirga', 'Thiobacimonas','Aquitalea', 'Roseivivax', 'Thiothrix', 'Arenimonas', 'Caldanaerobius', 'Marininema', 'Hapalosiphon','Sedimentitalea', 'metagenome', 'Tsukamurella', 'Limnothrix', 'Grimontia', 'Faecalibaculum', 'Desulfoplanes','Aeromonas', 'Aliifodinibius', 'Nelumbo', 'Prosthecochloris', 'Mobiluncus', 'Sulfurospirillum', 'Thermanaeromonas', 'Leptospira','Globicatella','Tropicimonas','Flaviramulus','Roseateles','Actinoalloteichus','Rubritalea','Actinomadura','Leeuwenhoekiella','Selenomonas','molybdenum','Dietzia','Syntrophomonas','Silvanigrella','Pseudorhodoplanes','Roseomonas','Seinonella','Klebsiella','Flavonifractor','Xylophilus','Methylomonas','Thermacetogenium','Insolitospirillum','Proteiniborus','Leadbetterella','Gramella','Croceivirga','Xylella','Cruoricaptor','Natranaerobius','Nakamurella','Tissierella','Mariniphaga','Nonomuraea','Friedmanniella','Fluviicola','Ornithinimicrobium','Chitinimonas','Maribius','Cedecea','Cobetia','Chlorobium', 'Sodalis','Garciella','Sandaracinus','Zhihengliuella','Wenxinia','coccus', 'bacillus','bascillus', 'unknown', 'bacterium', 'clostridium', 'sinorhizobium','streptosporangium', 'bacter', 'subtilis', 'coli', 'streptomyces', 'pseudolabrys', 'desulfovibrio',
+               'unclassified', 'porphyromonas', 'azoarcus', 'Caloramator', 'Pseudonocardia', 'Pseudacidovorax','Oceanicola','Tolypothrix', 'Gloeocapsa', 'Leptotrichia','Thermoactinomyces', 'Paraglaciecola','Shinella','Saccharomonospora','Cecembia','Kurthia','Rhizobium','Burkholderia','Leptolinea','Novosphingobium','Limnochorda', 'Methylosinus','Kibdelosporangium','Actinotalea','Francisella','Microlunatus','Gemmatimonas','Woeseia','Nocardioides','Actinoplanes','Halomonas','Blautia','Bosea','Acidisphaera','Desulfosporosinus','Sphingobium','Oerskovia','Pseudomonas','Erwinia','Thermobrachium',
+               'Kiloniella','Kiloniella','Thioclava','Nesterenkonia','Duganella','Hydrogenovibrio','Bordetella','Kerstersia','Aureimonas','human gut','Mitsuokella','Nocardiopsis','Bernardetia','Thalassospira','Donghicola','Williamsia','Cellulosimicrobium','Dorea','Noviherbaspirillum','Nitrosomonas',
+               'Lyngbya','Gordonia','Georgenia','Listeria','Pandoraea','Loktanella','Skermanella','Vibrio','Sphingomonas',
+               'Alishewanella','Kluyvera','Solemya', 'Caenispirillum','bioreactor','Brevundimonas','Mycoplasma','Luteimonas',
+               'Pseudorhodoferax','Nitratireductor','Acidovorax','Spirochaeta','Shewanella','Ornatilinea','Marinomonas',
+               'Legionella','Kitasatospora','Winogradskyella','Caballeronia','Pelosinus','Frondihabitans','Branchiibius',
+               'Pseudogymnoascus','Pseudoxanthomonas','Devosia', 'Anaerosporomusa','Mitsuaria','Caryophanon','Holdemania',
+               'Variovorax','Actinomyces','Thermotalea','Niastella','Methanomicrobiales','Shimia','Nocardia','Sinomonas',
+               'Prevotella','Sphaerotilus','Mariniradius','Agromyces','Sinomonas','Endozoicomonas',
+               'Frateuria','Pseudoalteromonas','Lawsonella','Geomicrobium','fluoride','cobalamin','purine',
+               'SAM riboswitch','Castellaniella','endosymbiont','Castellaniella','Moraxella',
+               'Halanaerobium','ZMP','Hydrogenophaga','Asaia','Myroides','Neisseria','Lentisphaera',
+               'Thauera','Acidomonas','Nitrincola','glycine','FMN','PreQ1','Labrenzia','Limnohabitans',
+               'lysine','Micromonospora','Oblitimonas','Methylocystis','di-GMP-II','Mastigocoleus',
+               'Planomonospora','Thalassobius','Proteiniphilum','Rhodovulum','Lutispora','Alteromonas','Chitinophaga',
+               'Acidimicrobium','Ochrobactrum','Treponema','Blastochloris','NiCo','Sporosarcina','Filimonas','Marivita',
+               'Actinophytocola','Lactonifactor','Spirosoma','Desulfotomaculum','Gilliamella','agariphila','SAM-I','SAM/SAH','Afipia',
+               'Algoriphagus','Salimicrobium','Planomicrobium','Brenneria','Hathewaya','Raoultella','Epulopiscium',
+               'Anaerosphaera','Xanthomonas','Marinospirillum','Nitrospira','Saccharothrix','Mesonia','Comamonas',
+               'Massilia','Xenorhabdus','glutamine','Lampropedia','Streptoalloteichus','Actinokineospora',
+               'Nitrosospira','Planktothricoides','Oscillatoria','Anaerocolumna','Peptoniphilus','Vogesella',
+               'Candidatus', 'Geodermatophilus','Roseovarius','Akkermansia','Seonamhaeicola','Pseudozobellia','Cnuella',
+               'Luteipulveratus','Muricauda','Pantoea','Jatrophihabitans','Albidiferax','Cellulomonas','Olsenella',
+               'Aurantimonas','Herbinix','Roseofilum','Lonsdalea','Kushneria','Frankia','Tatumella','Solibius','Orrella',
+               'Levilinea','Marinovum','Gemmata','Smithella','Tepidimonas','Hyphomicrobium','Stenotrophomonas','Hoeflea',
+               'Mastigocladus','Rubellimicrobium','Emticicia','Herbaspirillum','Weissella','Sulfuricella','Synergistes',
+               'Ensifer','Knoellia','Niabella','Microbulbifer','Leifsonia','Ferroplasma','Microvirga','Siansivirga',
+               'Ruegeria','Sphingorhabdus','Facklamia','Belliella','Sporomusa','Dehalogenimonas','Nitrolancea','Criblamydia',
+               'Prauserella','Tetrasphaera','Thalassotalea','Yokenella','Azospirillum','Acidocella','Anaerotruncus',
+               'Aeromicrobium','Pelomonas','Wenyingzhuangia','Jannaschia','Rheinheimera','Piscirickettsia',
+               'Piscirickettsia','Desulfotalea','Zunongwangia','Providencia','Opitutus','Methylophaga','Pasteurella',
+               'Rhodoferax','Actinopolymorpha','Microbispora','Serratia','Mycetocola','Geminocystis','Trabulsiella',
+               'Aquaspirillum','Anaerobium','Martelella','Aquimixticola','Colwellia','Ferrithrix','Roseburia',
+               'Andreprevotia','Desulfopila','Anaerostipes','Chishuiella','Sphingopyxis','Lentzea','Euryarchaeota','Gloeomargarita',
+               'Hespellia','Jiangella','Marivirga','Ferrimonas','Haemophilus','Amycolatopsis','Asanoa','Phormidium',
+               'Fibrisoma','Aquiflexum','Cryptosporangium','Caminicella','Jeotgalibaca','Tanticharoenia','Aquamicrobium',
+               'Dialister','Owenweeksia','Haematospirillum','Kocuria','Glaciecola','Coxiella','Oleiagrimonas','Ahrensia',
+               'Streptomonospora','Cohnella','Hyphomonas','Rubrivivax','Moorella','Kangiella','Nostoc','Moritella',
+               'Aquimarina', 'Nereida','Aphanizomenon', 'Methylovorus',
+               'Wenzhouxiangella', 'Riemerella', 'Lunatimonas', 'Solirubrum', 'Geitlerinema',
+               'Polaromonas','Actinospica','Anabaena','Roseivirga','Aliterella','Richelia','Erysipelothrix','Crenarchaeota',
+               'Solitalea','Dolosigranulum','Methylobrevis', 'Oceaniovalibus', 'Simiduia', 'Methylobrevis','Pacificimonas','Caldilinea']
+a = RS_db['DESC']
+b = [x for x in a if True in [y.lower()  in x.lower() for y in eukaryote_list ]]
+c = [x for x in a if True in [y.lower()  in x.lower() for y in remove_list ]]
+d = [x for x in a if True not in [y.lower()  in x.lower() for y in remove_list ]]
+e = [x for x in d if True not in [y.lower() in x.lower() for y in eukaryote_list ]]
+
+f = []
+for i in range(len(b)):
+    if b[i].split(' ')[0].lower() in elist:
+        f.append(b[i])
+    if b[i].split(' ')[0].lower() in ['beta']:
+        if 'beta vulgaris' in b[i].split(' ')[0].lower() :
+            f.append(b[i])
+print((len(f) + len(c)) / len(a))
+print(len(e)/len(a))
+print(e[0])
+print(e[1])
+print(e[2])
+print(e[3])
+print(e[4])
+print(e[5])
+print(e[6])
+print(e[7])
+print(e[8])
+print(e[9])
+print(len(e))
+print([x.split(' ')[0] for x in e[:10]])
+
+g = []
+h = []
+for i in range(len(f)):
+    if f[i] not in c:
+        g.append(f[i])
+    else:
+        h.append(f[i])
+        
+# manually add some
+        
+g = g + ['Beta vulgaris subsp. vulgaris TPP riboswitch (THI element)',
+ 'Beta vulgaris subsp. vulgaris yybP-ykoY manganese riboswitch',
+ 'Dendroctonus ponderosae (mountain pine beetle) TPP riboswitch (THI element)',
+ 'Fibulorhizoctonia sp. CBS 109695 TPP riboswitch (THI element)',
+ 'Hyphopichia burtonii NRRL Y-1933 TPP riboswitch (THI element)',
+ 'Neonectria ditissima TPP riboswitch (THI element)',
+ 'Ophiocordyceps unilateralis TPP riboswitch (THI element)',
+ 'Paracoccidioides brasiliensis Pb01 TPP riboswitch (THI element)',
+ 'Paracoccidioides brasiliensis Pb18 TPP riboswitch (THI element)',
+ 'Phaeoacremonium minimum UCRPA7 TPP riboswitch (THI element)',
+ 'TPP-specific riboswitch from Arabidopsis thaliana (PDB 3D2G, chain B)']
+
+#CHECK THAT ALL DESCRIPTIONS ARE LABELED
+print(len(set(g + c)) / len(set(a)))
+
+eukaryotic = []
+for i in range(len(a)):
+    if a[i] in g:
+        eukaryotic.append(1)
+    if a[i] in c:
+        eukaryotic.append(0)
+RS_db['EUKARYOTIC'] = eukaryotic
+
+
+lower_desc = [y.lower() for y in a]
+eukaryotic_TPP = [x.lower() for x in g if 'TPP'  in x]
+eukaryotic_junk = [x for x in g if 'TPP' not  in x]
+
+X_eukaryotic = np.zeros([len(eukaryotic_TPP), 66+8])
+k = 0
+missing = []
+for i in tqdm(range(len(RS_db))):
+  if RS_db['EUKARYOTIC'].iloc[i]:
+      if'tpp' in RS_db['DESC'].iloc[i].lower():
+          seq = clean_seq(RS_db['SEQ'].iloc[i])
+          if len(seq) <=25:
+              print(len(seq))
+          if len(seq) > 25:
+            seq = clean_seq(RS_db['SEQ'].iloc[i])
+            kmerf = kmer_freq(seq)
+            X_eukaryotic[k,:64] = kmerf/np.sum(kmerf)
+            X_eukaryotic[k,64] = RS_db['NUPACK_MFE'].iloc[i]
+            X_eukaryotic[k,65] = get_gc(seq)
+            X_eukaryotic[k,-8:] = be.annoated_feature_vector(RS_db['NUPACK_DOT'].iloc[i], encode_stems_per_bp=True)
+            k+=1
+            
+X_eukaryotic[:,66] = X_eukaryotic[:,66]/max_ubs
+X_eukaryotic[:,67] = X_eukaryotic[:,67]/max_bs
+X_eukaryotic[:,68] = X_eukaryotic[:,68]/max_ill
+X_eukaryotic[:,69] = X_eukaryotic[:,69]/max_ilr
+X_eukaryotic[:,70] = X_eukaryotic[:,70]/max_lp
+X_eukaryotic[:,71] = X_eukaryotic[:,71]/max_lb
+X_eukaryotic[:,72] = X_eukaryotic[:,72]/max_rb
+X_eukaryotic[:,64] = X_eukaryotic[:,64]/max_mfe
+X_eukaryotic = X_eukaryotic[:k]
+
+
+
+
+
+euk_acc = []
+euk_proba = []
+t = .5
+for i in range(20):
+    predicted_euk = ensemble[i].predict_proba(X_eukaryotic)
+    euk_proba.append(predicted_euk)
+    euk_acc.append( np.sum((predicted_euk[:,1] > t))/len(predicted_euk) )
+
+
+
+from sklearn.decomposition import PCA
+pca = PCA(n_components=2)
+p = pca.fit(np.vstack([X_UTR, X_RS]))
+print(pca.explained_variance_ratio_)
+p = pca.fit(np.vstack([X_UTR, X_RS_full]))
+x_utr_t = p.transform(X_UTR)
+x_rs_t = p.transform(X_RS_full)
+x_euk_t = p.transform(X_eukaryotic)
+plt.figure()
+plt.scatter(x_utr_t[:,0], x_utr_t[:,1], s=5,alpha=.2)
+plt.scatter(x_rs_t[:,0], x_rs_t[:,1],s=5, alpha=.2)
+plt.scatter(x_euk_t[:,0], x_euk_t[:,1],s=5, alpha=.2)
+plt.legend(['UTR','RS'])
+plt.xlabel(f'PC1 ({pca.explained_variance_ratio_[0]*100:.3f}%)')
+plt.ylabel(f'PC2 ({pca.explained_variance_ratio_[1]*100:.3f}%)')
+
