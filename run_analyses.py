@@ -8,6 +8,26 @@ Created on Thu Jul 11 12:52:00 2024
 # Description
 ###############################################################################
 
+'''
+This file runs all the analyses for the paper:
+
+Identification of potential riboswitch elements in Homo
+Sapiens mRNA 5’UTR sequences using Positive-Unlabeled
+machine learning
+
+By Dr. William Raymond, Dr. Jacob DeRoo, and Dr. Brian Munsky 
+
+
+File sections:
+    Data generation
+
+'''
+
+###############################################################################
+# OPTIONS
+###############################################################################
+
+
 ###############################################################################
 # Imports
 ###############################################################################
@@ -393,11 +413,11 @@ sorted_counts = counts[idx]
 sorted_names = [ligand_names[i] for i in idx.tolist()]
 explode = [0.02]*len(sorted_names)
 sub1 = sorted_counts/np.sum(sorted_counts) < .01
-colors = cm.Spectral_r(np.linspace(.05,.95,len(sorted_names)))
+colors2 = cm.Spectral_r(np.linspace(.05,.95,len(sorted_names)))
 
 plt.figure(dpi=300)
 _,f,t = plt.pie(sorted_counts, labels = sorted_names, explode = explode, autopct='%1.1f%%',
-        shadow=False, startangle=90, colors=colors, labeldistance =1.05, pctdistance=.53, textprops={'fontsize': 7})
+        shadow=False, startangle=90, colors=colors2, labeldistance =1.05, pctdistance=.53, textprops={'fontsize': 7})
 
 missing_labels = []
 subsum = 0
@@ -437,6 +457,7 @@ UTR_lens = np.array([len(x) for x in dot_UTR])
 RS_lens = np.array([len(x) for x in dot_RS_full])
 x,bins = np.histogram(RS_lens, bins=nbins)
 x2,_ = np.histogram(UTR_lens,bins=bins)
+plt.figure(dpi=300)
 plt.hist(RS_lens, bins=bins, density=True, alpha=1, histtype='step', lw=3)
 plt.hist(UTR_lens,bins=bins, density=True, alpha=1, histtype='step', lw=3)
 plt.xlim([0,325])
@@ -489,7 +510,6 @@ plt.legend(['UTR','RS'])
 plt.xlabel(f'PC1 ({pca.explained_variance_ratio_[0]*100:.3f}%)')
 plt.ylabel(f'PC2 ({pca.explained_variance_ratio_[1]*100:.3f}%)')
 
-1/0
 
 
 
@@ -656,15 +676,21 @@ for i in tqdm(range(len(pairs))):
 #combine the ensemble classifiers into a list
 ensemble = estimators + estimators_2 + estimators_other
 
-ensemble = estimators + predicted_RS_2 + estimators_other
-ensemble = estimators + predicted_witheld_2 + estimators_other
-ensemble = estimators + predicted_UTR_2 + estimators_other
-ensemble = estimators + UTR_acc_2 + estimators_other
-ensemble = estimators + RS_acc_2 + estimators_other
-ensemble = estimators + witheld_acc_2 + estimators_other
+predicted_RS_all = predicted_RSs + predicted_RSs_2 + predicted_RSs_other
+predicted_witheld_all = predicted_withelds + predicted_withelds_2 + predicted_withelds_other
+predicted_UTR_all = predicted_UTRs + predicted_UTRs_2 + predicted_UTRs_other
+UTR_acc_all = UTR_acc + UTR_acc_2 + UTR_acc_other
+RS_acc_all = RS_acc + RS_acc_2 + RS_acc_other
+witheld_acc_all = witheld_acc + witheld_acc_2 + witheld_acc_other
 
 #normalization vector for the outputs to the max of the training
 #ensemble_norm = np.load('./%s'%model_norm)
+
+
+
+###############################################################################
+# LEARN SINGULAR FEATURE IMPORTANCES
+###############################################################################
 
 redo_importance = False
 if redo_importance:
@@ -766,204 +792,10 @@ plt.savefig('./SIfigure2.png')
 
 
 
-import random
-random.seed(42)
-def generate_key():
-    STR_KEY_GEN = 'augc'
-    return ''.join(random.choice(STR_KEY_GEN) for _ in range(600))
-
-rand_30 = [generate_key() for i in range(60000)]
-
-h,xx = np.histogram(RS_lens, bins = np.max(RS_lens), density=True);
-cdf = np.cumsum(h*np.diff(xx))
-rand_lens = []
-for i in range(60000):
-    rand_lens.append(np.where(np.random.rand() > cdf)[0][-1] + 25)
-plt.hist(lens,bins = 100, density=True, alpha=.4)
-plt.hist(RS_lens, bins=100, density=True, alpha=.4)
-
-RAND_RS_features = []
-for i in range(len(rand_30)):
-  mfe,hr = get_mfe_nupack(rand_30[i][:rand_lens[i]])
-  RAND_RS_features.append([rand_30[i][:rand_lens[i]], str(mfe[0][0]), mfe[0][1]])
-
-X_RAND =np.zeros([len(rand_30), 66+8])
-k = 0
-for i in range(len(rand_30)):
-  seq = clean_seq(rand_30[i])
-  if len(seq) > 25:
-
-    #seq = clean_seq(RS_df['SEQ'].iloc[i])
-    kmerf = kmer_freq(seq)
-    X_RAND[k,:64] = kmerf/np.sum(kmerf)
-    X_RAND[k,64] = RAND_RS_features[i][-1]/max_mfe
-    X_RAND[k,65] = get_gc(seq)
-    #ds_RS.append(RS_df['ID'].iloc[i])
-    #dot_RS.append(RS_df['NUPACK_DOT'].iloc[i])
-    X_RAND[k,-8:] = be.annoated_feature_vector(RAND_RS_features[i][-2])
-
-    X_RAND[k,66] = X_RAND[k,66]/max_ubs
-    X_RAND[k,67] = X_RAND[k,67]/max_bs
-    X_RAND[k,68] = X_RAND[k,68]/max_ill
-    X_RAND[k,69] = X_RAND[k,69]/max_ilr
-    X_RAND[k,70] = X_RAND[k,70]/max_lp
-    X_RAND[k,71] = X_RAND[k,71]/max_lb
-    X_RAND[k,72] = X_RAND[k,72]/max_rb
-
-    k+=1
-
-reload_X_RAND = True
-if reload_X_RAND:
-    X_RAND = np.load('./X_RAND.npy')
-predicted_rand = np.zeros([len(X_RAND), 20])
-ensemble = estimators + estimators_2 + estimators_other
-for j in range(20):
-  predicted_rand[:,j] = ensemble[j].predict_proba(X_RAND)[:,1]
-
-plt.plot(np.sum(predicted_rand > .5, axis =1)/20,'o')
-
 
 ###############################################################################
-# 20 fold k cross validation without structural holdouts
+# PCA PLOT for SI
 ###############################################################################
-import sklearn
-save = True
-retrain = True
-model_name = 'EKmodel_witheld_20kfcv_2'
-
-X = np.vstack([X_UTR, X_RS_full,])
-y = np.zeros(len(X))
-y[len(X_UTR):] = 1
-kf = sklearn.model_selection.KFold(n_splits=20, shuffle=True, random_state=42)
-
-X_RAND = np.load('./X_RAND.npy')
-X_EXONS = np.load('./X_EXONS.npy')
-
-ensemble_2 = []
-witheld_RS_acc_2 = []
-for i, (train_index, test_index) in enumerate(kf.split(X,y)):
-    print(i)
-    X_train, X_test, y_train, y_test = X[train_index], X[test_index], y[train_index], y[test_index]
-    if retrain:
-        svc = SVC(C=15, kernel='rbf', gamma=0.2, probability=True)
-        pu_estimator = ElkanotoPuClassifier(estimator=svc, hold_out_ratio=0.2)
-        pu_estimator.fit(X_train, y_train)
-        if save:
-          dump(pu_estimator,'./elkanoto_models/%s_%s.joblib'%(model_name,i))
-    else:
-        svc = SVC(C=10, kernel='rbf', gamma=0.4, probability=True)
-        pu_estimator = ElkanotoPuClassifier(estimator=svc, hold_out_ratio=0.2)
-        pu_estimator =load('./elkanoto_models/%s_%s.joblib'%(model_name,str(i)))
-        
-    predicted_RS = pu_estimator.predict_proba(X_test[y_test==1])
-    witheld_RS_acc_2.append(np.sum(predicted_RS > .5 )/ (len(X_test[y_test==1])))
-    print(np.sum(predicted_RS > .5 )/ (len(X_test[y_test==1])))
-    ensemble_2.append(pu_estimator)
-
-kf = sklearn.model_selection.KFold(n_splits=20, shuffle=True, random_state=42)
-train_ens2_acc = []
-test_ens2_acc = []
-found_UTR_ens2 = []
-random_ens2_acc = []
-structured_ens2_acc = []
-
-rands_2 = []
-exons_2 = []
-
-
-for i, (train_index, test_index) in enumerate(kf.split(X,y)):
-
-    X_train, X_test, y_train, y_test = X[train_index], X[test_index], y[train_index], y[test_index]
-    
-    p = ensemble_2[i].predict_proba((X_test[y_test==1]))
-    t = ensemble_2[i].predict_proba((X_train[y_train==1]))
-    u = ensemble_2[i].predict_proba(X_UTR)
-    r =   ensemble_2[i].predict_proba(X_RAND)       
-    ex =   ensemble_2[i].predict_proba(X_EXONS)                  
-
-    rands_2.append(r)
-    exons_2.append(ex)
-    test_ens2_acc.append(np.sum(p[:,1] > .5 )/ (len(X_test[y_test==1])))
-    train_ens2_acc.append(np.sum(t[:,1] > .5 )/ (len(X_train[y_train==1])))
-    found_UTR_ens2.append(np.sum(u[:,1] > .5 )/ (len(X_UTR)))
-    random_ens2_acc.append(np.sum(r[:,1] > .5 )/ (len(X_RAND)))
-    structured_ens2_acc.append(np.sum(ex[:,1] > .5 )/ (len(X_EXONS)))
-    
-    
-train_ens_acc = []
-test_ens_acc = []
-found_UTR_ens = []
-
-random_ens_acc = []
-structured_ens_acc = []
-for i in range(len(ensemble)):
-    r =   ensemble[i].predict_proba(X_RAND)       
-    ex =   ensemble[i].predict_proba(X_EXONS)      
-    random_ens_acc.append(np.sum(r[:,1] > .5 )/ (len(X_RAND)))
-    structured_ens_acc.append(np.sum(ex[:,1] > .5 )/ (len(X_EXONS)))
-
-
-data = np.array([RS_acc + RS_acc_2 + RS_acc_other,
-                      witheld_acc + witheld_acc_2 + witheld_acc_other, 
-                      UTR_acc + UTR_acc_2 + UTR_acc_other,
-                      random_ens_acc,
-                      structured_ens_acc])
-
-data[2,:] = 1 - data[2,:]
-plt.matshow(data)
-ax = plt.gca()
-for (i, j), z in np.ndenumerate(data):
-    ax.text(j, i, '{:0.3f}'.format(z), ha='center', va='center')
-ax.set_xticks([x for x in range(20)])
-ax.set_xticklabels([x for x in range(20)])
-ax.set_yticklabels(['','Train', 'Test', 'UTR', 'RAND', 'EXON'])
-
-data = np.array([train_ens2_acc,
-                      test_ens2_acc, 
-                      found_UTR_ens2,
-                      random_ens2_acc,
-                      structured_ens2_acc])
-
-plt.figure()
-plt.matshow(data)
-
-ax = plt.gca()
-for (i, j), z in np.ndenumerate(data):
-    ax.text(j, i, '{:0.3f}'.format(z), ha='center', va='center')
-ax.set_xticks([x for x in range(20)])
-ax.set_xticklabels([x for x in range(20)])
-ax.set_yticklabels(['', 'Train', 'Test', 'UTR', 'RAND', 'EXON'])
-
-testens=[]
-for i in range(len(ensemble)):
-
-    ex =   ensemble[i].predict_proba(X_EXONS)      
-
-    testens.append(np.sum(ex[:,1] > .95 )/ (len(X_EXONS)))
-
-
-
-
-
-
-
-
-1/0
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 from sklearn.decomposition import PCA
 pca = PCA(n_components=2)
 #p = pca.fit(np.vstack([X_UTR, X_RS, X_RAND, X_EXONS]))
@@ -972,16 +804,6 @@ p = pca.fit(np.vstack([X_UTR, X_RS_full])) # X_RAND, X_EXONS]))
 print(pca.explained_variance_ratio_)
 x_utr_t = p.transform(X_UTR)
 x_rs_t = p.transform(X_RS_full)
-x_rand_t = p.transform(X_RAND)
-x_exon_t = p.transform(X_EXONS)
-plt.figure()
-plt.scatter(x_utr_t[:,0], x_utr_t[:,1], s=5,alpha=.2)
-plt.scatter(x_rs_t[:,0], x_rs_t[:,1],s=5, alpha=.2)
-#plt.scatter(x_rand_t[:,0], x_rand_t[:,1],s=5, alpha=.2)
-#plt.scatter(x_exon_t[:,0], x_exon_t[:,1],s=5, alpha=.2)
-plt.legend(['UTR','RS'])#, 'RAND', 'EXON'])
-plt.xlabel(f'PC1 ({pca.explained_variance_ratio_[0]*100:.3f}%)')
-plt.ylabel(f'PC2 ({pca.explained_variance_ratio_[1]*100:.3f}%)')
 
 
 with open('./final_set.json', 'r') as f:
@@ -1029,38 +851,1033 @@ plt.text(-.4, 10**2.3, f'{(1-436/len(x_utr_t))*100:.3f}' +'% of UTRs' , color=co
 plt.title('PCA separation of UTR and RS datasets')
 plt.savefig('pca_2.svg')
 
-plt.figure()
-x,bins = np.histogram(x_utr_t[:,0], bins=30);
-plt.stairs(x,edges=bins, lw=2);
-x,_ = np.histogram(x_rs_t[:,0], bins=bins)
-plt.stairs(x,edges=bins, lw=2);
-x,_ = np.histogram(x_utr_t[[ids_UTR.index(x) for x in UTR_hit_list]][:,0], bins=bins)
-plt.stairs(x,edges=bins, lw=2);
+###############################################################################
+# Circle plot of the ensemble for the paper
+###############################################################################
 
-x,_ = np.histogram(x_utr_t[[ids_UTR.index(x) for x in ids_UTR if x not in UTR_hit_list]][:,0], bins=bins)
-plt.stairs(x,edges=bins, lw=2, ls='--');
-
-plt.legend(['UTR', 'RS', '436', 'UTR-436'])
-plt.xlabel(f'PC1 ({pca.explained_variance_ratio_[0]*100:.3f}%)')
-ax = plt.gca()
-plt.plot([thresh, thresh], [0,10000], 'k--')
+all_utr_predicitions = np.array(predicted_UTRs + predicted_UTRs_2 + predicted_UTRs_other).T
 
 
-plt.figure()
-x,bins = np.histogram(x_utr_t[:,0], bins=30);
-plt.stairs(x/np.sum(x),edges=bins, lw=2);
-x,_ = np.histogram(x_rs_t[:,0], bins=bins)
-plt.stairs(x/np.sum(x),edges=bins, lw=2);
-x,_ = np.histogram(x_utr_t[[ids_UTR.index(x) for x in UTR_hit_list]][:,0], bins=bins)
-plt.stairs(x/np.sum(x),edges=bins, lw=2);
+id_set = []
 
-x,_ = np.histogram(x_utr_t[[ids_UTR.index(x) for x in ids_UTR if x not in UTR_hit_list]][:,0], bins=bins)
-plt.stairs(x/np.sum(x),edges=bins, lw=2, ls='--');
+for i in range(len(predicted_UTRs)):
+  subset = []
+  matches = predicted_UTRs[i][:,1] > .95
+  for j in range(len(matches)):
+    if matches[j]:
+      subset.append(ids_UTR[j])
+  id_set.append(subset)
+  if i == 0:
+    total_set =set(subset)
+  else:
+    total_set = total_set.intersection(set(subset))
 
-plt.legend(['UTR', 'RS', '436', 'UTR-436'])
-plt.xlabel(f'PC1 ({pca.explained_variance_ratio_[0]*100:.3f}%)')
-ax = plt.gca()
-plt.plot([thresh, thresh], [0,.2], 'k--')
+id_set = []
+
+for i in range(len(predicted_UTRs_2)):
+  subset = []
+  matches = predicted_UTRs_2[i][:,1] > .95
+  for j in range(len(matches)):
+    if matches[j]:
+      subset.append(ids_UTR[j])
+
+  id_set.append(subset)
+  if i == 0:
+
+    total_set_2 =set(subset)
+  else:
+    total_set_2 = total_set_2.intersection(set(subset))
+
+id_set = []
+
+for i in range(len(predicted_UTRs_other)):
+  subset = []
+  matches = predicted_UTRs_other[i][:,1] > .95
+  for j in range(len(matches)):
+    if matches[j]:
+      subset.append(ids_UTR[j])
+
+  id_set.append(subset)
+  if i == 0:
+
+    total_set_3 =set(subset)
+  else:
+    total_set_3 = total_set_3.intersection(set(subset))
+
+
+
+from matplotlib import colors as col
+nn = 20
+def truncate_colormap(cmapIn='jet', minval=0.0, maxval=1.0, n=100):
+    '''truncate_colormap(cmapIn='jet', minval=0.0, maxval=1.0, n=100)'''
+    cmapIn = plt.get_cmap(cmapIn)
+
+    new_cmap = col.LinearSegmentedColormap.from_list(
+        'trunc({n},{a:.2f},{b:.2f})'.format(n=cmapIn.name, a=minval, b=maxval),
+        cmapIn(np.linspace(minval, maxval, n)))
+    return new_cmap
+
+total_set = set(list(total_set) + list(total_set_2) + list(total_set_3))
+fig,ax = plt.subplots(1,1,dpi=600)
+fig_x, fig_y = 1,1
+data = np.round(np.array([RS_acc +  RS_acc_2]),2)[:,::-1]
+
+names = ['Other'] + witheld_ligands +  [x[1] + '+' + x[0] for x in [('SAM', 'cobalamin'), ('TPP','glycine'),('SAM','TPP'),('glycine','cobalamin'),('TPP','cobalamin'),
+  ('FMN','cobalamin'),('FMN','TPP'),('FMN','SAM'),('FMN','glycine')]]
+import matplotlib.colors as col
+norm = col.Normalize(vmin=.7, vmax=1)
+colors = cm.summer_r(norm(data[0]) )
+
+_,f,t = ax.pie([1,]*nn, labels = names, explode = nn*[.1,], autopct='',
+        shadow=False, startangle=90, colors=colors, labeldistance =1.05, pctdistance=.53, textprops={'fontsize': 7})
+
+centre_circle = plt.Circle((0,0),0.70,fc='white', zorder=1)
+#ax.add_artist(centre_circle)
+
+data = np.round(np.array([witheld_acc +  witheld_acc_2 + witheld_acc_other]),2)[:,::-1]
+#data = np.array([  [np.sum(predicted_UTRs[i] > .95) for i in range(len(predicted_UTRs))] + [np.sum(predicted_UTRs_2[i] > .95) for i in range(len(predicted_UTRs_2))]  ])
+
+names = ['',]*nn
+colors = cm.summer_r(norm(data[0]))
+
+_,f,t = ax.pie([1,]*nn, labels = names, explode = nn*[.1,], autopct='', radius=.8,
+        shadow=False, startangle=90, colors=colors, labeldistance =1.05, pctdistance=.53, textprops={'fontsize': 7})
+
+centre_circle = plt.Circle((0,0),0.50,fc='white',)
+#ax.add_artist(centre_circle)
+
+names = ['',]*nn
+data = np.array([  [np.sum(predicted_UTRs[i][:,1] > .95) for i in range(len(predicted_UTRs))] + [np.sum(predicted_UTRs_2[i][:,1] > .95) for i in range(len(predicted_UTRs_2))] + [np.sum(predicted_UTRs_other[i][:,1] > .95) for i in range(len(predicted_UTRs_other))] ])[:,::-1]
+colors = ['#eeeeee']*nn
+_,f,t = ax.pie([1,]*nn, labels = names, explode = nn*[.1,], autopct='', radius=.6,
+        shadow=False, startangle=90, colors=colors, labeldistance =1.05, pctdistance=.53, textprops={'fontsize': 7}, )
+
+centre_circle = plt.Circle((0,0),0.5,fc='white')
+ax.add_artist(centre_circle)
+print(data)
+match_indexes = [np.where(all_utr_predicitions[:,i] >.95)[0].tolist() for i in range(20)]
+hit_overlap = set.intersection(*map(set,match_indexes))
+ax.text(-.45,0, '%0.0f / %0.0f of UTRs'%(len(hit_overlap),len(X_UTR)), fontsize=7)
+
+x_min, x_max = plt.xlim()
+y_min, y_max = plt.ylim()
+
+r_acc  = np.round(np.array([RS_acc +  RS_acc_2 + RS_acc_other]),2)
+val_acc  = np.round(np.array([witheld_acc +  witheld_acc_2 + witheld_acc_other]),2)
+thresh = .95
+UTR_pred = np.array([  [np.sum(predicted_UTRs[i] > thresh) for i in range(len(predicted_UTRs))] + [np.sum(predicted_UTRs_2[i] > thresh) for i in range(len(predicted_UTRs_2))]  + [np.sum(predicted_UTRs_other[i] > thresh) for i in range(len(predicted_UTRs_other))] ] )
+
+n = nn
+r = 1.1
+dr = 360/nn
+angle = dr/2
+for i in range(nn):
+
+  flippers = [0,1,2,3,4, 10,11,12,13]
+  x,y = r * np.sin(np.radians(angle)), r* np.cos(np.radians(angle))
+  #plt.plot([0,x],[0,y],'r-', zorder=1)
+
+  s = .1
+  x1,y1 = (r-.1) * np.sin(np.radians(angle)), (r-.1)* np.cos(np.radians(angle))
+  x2,y2 = (r-.3) * np.sin(np.radians(angle)), (r-.3)* np.cos(np.radians(angle))
+  x3,y3 = (r-.5) * np.sin(np.radians(angle)), (r-.5)* np.cos(np.radians(angle))
+
+  #plt.scatter([x1,x2,x3],[y1,y2,y3], zorder=3)
+  angle +=dr
+
+  fs = 5
+
+  # insane matplotlib rotation fix I hate matplotlib with the burning passion of
+  # 10000 firey suns.
+  # https://stackoverflow.com/questions/51028431/calculating-matplotlib-text-rotation
+
+  dx = x2-x1
+  dy = y2-y1
+  Dx = dx * fig_x / (x_max - x_min)
+  Dy = dy * fig_y / (y_max - y_min)
+
+
+  if i not in flippers:
+    aa = 90+ (180/np.pi)*np.arctan( Dy / Dx)
+  else:
+    aa = 270+ (180/np.pi)*np.arctan( Dy / Dx)
+
+
+
+  plt.text(*(x1,y1),s='%0.2f'%r_acc[0][i], ha='center', va='center', fontsize=fs, rotation=aa, rotation_mode='anchor'  )
+  plt.text(*(x2,y2),s='%0.2f'%val_acc[0][i], ha='center', va='center',fontsize=fs, rotation=aa, rotation_mode='anchor'  )
+  plt.text(*(x3,y3),s='%0.0f'%UTR_pred[0][i], ha='center', va='center',fontsize=fs, rotation =aa, rotation_mode='anchor'  )
+
+1/0
+###############################################################################
+# Generate X_RAND for FPR analysis
+###############################################################################
+
+reload_X_RAND = True
+
+if reload_X_RAND:
+    X_RAND = np.load('./X_RAND.npy')
+else:
+    import random
+    random.seed(42)
+    def generate_key(): # function to make random RNA sequences
+        STR_KEY_GEN = 'augc'
+        return ''.join(random.choice(STR_KEY_GEN) for _ in range(600))
+    
+    rand_30 = [generate_key() for i in range(60000)] #generate 60000, 600nt random sequences
+    
+    # cut the random sequences into lengths that match the RS data set
+    h,xx = np.histogram(RS_lens, bins = np.max(RS_lens), density=True);
+    cdf = np.cumsum(h*np.diff(xx)) 
+    rand_lens = []
+    for i in range(60000):
+        rand_lens.append(np.where(np.random.rand() > cdf)[0][-1] + 25)
+    plt.hist(lens,bins = 100, density=True, alpha=.4)
+    plt.hist(RS_lens, bins=100, density=True, alpha=.4)
+    
+    # Convert the sequences to feature sets
+    RAND_RS_features = []
+    for i in range(len(rand_30)):
+      mfe,hr = get_mfe_nupack(rand_30[i][:rand_lens[i]])
+      RAND_RS_features.append([rand_30[i][:rand_lens[i]], str(mfe[0][0]), mfe[0][1]])
+    
+    X_RAND =np.zeros([len(rand_30), 66+8])
+    k = 0
+    for i in range(len(rand_30)):
+      seq = clean_seq(rand_30[i])
+      if len(seq) > 25:
+    
+        #seq = clean_seq(RS_df['SEQ'].iloc[i])
+        kmerf = kmer_freq(seq)
+        X_RAND[k,:64] = kmerf/np.sum(kmerf)
+        X_RAND[k,64] = RAND_RS_features[i][-1]/max_mfe
+        X_RAND[k,65] = get_gc(seq)
+        #ds_RS.append(RS_df['ID'].iloc[i])
+        #dot_RS.append(RS_df['NUPACK_DOT'].iloc[i])
+        X_RAND[k,-8:] = be.annoated_feature_vector(RAND_RS_features[i][-2])
+    
+        X_RAND[k,66] = X_RAND[k,66]/max_ubs
+        X_RAND[k,67] = X_RAND[k,67]/max_bs
+        X_RAND[k,68] = X_RAND[k,68]/max_ill
+        X_RAND[k,69] = X_RAND[k,69]/max_ilr
+        X_RAND[k,70] = X_RAND[k,70]/max_lp
+        X_RAND[k,71] = X_RAND[k,71]/max_lb
+        X_RAND[k,72] = X_RAND[k,72]/max_rb
+    
+        k+=1
+
+# use the original ensemble on X_RAND
+predicted_rand = np.zeros([len(X_RAND), 20])
+ensemble = estimators + estimators_2 + estimators_other
+for j in range(20):
+  predicted_rand[:,j] = ensemble[j].predict_proba(X_RAND)[:,1]
+plt.plot(np.sum(predicted_rand > .5, axis =1)/20,'o')
+
+
+
+###############################################################################
+# Substring testing
+###############################################################################
+
+reload_X_SUB = True
+reload_prediction_sub = True
+save_substrings = True
+if reload_X_SUB:
+    X_SUB = np.load('./X_SUB.npy')
+    n_substrings = 20
+else:
+    n_substrings = 20
+    X_SUB =np.zeros([X_UTR.shape[0],n_substrings+1, 66+8])
+    print('WARNING THIS WILL TAKE A LONG TIME TO GENERATE!!')
+    print('generating sub strings...')
+    k = 0
+    for i in tqdm(range(len(UTR_db))):
+      if not pd.isna(UTR_db[ccds_length].iloc[i]):
+        seq = clean_seq(UTR_db[ccds_length].iloc[i])
+        if len(seq) > 25:
+          if np.sum(X_SUB[k]) == 0:
+            print(k)
+    
+            subs = np.linspace(30,len(seq),n_substrings+1).astype(int)
+            substrs = [seq[-x:] for x in subs]  + [seq,]
+            for j in range(n_substrings+1):
+              mfe,hr = get_mfe_nupack(substrs[j])
+              kmerf = kmer_freq(substrs[j])
+              X_SUB[k,j,:64] = kmerf/np.sum(kmerf)
+    
+              X_SUB[k,j,64] = mfe[0][1]/max_mfe
+    
+              X_SUB[k,j,65] = get_gc(seq)
+    
+              X_SUB[k,j,-8:] = be.annoated_feature_vector(str(mfe[0][0]), encode_stems_per_bp=True)
+    
+              X_SUB[k,j,66] = X_SUB[k,j,66]/max_ubs
+              X_SUB[k,j,67] = X_SUB[k,j,67]/max_bs
+              X_SUB[k,j,68] = X_SUB[k,j,68]/max_ill
+              X_SUB[k,j,69] = X_SUB[k,j,69]/max_ilr
+              X_SUB[k,j,70] = X_SUB[k,j,70]/max_lp
+              X_SUB[k,j,71] = X_SUB[k,j,71]/max_lb
+              X_SUB[k,j,72] = X_SUB[k,j,72]/max_rb
+    
+          k+=1
+          if save_substrings:
+              if k%1000 == 0:
+                np.save('./X_SUB.npy', X_SUB)
+               
+if reload_prediction_sub:
+    predicted_sub = np.load('./predicted_sub.npy')
+else:
+    predicted_sub = np.zeros([len(X_SUB),2,20])
+    for i in tqdm(range(0,len(X_SUB))):
+       print('WARNING THIS WILL TAKE A LONG TIME TO GENERATE!!')
+      #if np.sum(predicted_sub[i,:,j]) == 0:
+      for j in range(20):
+          predicted_sub[i,:,j] = ensemble[j].predict_proba(X_SUB[i])
+
+
+fullseqs_UTR = np.sum(predicted_sub[list(full_seqs_found_ids),:,:],axis=-1).T/20
+subseqs_UTR = np.sum(predicted_sub[list(subseqs_found_ids - full_seqs_found_ids),:,:],axis=-1).T/20
+subseqs_all = np.sum(predicted_sub,axis=-1).T/20
+
+for i in [0,1,2]:
+    plt.figure(dpi=global_dpi)
+    b = fullseqs_UTR.T.flatten()
+    if i == 0:
+        a = np.vstack([np.linspace(0,20,21)]*fullseqs_UTR.shape[1]).flatten()
+        t = 'All UTR found by full seqeunces'
+    if i == 1:
+        a = np.vstack([np.linspace(0,20,21)]*subseqs_UTR.shape[1]).flatten()
+        t = 'subsequences UTR'
+    if i == 2:
+        a = np.vstack([np.linspace(0,20,21)]*subseqs_all.shape[1]).flatten()
+        t = 'subsequences all'
+    if i == 3: 
+        a = np.vstack([np.linspace(0,20,21)]*subseqs_UTR.shape[1]).flatten()
+        t = 'UTRs found not by full UTR'
+    plt.hist2d(a, b, (np.arange(0,22)-.5, 20), cmap=plt.cm.RdBu, density=True, vmax=.7)
+    plt.colorbar()
+    plt.xlabel('subsequence id')
+    plt.ylabel('ensemble probability')
+    plt.title(t)
+
+###############################################################################
+# Testing on synthethic riboswitches
+###############################################################################
+
+theophylline_RSes = [ '''UAUGUUGAUACU
+UAAUUUAAAGAU
+UAAACAAAAGAU
+GAUACCAGCCGA
+AAGGCCCUUGGC
+AGCUCUCGUGGA
+GUGGAUGAAGUG''',
+
+'''
+CCCGGUACCGGU
+GAUACCAGCAUC
+GUCUUGAUGCCC
+UUGGCAGCACCU
+AUAAAGACAACA
+AGAUGUGCGAAC
+UCG
+''',
+
+'''
+GGUGAUACCAGC
+AUCGUCUUGAUG
+CCCUUGGCAGCA
+CCCCGCUGCAGG
+ACAACAAGAUG
+''',
+
+
+'''
+GGUGAUACCAGC
+AUCGUCUUGAUG
+CCCUUGGCAGCA
+CCCUGCUAAGGU
+AACAACAAGAUG
+''',
+
+'''
+GGUACCGGUGAU
+ACCAGCAUCGUC
+UUGAUGCCCUUG
+GCAGCACCCUGA
+GAAGGGGCAACA
+AGAUG''',
+
+'''
+GGUACCGGUGAU
+ACCAGCAUCGUC
+UUGAUGCCCUUG
+GCAGCACCCGCU
+GCGCAGGGGGUA
+UCAACAAGAUG
+''',
+
+'''
+GGUACCUGAUAA
+GAUAGGGGUGAU
+ACCAGCAUCGUC
+UUGAUGCCCUUG
+GCAGCACCAAGA
+CAACAAGAUG
+''',
+
+'''
+GGUACCGGUGAU
+ACCAGCAUCGUC
+UUGAUGCCCUUG
+GCAGCACCCUGC
+UAAGGUAACAAC
+AAGAUG''',
+
+'''
+GGUACCGGUGAU
+ACCAGCAUCGUC
+UUGAUGCCCUUG
+GCAGCACCCUGC
+UAAGGAGGUAAC
+AACAAGAUG''',
+
+'''
+GGUACCGGUGAU
+ACCAGCAUCGUC
+UUGAUGCCCUUG
+GCAGCACCCUGC
+UAAGGAGGCAAC
+AAGAUG''',
+
+'''
+AUACGACUCACU
+AUAGGUGAUACC
+AGCAUCGUCUUG
+AUGCCCUUGGCA
+GCACCCUGCUAA
+AGGAGGUAACAA
+CAAGAUG''',
+
+'''
+AACGGGACUCAC
+UAUAGGUACCGG
+UGAUACCAGCAU
+CGUCUUGAUGCC
+CUUGGCAGCACC
+CUGCGGGCCGGG
+CAACAAGAUG
+''',
+
+'''
+CACUGUUCGUCA
+AGAAAGCAUCAU
+UGUGACUGUGUA
+GAUUGCUAUUAC
+AAGAAGAUCAGG
+AGCAAACUAUG''',
+
+'''GGUGAUACCAGC
+AUCGUCUUGAUG
+CCCUUGGCAGCA
+CCCUGCUAAGGA
+GGUAACAACAUG''',
+
+'''
+GGUGAUACCAGC
+AUCGUCUUGAUG
+CCCUUGGCAGCA
+CCCUGCUAAGGA
+GGUAACUUAAUG
+''',
+
+'''
+GGUGAUACCAGC
+AUCGUCUUGAUG
+CCCUUGGCAGCA
+CCCUGCUAAGGA
+GGUGUGUUAAUG''',
+
+'''
+GGUGAUACCAGC
+AUCGUCUUGAUG
+CCCUUGGCAGCA
+CCCUGCUAAGGA
+GGUCAACAAGAU
+G''',
+
+'''
+CAGGUGAUACCA
+GCAUCGUCUUGA
+UGCCCUUGGCAG
+CACCTATATAAGA
+AGAAGGGUACCU
+UAAACCCCUUCU
+UCUUAUGAAGAA
+GGGGUUUUUAUU
+UUGGAGGAAUUU
+UCCAUG''',
+
+'''
+AAGUGAUACCAG
+CAUCGUCUUGAU
+GCCCUUGGCAGC
+ACUUCAGAAAUC
+UCUGAAGUGCUG
+UUUUUUUUAGGA
+GGUUAAUGAUG''',
+
+'''
+AAUUAAAUAGCU
+AUUAUCACGAUU
+UUAUACCAGCUU
+CGAAAGAAGCCC
+UUGGCAGAAAAU
+CCUGAUUACAAA
+AUUUGUUUAUGA
+CAUUUUUUGUAA
+UCAGGAUUUUUU
+UUGGAGGAATTTT
+CCAUG''',
+
+'''
+GGGAGACCACAA
+CGGUUUCCCUAU
+CACCUUUUUGUA
+GGUUGCCCGAAA
+GGGCGACCCUGA
+UGAGCCUGGAUA
+CCAGCCGAAAGG
+CCCUUGGCAGUU
+AGACGAAACAAG
+AAGGAGAUAUAC
+CAAUG''',
+
+'''AUAGGUACCUAA
+UGCAACCUGAUA
+CCAGCAUCGUCU
+UGAUGCCCUUGG
+CAGCAGGCAACA
+AG
+''',
+
+'''
+AAUUUCAUAGUU
+AGAUCGUGUUAU
+AUGGUGAAGAUA
+AUACCAGCUUCG
+AAAGAAGCCCUU
+GGCAGUAUCUCG
+UUGUUCAUAAUC
+AUUUAUGAUGAU
+UAAUUGAUAAGC
+AAUGAGAGUAUU
+CCUCUCAUUGCU
+UUUUUUAUUGUG
+GACAAAGCGCUC
+UUUCUCCUCACC
+CGCACGAACCAA
+AAUGUAAAGGGU
+GGUAAUACAUG
+''',
+
+'''
+CUUCCUGACACGA
+AAAUUUCAUAUCC
+GUUCUUAAUACCA
+GCUUCGAAAGAAG
+CCCUUGGCAGUAA
+GAAGAGACAAAAU
+CACUGACAAAGUC
+UUCUUCUUAAGAG
+GACUUUUUUUAUU
+UCUCUUUUUUCCU
+UGCUGAUGUGAAU
+AAAGGAGGCAGAC
+AAUG
+''',
+
+'''
+CAAAAAAUUAAUA
+ACAUUUUCUCUUA
+UACCAGCUUCGAA
+AGAAGCCCUUGGC
+AGGAGAGAGGCAG
+UGUUUUACGUAGA
+AAAGCCUCUUUCU
+CUCAUGGGAAAGA
+GGCUUUUUGUUGU
+GAGAAAACCUCUU
+AGCAGCCUGUAUC
+CGCGGGUGAAAGA
+GAGUGUUUUACAU
+AUAAAGGAGGAGA
+AACAAUG
+'''
+
+]
+
+
+
+theophylline_RS = [x.replace('\n','').lower() for x in theophylline_RSes] + [ 'TCTAGAGACCGCTAAAGGAGATACCAGCATCGTCTTGATGCCCTTGGCAGCTCCGGTTCAGCGCCGAGGAATATAGGAGGTAATCCC'.replace('T','U').lower()]
+
+Thyroxine_RS = ['GACGTCCTTAACGCGGGATAACATAGTCACGGTTTGTGGGAGGCTGTGGAGGCGAGACCGTGACCCCGGCAGCACCCAGGAGGAATACT'.replace('T','U').lower()]
+TMR_RS = ['GCAGGCTCCCACGGATCGCGACTGGCGAGAGCCAGGTAACGAATCGATCCAGTACCCACGATTCGTTAAGGAGGTAATCC'.replace('T','U').lower()]
+Dopamine_RS = ['GACGTCCTACCGCATTTCGGACATAGGGAATTCCGCGTGTGCGCCGCGGAAGACGTTGGAAGGATAGATACCTACAACGGGGAATATAGAGGCCAGCACATAGTGAGGCCCTCCTCCCCCCGGACGTACACGGGAGGCAGTTT'.replace('T','U').lower(),
+               'GACGTCGCGACGCAACAGCGACCCCGTCTCTGTGTGCGCCAGAGACACTGGGGCAGATATGGGCCAGCACAGAATGAGGCCCCCTAGTAACATTACGGAGGGCGCCC'.replace('T','U').lower()]
+Synthetic_Fluoride_RS = ['TCTAGACACCCTAATTGGAGATGGCATTCCTCCATTAACAAACCGCTGCGCCCGTAGCAGCTGATGATGCCTACAGAACACATAAGGAGGGTAGTCAT'.replace('T','U').lower()]
+DNT_RS = ['TCTAGAGTCGAAGATAAGGCCGCTTTCCAGCTCGGTACCATAACACAAGTGGTAGACTATTCTCTGGTACGTGCGCCCCCGGCCGTATTACGGGAGCACGCCGGCTAAGGGAATAAGCGCACCGAGGAGGTCAAAT'.replace('T','U').lower()]
+
+synthetic_apt = ['GGATCGCGACTGGCGAGAGCCAGGTAACGAATCGATCC'.replace('T','U').lower(),
+                 'TCCAGCTCGGTACCATAACACAAGTGGTAGACTATTCTCTGGTACGTGCGCCCCCGGCCGTATTACGGGAGCACGCCGGCTAAGGG'.replace('T','U').lower(),
+                 'GGAGATACCAGCATCGTCTTGATGCCCTTGGCAGCTCC'.replace('T','U').lower(),
+                 'ATTGGAGATGGCATTCCTCCATTAACAAACCGCTGCGCCCGTAGCAGCTGATGATGCCTACAGA'.replace('T','U').lower(),
+                 'GGATCGCGACTGGCGAGAGCCAGGTAACGAATCGATCC'.replace('T','U').lower(),]
+
+
+syn_RS_features = []
+for i in range(len(syn_RS)):
+  mfe,hr = get_mfe_nupack(syn_RS[i])
+  syn_RS_features.append([syn_RS[i], str(mfe[0][0]), mfe[0][1]])
+
+X_SYN =np.zeros([len(syn_RS), 66+8])
+k = 0
+for i in range(len(syn_RS)):
+  seq = clean_seq(syn_RS[i])
+  if len(seq) > 25:
+
+    #seq = clean_seq(RS_df['SEQ'].iloc[i])
+    kmerf = kmer_freq(seq)
+    X_SYN[k,:64] = kmerf/np.sum(kmerf)
+    X_SYN[k,64] = syn_RS_features[i][-1]/max_mfe
+    X_SYN[k,65] = get_gc(seq)
+    #ds_RS.append(RS_df['ID'].iloc[i])
+    #dot_RS.append(RS_df['NUPACK_DOT'].iloc[i])
+    X_SYN[k,-8:] = be.annoated_feature_vector(syn_RS_features[i][-2])
+
+    X_SYN[k,66] = X_SYN[k,66]/max_ubs
+    X_SYN[k,67] = X_SYN[k,67]/max_bs
+    X_SYN[k,68] = X_SYN[k,68]/max_ill
+    X_SYN[k,69] = X_SYN[k,69]/max_ilr
+    X_SYN[k,70] = X_SYN[k,70]/max_lp
+    X_SYN[k,71] = X_SYN[k,71]/max_lb
+    X_SYN[k,72] = X_SYN[k,72]/max_rb
+
+    k+=1
+
+
+predicted_syn = np.zeros([len(syn_RS), 20])
+ensemble = estimators + estimators_2 + estimators_other
+for j in range(20):
+  predicted_syn[:,j] = ensemble[j].predict_proba(X_SYN)
+  
+x = np.linspace(0.01, .99, 100)
+plt.figure(dpi=300)
+p_r = [np.sum(np.sum(predicted_rand,axis=1)/20 > xx)/300 for xx in x]
+p_t = [np.sum(((np.sum(predicted_syn > .5, axis =1)/20)[:25]) > xx)/25 for xx in x]
+plt.plot(x, p_r)
+plt.plot(x, p_t)
+plt.legend(['Random','Theophylline RSs'])
+plt.ylim([0,1])
+plt.ylabel('% of sequences identified as RS')
+plt.xlabel('selection threshold (P(Seq) > value)')
+plt.plot([x[50], x[-5], x[-1]], [p_t[50], p_t[-5], p_t[-1]],'o', color=colors[1])
+plt.text(x[50]-.03, p_t[50]-.1+.05, '***')
+plt.text(x[-5]-.02, p_t[-5]-.1+.05, '**')
+plt.text(x[-1]-.01, p_t[-1]-.1+.05, '**')
+
+plt.figure(dpi=300).set_figheight(2)
+
+p_values = [stats.binomtest(int(p_t[i]*25), n=25, p=p_r[i], alternative='two-sided').pvalue for i in range(len(x))]
+plt.semilogy(x, p_values, color=colors[2])
+plt.semilogy([0,1],[.05,.05],'--', color=colors[3])
+plt.ylim([10**-7, 10**-.5])
+plt.ylabel('P-value (binomal test 2 sided)')
+plt.xlabel('selection threshold (P(Seq) > value)')
+plt.text(.9, .08,'0.05', fontsize=8, color=colors[3])
+
+###############################################################################
+# GO analyses
+###############################################################################
+
+#Print list of genes to use for GO analysis
+gene_hits = UTR_db[UTR_db['ID'].isin(UTR_hit_list)]['GENE'].values.tolist()
+
+
+#@title barchart setup for GO Process
+overall_labels = []
+go_ids = []
+genes = []
+folds = []
+pvals = []
+
+sublabels = []
+subgenes = []
+sub_gos = []
+sub_fold = []
+sub_pvals = []
+levels = []
+for i in range(len(process['overrepresentation']['group'])):
+
+  if i != 15:
+    try:
+      overall_labels.append(process['overrepresentation']['group'][i]['result'][0]['term']['label'])
+      go_ids.append([process['overrepresentation']['group'][i]['result'][x]['term']['id'] for x in range(len(process['overrepresentation']['group'][i]['result']))][0])
+      folds.append(process['overrepresentation']['group'][i]['result'][0]['input_list']['fold_enrichment'])
+      pvals.append(process['overrepresentation']['group'][i]['result'][0]['input_list']['pValue'])
+      genes.append(process['overrepresentation']['group'][i]['result'][0]['input_list']['mapped_id_list']['mapped_id'])
+
+
+      sublabels.append([process['overrepresentation']['group'][i]['result'][x]['term']['label'] for x in range(len(process['overrepresentation']['group'][i]['result']))][0:])
+      sub_gos.append([process['overrepresentation']['group'][i]['result'][x]['term']['id'] for x in range(len(process['overrepresentation']['group'][i]['result']))][0:])
+      subgenes.append([process['overrepresentation']['group'][i]['result'][x]['input_list']['mapped_id_list']['mapped_id'] for x in range(len(process['overrepresentation']['group'][i]['result']))][0:])
+      sub_fold.append([process['overrepresentation']['group'][i]['result'][x]['input_list']['fold_enrichment'] for x in range(len(process['overrepresentation']['group'][i]['result']))][0:])
+      sub_pvals.append([process['overrepresentation']['group'][i]['result'][x]['input_list']['pValue'] for x in range(len(process['overrepresentation']['group'][i]['result']))][0:])
+      levels.append([process['overrepresentation']['group'][i]['result'][x]['term']['level'] for x in range(len(process['overrepresentation']['group'][i]['result']))][0:])
+    except:
+      overall_labels.append(process['overrepresentation']['group'][i]['result']['term']['label'])
+      go_ids.append(process['overrepresentation']['group'][i]['result']['term']['id'])
+      folds.append(process['overrepresentation']['group'][i]['result']['input_list']['fold_enrichment'])
+      pvals.append(process['overrepresentation']['group'][i]['result']['input_list']['pValue'])
+      if i<16:
+        genes.append(process['overrepresentation']['group'][i]['result']['input_list']['mapped_id_list']['mapped_id'])
+        subgenes.append([process['overrepresentation']['group'][i]['result']['input_list']['mapped_id_list']['mapped_id']])
+      else:
+        genes.append([])
+        subgenes.append(['None', ])
+
+
+      sublabels.append([process['overrepresentation']['group'][i]['result']['term']['label']])
+      sub_gos.append([process['overrepresentation']['group'][i]['result']['term']['id']])
+      levels.append([0,])
+      sub_fold.append([process['overrepresentation']['group'][i]['result']['input_list']['fold_enrichment']])
+      sub_pvals.append([process['overrepresentation']['group'][i]['result']['input_list']['pValue']])
+
+sublabels = [item for sublist in sublabels for item in sublist][::-1]
+levels = [item for sublist in levels for item in sublist][::-1]
+sub_gos = [item for sublist in sub_gos for item in sublist][::-1]
+sub_fold = [item for sublist in sub_fold for item in sublist][::-1]
+sub_pvals = [item for sublist in sub_pvals for item in sublist][::-1]
+subgenes =  [item for sublist in subgenes for item in sublist][::-1]
+ask = [    ''.join(    [['','*'][p<.05] ,  ['','*'][p<.01] , ['','*'][p<.001] , ['','*'][p<.0001] ])  for p in sub_pvals]
+
+
+gc_total = [526,560,1216,1423,1270,444,368,247,243,607,451,243,181,2883,179,5727,2633,449,303,254,536,3050,2999,3292,2825,2276,1635,868,413,223,127,252,508,106,7228,3920,1487,2518,773,5941,2314,2534,1333,2603,2464,1588,
+            527,3573,802,7697,6710,5013,537,408,379,124,67,77,59,86,103,60,1943,3542,3122,3174,2058,4102,5872,5647,5709,4067,3752,4163,3938,50,91,91,119,113,15044,8131,6606,159,86,46,25,111,28]
+
+gc = [len(x) for x in subgenes]
+gc[0] = 0
+gc[1] = 0
+
+
+gc_per = np.array(gc)/np.array(456)
+ss = [sub_gos[i] + ':      '+ ''.join(['->',]*levels[i]) +' '+ sublabels[i] + ''.join([' ',]) for i in range(len(sublabels))]
+
+#@title barchart for GO Process
+colors = ['#ef476f', '#073b4c','#06d6a0','#7400b8','#073b4c', '#118ab2',]
+fig,axes = plt.subplots(1,2,figsize=(2,8),dpi=400)
+bars = axes[0].barh(ss, sub_fold,)
+axes[0].plot([1,1], [-1, len(sublabels)+1],'b-',lw=.5)
+
+axes[0].tick_params(axis='y', which='major', labelsize=3)
+axes[0].tick_params(axis='y', which='minor', labelsize=2)
+
+axes[0].tick_params(axis='x', which='major', labelsize=5)
+axes[0].tick_params(axis='x', which='minor', labelsize=5)
+
+axes[1].tick_params(axis='x', which='major', labelsize=5)
+axes[1].tick_params(axis='x', which='minor', labelsize=5)
+
+axes[0].set_xlabel('Fold enrichment', fontsize=6)
+r = axes[0].set_yticklabels(ss, ha = 'left')
+
+
+yax = axes[1].get_yaxis()
+yax.set_visible(False)
+b2 = axes[1].barh(ss, np.log10(np.array(sub_pvals)))
+axes[1].set_xlabel('Log10 (p-value)', fontsize=6)
+
+crosslines = np.where(np.array(levels[1:]) - np.array(levels[:-1]) <= 0)[0] + 1
+
+axes[1].plot([-101,-2],[0-.5,0-.5],'k-',lw=.5, clip_on=False, zorder=100)
+k = 0
+c = colors[k]
+for i in range(len(levels)):
+  bars[i].set_color(colors[k])
+  b2[i].set_color(colors[k])
+  if levels[i] == 0:
+    a = axes[1].plot([-101,-2],[i+.5,i+.5],'k-',lw=.5, clip_on=False, zorder=100)
+    k+=1
+    k = k%len(colors)
+
+for i in range(len(ask)):
+  axes[0].text(sub_fold[i]+1  ,i,s=ask[i], fontsize=3, ha='center',va='center')
+
+axes[0].set_ylim([-1, len(levels)+1])
+axes[1].set_ylim([-1, len(levels)+1])
+axes[0].set_xlim([0,15])
+axes[1].set_xlim([-18,-2])
+plt.draw()
+yax = axes[0].get_yaxis()
+pad = max(T.label.get_window_extent().width for T in yax.majorTicks)
+axes[0].yaxis.set_tick_params(pad=pad/5)
+
+axes[1].plot([-5,-5], [-1, len(sublabels)+1],'k-',lw=.2)
+axes[1].plot([-10,-10], [-1, len(sublabels)+1],'k-',lw=.2)
+axes[1].plot([-15,-15], [-1, len(sublabels)+1],'k-',lw=.2)
+
+plt.savefig('process_go_plot.svg')
+
+#@title GO function bar chart setup
+with open('/content/drive/MyDrive/function.json', 'r') as f:
+    function = json.load(f)
+overall_labels = []
+go_ids = []
+genes = []
+folds = []
+pvals = []
+
+sublabels = []
+subgenes = []
+sub_gos = []
+sub_fold = []
+sub_pvals = []
+levels = []
+for i in range(len(function['overrepresentation']['group'])):
+
+  if i != 5: #unclassified is 5
+    try:
+      overall_labels.append(function['overrepresentation']['group'][i]['result'][0]['term']['label'])
+      go_ids.append([function['overrepresentation']['group'][i]['result'][x]['term']['id'] for x in range(len(function['overrepresentation']['group'][i]['result']))][0])
+      folds.append(function['overrepresentation']['group'][i]['result'][0]['input_list']['fold_enrichment'])
+      pvals.append(function['overrepresentation']['group'][i]['result'][0]['input_list']['pValue'])
+      genes.append(function['overrepresentation']['group'][i]['result'][0]['input_list']['mapped_id_list']['mapped_id'])
+
+
+      sublabels.append([function['overrepresentation']['group'][i]['result'][x]['term']['label'] for x in range(len(function['overrepresentation']['group'][i]['result']))][0:])
+      sub_gos.append([function['overrepresentation']['group'][i]['result'][x]['term']['id'] for x in range(len(function['overrepresentation']['group'][i]['result']))][0:])
+      subgenes.append([function['overrepresentation']['group'][i]['result'][x]['input_list']['mapped_id_list']['mapped_id'] for x in range(len(function['overrepresentation']['group'][i]['result']))][0:])
+      sub_fold.append([function['overrepresentation']['group'][i]['result'][x]['input_list']['fold_enrichment'] for x in range(len(function['overrepresentation']['group'][i]['result']))][0:])
+      sub_pvals.append([function['overrepresentation']['group'][i]['result'][x]['input_list']['pValue'] for x in range(len(function['overrepresentation']['group'][i]['result']))][0:])
+      levels.append([function['overrepresentation']['group'][i]['result'][x]['term']['level'] for x in range(len(function['overrepresentation']['group'][i]['result']))][0:])
+    except:
+      overall_labels.append(function['overrepresentation']['group'][i]['result']['term']['label'])
+      go_ids.append(function['overrepresentation']['group'][i]['result']['term']['id'])
+      folds.append(function['overrepresentation']['group'][i]['result']['input_list']['fold_enrichment'])
+      pvals.append(function['overrepresentation']['group'][i]['result']['input_list']['pValue'])
+      if i<16:
+        genes.append(function['overrepresentation']['group'][i]['result']['input_list']['mapped_id_list']['mapped_id'])
+        subgenes.append([function['overrepresentation']['group'][i]['result']['input_list']['mapped_id_list']['mapped_id']])
+      else:
+        genes.append([])
+        subgenes.append(['None', ])
+
+
+      sublabels.append([function['overrepresentation']['group'][i]['result']['term']['label']])
+      sub_gos.append([function['overrepresentation']['group'][i]['result']['term']['id']])
+      levels.append([0,])
+      sub_fold.append([function['overrepresentation']['group'][i]['result']['input_list']['fold_enrichment']])
+      sub_pvals.append([function['overrepresentation']['group'][i]['result']['input_list']['pValue']])
+
+sublabels = [item for sublist in sublabels for item in sublist][::-1]
+levels = [item for sublist in levels for item in sublist][::-1]
+sub_gos = [item for sublist in sub_gos for item in sublist][::-1]
+sub_fold = [item for sublist in sub_fold for item in sublist][::-1]
+sub_pvals = [item for sublist in sub_pvals for item in sublist][::-1]
+subgenes =  [item for sublist in subgenes for item in sublist][::-1]
+ss = [sub_gos[i] + ':      '+ ''.join(['->',]*levels[i]) +' '+ sublabels[i] + ''.join([' ',]) for i in range(len(sublabels))]
+ask = [    ''.join(    [['','*'][p<.05] ,  ['','*'][p<.01] , ['','*'][p<.001] , ['','*'][p<.0001] ])  for p in sub_pvals]
+
+###############################################################################
+# 20 fold k cross validation without structural holdouts
+###############################################################################
+
+#Here is an optional ensemble without structural cross validation, instead it uses
+# a 20 fold cross validation with all structures scrambled. Asked as a reviewer question
+# for the original submission
+
+import sklearn
+
+do_20kcv = True
+save = True
+retrain = False
+model_name = 'EKmodel_witheld_20kfcv_2'
+
+print('Training an ensemble with no structural cross validation, using random 20 fold cross validation...')
+print('save the model files? %i'%save)
+print('retraining? %i'%retrain)
+print('using model name: %s'%model_name)
+print('__________________________')
+if do_20kcv:
+    X = np.vstack([X_UTR, X_RS_full,])
+    y = np.zeros(len(X))
+    y[len(X_UTR):] = 1
+    # generate the 20 fold cross validation shuffles
+    kf = sklearn.model_selection.KFold(n_splits=20, shuffle=True, random_state=42)
+    
+    X_RAND = np.load('./X_RAND.npy')
+    X_EXONS = np.load('./X_EXONS.npy')
+    
+    ensemble_2 = [] # preallocate a list for the 20 classifiers
+    witheld_RS_acc_2 = []
+    for i, (train_index, test_index) in enumerate(kf.split(X,y)): # for every cross fold train
+        print('training cross fold %i'%i)
+        X_train, X_test, y_train, y_test = X[train_index], X[test_index], y[train_index], y[test_index]
+        if retrain:
+            svc = SVC(C=15, kernel='rbf', gamma=0.2, probability=True)
+            pu_estimator = ElkanotoPuClassifier(estimator=svc, hold_out_ratio=0.2)
+            pu_estimator.fit(X_train, y_train)
+            if save:
+              dump(pu_estimator,'./elkanoto_models/%s_%s.joblib'%(model_name,i))
+        else:
+            svc = SVC(C=10, kernel='rbf', gamma=0.4, probability=True)
+            pu_estimator = ElkanotoPuClassifier(estimator=svc, hold_out_ratio=0.2)
+            pu_estimator =load('./elkanoto_models/%s_%s.joblib'%(model_name,str(i)))
+            
+        predicted_RS = pu_estimator.predict_proba(X_test[y_test==1])
+        witheld_RS_acc_2.append(np.sum(predicted_RS[:,1] > .5 )/ (len(X_test[y_test==1])))
+        print('Test accuracy:')
+        print(np.sum(predicted_RS[:,1] > .5 )/ (len(X_test[y_test==1])))
+        print('__________________________')
+        ensemble_2.append(pu_estimator)
+    
+    kf = sklearn.model_selection.KFold(n_splits=20, shuffle=True, random_state=42)
+    train_ens2_acc = []
+    test_ens2_acc = []
+    found_UTR_ens2 = []
+    random_ens2_acc = []
+    structured_ens2_acc = []
+    
+    rands_2 = []
+    exons_2 = []
+    
+    print('Running ensemble on all data to construct plot....')
+    # for each cross fold get its performance on the data
+    for i, (train_index, test_index) in enumerate(kf.split(X,y)):
+        print('k fold %i'%i)
+        X_train, X_test, y_train, y_test = X[train_index], X[test_index], y[train_index], y[test_index]
+        
+        p = ensemble_2[i].predict_proba((X_test[y_test==1]))
+        t = ensemble_2[i].predict_proba((X_train[y_train==1]))
+        u = ensemble_2[i].predict_proba(X_UTR)
+        r =   ensemble_2[i].predict_proba(X_RAND)       
+        ex =   ensemble_2[i].predict_proba(X_EXONS)                  
+    
+        rands_2.append(r)
+        exons_2.append(ex)
+        test_ens2_acc.append(np.sum(p[:,1] > .5 )/ (len(X_test[y_test==1])))
+        train_ens2_acc.append(np.sum(t[:,1] > .5 )/ (len(X_train[y_train==1])))
+        found_UTR_ens2.append(np.sum(u[:,1] > .5 )/ (len(X_UTR)))
+        random_ens2_acc.append(np.sum(r[:,1] > .5 )/ (len(X_RAND)))
+        structured_ens2_acc.append(np.sum(ex[:,1] > .5 )/ (len(X_EXONS)))
+        
+        
+    train_ens_acc = []
+    test_ens_acc = []
+    found_UTR_ens = []
+    
+    random_ens_acc = []
+    structured_ens_acc = []
+    for i in range(len(ensemble)):
+        r =   ensemble[i].predict_proba(X_RAND)       
+        ex =   ensemble[i].predict_proba(X_EXONS)      
+        random_ens_acc.append(np.sum(r[:,1] > .5 )/ (len(X_RAND)))
+        structured_ens_acc.append(np.sum(ex[:,1] > .5 )/ (len(X_EXONS)))
+    
+    
+    data = np.array([RS_acc + RS_acc_2 + RS_acc_other,
+                          witheld_acc + witheld_acc_2 + witheld_acc_other, 
+                          UTR_acc + UTR_acc_2 + UTR_acc_other,
+                          random_ens_acc,
+                          structured_ens_acc])
+    
+    # Ensemble with structural cross validation
+    data[2,:] = 1 - data[2,:]
+    plt.matshow(data, cmap='coolwarm_r', vmax=1, vmin=0)
+    ax = plt.gca()
+    for (i, j), z in np.ndenumerate(data):
+        ax.text(j, i, '{:0.3f}'.format(z), ha='center', va='center')
+    ax.set_xticks([x for x in range(20)])
+    ax.set_xticklabels([x for x in range(20)])
+    ax.set_yticklabels(['','Train', 'Test', 'UTR', 'RAND', 'EXON'])
+    ax.set_xticklabels( witheld_ligands + ['-'.join(x) for x in pairs] + ['other'], rotation=90)
+    ax.set_xlabel('Ensemble w/ structural cross validation training and testing results on all groups')
+    
+    data = np.array([train_ens2_acc,
+                          test_ens2_acc, 
+                          found_UTR_ens2,
+                          random_ens2_acc,
+                          structured_ens2_acc])
+    
+    # Ensemble 2 training outputs
+    plt.figure()
+    plt.matshow(data, cmap='coolwarm_r', vmax=1, vmin=0)
+    
+    ax = plt.gca()
+    for (i, j), z in np.ndenumerate(data):
+        ax.text(j, i, '{:0.3f}'.format(z), ha='center', va='center')
+    ax.set_xticks([x for x in range(20)])
+    ax.set_xticklabels([x for x in range(20)])
+    ax.set_yticklabels(['', 'Train', 'Test', 'UTR', 'RAND', 'EXON'])
+    ax.set_xlabel('Ensemble w/ random 20 fold cross validation training and testing results on all groups')
+    
+    #ax.set_xticklabels( witheld_ligands + ['-'.join(x) for x in pairs] + ['other'], rotation=90)
+    
+    
+
+#@title GO function bar chart
+colors = ['#ef476f', '#073b4c','#06d6a0','#7400b8','#073b4c', '#118ab2',]
+fig,axes = plt.subplots(1,2,figsize=(2,2),dpi=400)
+bars = axes[0].barh(ss, sub_fold)
+axes[0].plot([1,1], [-1, len(sublabels)+1],'b-',lw=.5)
+
+axes[0].tick_params(axis='y', which='major', labelsize=3)
+axes[0].tick_params(axis='y', which='minor', labelsize=2)
+
+axes[0].tick_params(axis='x', which='major', labelsize=5)
+axes[0].tick_params(axis='x', which='minor', labelsize=5)
+
+axes[1].tick_params(axis='x', which='major', labelsize=5)
+axes[1].tick_params(axis='x', which='minor', labelsize=5)
+
+axes[0].set_xlabel('Fold enrichment', fontsize=6)
+r = axes[0].set_yticklabels(ss, ha = 'left')
+
+
+yax = axes[1].get_yaxis()
+yax.set_visible(False)
+b2 = axes[1].barh(ss, np.log10(np.array(sub_pvals)))
+axes[1].set_xlabel('Log10(p-value)', fontsize=6)
+
+crosslines = np.where(np.array(levels[1:]) - np.array(levels[:-1]) <= 0)[0] + 1
+
+axes[1].plot([-75,-2],[0-.5,0-.5],'k-',lw=.5, clip_on=False, zorder=100)
+k = 0
+c = colors[k]
+for i in range(len(levels)):
+  bars[i].set_color(colors[k])
+  b2[i].set_color(colors[k])
+  if levels[i] == 0:
+    a = axes[1].plot([-75,-2],[i+.5,i+.5],'k-',lw=.5, clip_on=False, zorder=100)
+    k+=1
+    k = k%len(colors)
+
+for i in range(len(ask)):
+  axes[0].text(sub_fold[i]+1  ,i,s=ask[i], fontsize=3, ha='center',va='center')
+
+axes[0].set_ylim([-1, len(levels)+1])
+axes[1].set_ylim([-1, len(levels)+1])
+axes[0].set_xlim([0,15])
+axes[1].set_xlim([-18,-2])
+plt.draw()
+yax = axes[0].get_yaxis()
+pad = max(T.label.get_window_extent().width for T in yax.majorTicks)
+axes[0].yaxis.set_tick_params(pad=pad/5)
+
+axes[1].plot([-5,-5], [-1, len(sublabels)+1],'k-',lw=.2)
+axes[1].plot([-10,-10], [-1, len(sublabels)+1],'k-',lw=.2)
+axes[1].plot([-15,-15], [-1, len(sublabels)+1],'k-',lw=.2)
+
+plt.savefig('function_go_plot.svg')
 
 
 ###############################################################################
@@ -1272,12 +2089,13 @@ plt.savefig('fpr.svg')
         
         
         
-
-plt.boxplot(np.array([RS_acc, witheld_acc, [1-x for x in UTR_acc], Exon_acc, Rand_acc]).T  , vert=True, showfliers=True, boxprops={'alpha':.8, 'color':cm.viridis(i/20)},
-            capprops={'alpha':.8, 'color':cm.viridis(i/40)},
-            whiskerprops={'alpha':.8, 'color':cm.viridis(i/40)},
-            medianprops={'alpha':.8, 'color':cm.viridis(i/40)},
-            meanprops={'alpha':.8, 'color':cm.viridis(i/40)},
+plt.figure()
+plt.boxplot(np.array([RS_acc, witheld_acc, [1-x for x in UTR_acc], Exon_acc, Rand_acc]).T  , vert=True, showfliers=True, 
+            #boxprops={'alpha':.8, 'color':cm.viridis(i/20)},
+            #capprops={'alpha':.8, 'color':cm.viridis(i/40)},
+            #whiskerprops={'alpha':.8, 'color':cm.viridis(i/40)},
+            #medianprops={'alpha':.8, 'color':cm.viridis(i/40)},
+            #meanprops={'alpha':.8, 'color':cm.viridis(i/40)},
             ); 
 
 ens1_utrs = [ids_UTR.index(x) for x in ids_UTR if x in UTR_hit_list]
@@ -1285,13 +2103,15 @@ ens2_utrs = []
 for i in range(20):
    ens2_utrs.append((np.where(predicted_UTRs[i][:,1] > t)[0]).tolist())
 ens2_utrs = set.intersection(*[set(x) for x in ens2_utrs])
-print(len(ens1_utrs))
-print(len(ens2_utrs))
-print(len(set(ens1_utrs).intersection(ens2_utrs)))
+ax = plt.gca()
+ax.set_xticklabels(['train RS','test RS','UTR','Exon','Random'])
+plt.title('Box plot across classifiers for FPR analyses (.95 threshold)')
 
-#ax.set_xticks([x for x in range(20)])
-#ax.set_xticklabels(['-'.join(x) for x in pairs] , size=5, rotation=90, )
-#plt.savefig('ensemble2_5.svg')
+
+
+###############################################################################
+# Generate X_Eukaryotic for testing the ensembles
+###############################################################################
 
 
 eukaryote_list = ['TPP-specific','Phaeoacremonium','TPP-specific riboswitch from Arabidopsis','Paracoccidioides','Ophiocordyceps','Hyphopichia','Neonectria','Fibulorhizoctonia','Beta vulgaris', 'Caenorhabditis','Cinara','Seminavis', 'Thalictrum','Drosophila', 'Olea', 'Salix', 'Hymenolepis','Bathymodiolus','Steinernema','Zymoseptoria', 'Serpula', 'Rhizophagus', 'Dichanthelium', 'Gaeumannomyces','Yarrowia', 'Amazona','Ipomoea','Helianthus','Taphrina','Emergomyces','Picea', 'Fibroporia','Picea','Malassezia','Arthrobotrys', 'Poa','Lupinus','Tuber', 'Magnaporthe','Thielavia','Arthroderma',  'Lawsonia','Geomyces', 'Aedes','Debaryomyces','Hyaloperonospora', 'Theobroma','Acyrthosiphon', 'Komagataella', 'Solanum','Populus','Xylona','Podospora', 'Setaria',  'Leucosporidiella', 'Ricinus','Rhodnius','Brugia', 'Scheffersomyces', 'Microbotryum', 'Spathaspora', 'Anopheles', 'Chlamydomonas','Volvox','Zea', 'Coprinopsis', 'Wickerhamomyces', 'Myceliophthora', 'Pythium','Exidia', 'Byssochlamys','Madurella','Micromonas', 'Chaetomium','Meyerozyma','Botrytis', 'Setosphaeria', 'Daedalea','Prunus','Calocera', 'Fomitiporia', 'Lichtheimia','Brachypodium', 'Physcomitrella','Scedosporium','Pachysolen', 'Dactylellina','Grosmannia','Cajanus','Trichophyton', 'Perkinsus', 'Phaeodactylum','Piloderma', 'Jatropha',  'Pleurotus', 'Fragilariopsis', 'Fragilariopsis', 'Morus','Cyphellophora', 'Protochlamydia','Galerina', 'Kuraishia','Dothistroma','Capsicum', 'Heterobasidion', 'Lipomyces', 'Pyrenophora','Selaginella', 'Selaginella','Sphaeroforma', 'Nitzschia', 'Lucilia','Plasmopara','Babjeviella', 'Cyberlindnera', 'Reticulomyxa', 'Drechmeria', 'Pochonia', 'Coccomyxa','Escovopsis', 'Baudoinia','Escovopsis','Serendipita','Valsa','Parasitella','Cylindrobasidium', 'Ascoidea', 'Mortierella','Wallemia', 'Moniliophthora', 'Agaricus','Neurospora', 'Nasonia','Ciona','Ajellomyces','Phaeosphaeria','Ogataea','Rhinocladiella','Polyangium','Pyronema','Laccaria','Capsella','Gymnopus','Hypocrea','Hyphodontia','Rosa','Guillardia','Diplodia','Didymella','Paxillus','Clonorchis','Kwoniella','Claviceps','Hordeum','Stachybotrys','Neofusicoccum', 'Gossypium','Rasamsonia','Sphaerulina','Dichomitus','Punica','Eutrema','Suillus', 'Rosellinia', 'Diaporthe', 'Torrubiella', 'Nadsonia','fungal', 'Ochroconis','Toxocara', 'Coniosporium','Tortispora', 'Phaseolus','Verticillium', 'Klebsormidium', 'Glarea', 'Pneumocystis', 'Aphanomyces','Phytophthora','Cucumis','Parastrongyloides','Botryosphaeria','Rhizopogon','Chroococcidiopsis','Vitis','Emmonsia','Oidiodendron', 'Metschnikowia', 'Microdochium','Mimulus','Kribbella','Saitoella','Acremonium','Brassica','Eutypa', 'Trichoderma', 'Tolypocladium','Pisolithus','Protomyces','Monoraphidium','Citrus','Lobosporangium','Leucoagaricus','Pestalotiopsis','Schwartzia','Ananas', 'Fonsecaea','Paraphaeosphaeria','Stagonospora', 'Leptonema','Phialophora','Talaromyces','Citreicella','Penicilliopsis','Pyrenochaeta','Purpureocillium','Cladophialophora','Basidiobolus','Uncinocarpus','Neolecta','Thalassiosira','Coccidioides','Rhynchosporium','Fistulifera','Daucus','arabidopsis','aspergillus', 'Zostera','Aschersonia','Eucalyptus','Beauveria','Stemphylium',
@@ -1362,20 +2182,6 @@ for i in range(len(b)):
     if b[i].split(' ')[0].lower() in ['beta']:
         if 'beta vulgaris' in b[i].split(' ')[0].lower() :
             f.append(b[i])
-print((len(f) + len(c)) / len(a))
-print(len(e)/len(a))
-print(e[0])
-print(e[1])
-print(e[2])
-print(e[3])
-print(e[4])
-print(e[5])
-print(e[6])
-print(e[7])
-print(e[8])
-print(e[9])
-print(len(e))
-print([x.split(' ')[0] for x in e[:10]])
 
 g = []
 h = []
@@ -1442,8 +2248,6 @@ X_eukaryotic[:,71] = X_eukaryotic[:,71]/max_lb
 X_eukaryotic[:,72] = X_eukaryotic[:,72]/max_rb
 X_eukaryotic[:,64] = X_eukaryotic[:,64]/max_mfe
 X_eukaryotic = X_eukaryotic[:k]
-
-
 
 
 
