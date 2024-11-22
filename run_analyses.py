@@ -27,6 +27,10 @@ File sections:
 # OPTIONS
 ###############################################################################
 
+# filenames for the RS dataset and UTR dataset
+RS_fname = './data_files/RS_final_with_euk2.csv'
+UTR_fname = './data_files/5primeUTR_final_db_3.csv'
+
 
 ###############################################################################
 # Imports
@@ -71,9 +75,9 @@ print('Loading and sanatizing data files....')
 # STARTPLUS25 - sequence of the 5'UTR + 25 nt
 # NUPACK_25 - nupack MFE dot structure for 100 foldings of the dot structure
 # NUPACK_25_MFE - energy of the MFE structure
-fname = './data_files/5primeUTR_final_db_3.csv'
-UTR_db = pd.read_csv(fname)
-print('UTR data file loaded: %s'%fname)
+
+UTR_db = pd.read_csv(UTR_fname)
+print('UTR data file loaded: %s'%UTR_fname)
 
 # Riboswitch data file
 # ID - ID within RNA central
@@ -84,9 +88,9 @@ print('UTR data file loaded: %s'%fname)
 # NUPACK_DOT - NUPACK dot structure of 100 foldings
 # NUPACK_MFE - NUPACK mfe of the structure of 100 foldings
 # Kmers aaa.... kmer counts for each triplet
-fname = './data_files/RS_final_with_euk2.csv'
-RS_db = pd.read_csv(fname)
-print('RS data file loaded: %s'%fname)
+
+RS_db = pd.read_csv(RS_fname)
+print('RS data file loaded: %s'%RS_fname)
 
 ## We have to apply some patches to the UTR data file to remove 3'UTR sequences and duplicate IDs
 ## since some UTRs have multiple isoforms and UTRdb didnt handle this
