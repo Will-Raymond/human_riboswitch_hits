@@ -335,8 +335,176 @@ class kmer_DataProcessor():
             
         return kmer_freq_vec
 
-if __name__ == "__main__":
-    utr5_db = kmer_DataProcessor()
-    utr5_db.create_database('./data_files/5UTRaspic.Hum.fasta')
-    utr5_db.get_all_kmers(3)
-    utr5_db.export_to_csv('./data_files/test.csv') 
+
+################## Make the UTR csv ###########################################
+
+utr5_db = kmer_DataProcessor()
+utr5_db.create_database('./data_files/5UTRaspic.Hum.fasta')
+utr5_db.get_all_kmers(3)
+utr5_db.export_to_csv('./data_files/test.csv') 
+
+
+
+import json
+UTR_db = pd.read_csv('./data_files/test.csv')
+utr_id_to_gene = json.load(open('./data_files/UTR_ID_to_gene.json','r'))
+UTR_db = pd.read_csv(db_file)
+UTR_db['GENE'] =''
+g_list = []
+for i in range(len(UTR_db)):
+  g_list.append(utr_id_to_gene[UTR_db['ID'].iloc[i]])
+UTR_db['GENE'] = g_list
+#parse out duplicates
+cols = UTR_db.columns.tolist()
+cols =  [cols[-1]] + cols[1:3]  + cols[3:-1]
+UTR_db = UTR_db[cols]
+UTR_db = UTR_db[UTR_db['GENE'] != 'duplicate']
+UTR_db = UTR_db.reset_index(drop=True) #reset the indexes
+UTR_db
+
+
+1/0
+################# Make the RS csv #############################################
+
+from Bio import SeqIO  #BIOPYTHON
+from Bio import pairwise2
+
+import numpy as np
+import itertools as it
+import re
+import os
+
+import pandas as pd
+import json
+import time
+import itertools as it
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+
+import subprocess 
+
+
+
+## All riboswitches were pulled from RNAcentral on 8.19.22, any entry with the tag "riboswitch"
+## data was filtered for duplicates leaving (n = 73119)
+## all ligands were extracted from RNAcentral and added to a database (RSid_to_ligand.json)
+
+# this code parses them all to the same molecule names and then plots them.
+
+# riboswitches considered speculative and thus labeled unknown: nhA-I motif, duf1646, raiA, synthetic, sul1,
+#
+
+RS_data = json.load(open('./riboswitch_RNAcentral_8.19.21.json.json'))
+
+ligand_data = json.load(open('./RSid_to_ligand.json'))
+
+unique_RS_ids = list(ligand_data.keys())
+
+ligands = ['tpp', 'guanine', 'preq1', 'leucine','tryptophan', 'threonine','serine','cyclic di-gmp','gmp','cobalamin','molybdenum',
+           'abocbl', 'nhaa-i','nhaa', 'glms','glucosamine','methionine','guanidine','fmn','thf',
+           'nico','duf1646','magnesium','manganese','purine','fluoride','flavin','glycine','mg','ykok','m-box','adenine','lysine',
+           'zmp','ztp','glutamine','sam','homocysteine','tyrosine','valine','b12','adocbl','alanine','guanidine','synthetic','glyq',' mn ',
+           'ppgpp','guanosine',"2'dg-ii","dg-ii",'2-deoxy-d-glucose','2-dg','thf','thfa','tetrahydrofolate','raia','sul1','aminoglycoside',
+           'guanidine-iii','guanidineiii','tetracycline','yybp-ykoy','proline','cyclic di-amp','cyclic-di-amp','ydao/yuaa',
+           'ydao','yuaa','ydao-yuaa','histidine','aspartate','glct','glna']
+
+ligand_alias_dict = {'': 'unknown',
+                     'adenine':'adenine',
+                     'adocbl':'adocbl',
+                     'b12':'cobalamin',
+                     'cobalamin':'cobalamin',
+                     'cyclic di-gmp':'cyclic-di-GMP',
+                     'cyclic-di-gmp':'cyclic-di-GMP',
+                     'c-di-amp':'cyclic-di-AMP',
+                     'cyclic-di-amp':'cyclic-di-AMP',
+                     'dg-ii':"2'-dG-II",
+                     'duf1646':'unknown',
+                     'flavin':'FMN',
+                     'glct':'protein',
+                     'glcyine':'glcyine',
+                     'glycine':'glycine',
+                     'glms':'glucosamine-6-phosphate',
+                     'glna':'glutamine',
+                     'glucosamine':'glucosamine',
+                     'glutamine':'glutamine',
+                     'glyq':'tRNA',
+                     'gmp':'GMP',
+                     'guanidine':'guanidine',
+                     'guanidine-iii':'guanidine',
+                     'guanine':'guanine',
+                     'histidine':'histidine',
+                     'homocysteine':'homocysteine',
+                     'leucine':'leucine',
+                     'lysine':'lysine',
+                     'magnesium':'Mg2+',
+                     'mg':'Mg2+',
+                     ' mn ':'Mn2+',
+                     'manganese':'Mn2+',
+                     'Manganese ':'Mn2+',
+                     'methionine':'methionine',
+                     'mfr':'purine',
+                     'moco_rna_motif':'molybdenum',
+                     'molybdenum':'molybdenum',
+                     'obsolete cofactor?':'unknown',
+                     'obsolete covaftor?':'unknown',
+                     'nico':'Ni/Co',
+                     'nhaa-i':'unknown',
+                     'ppgpp':'(p)ppGpp',
+                     'proline':'proline',
+                     'purine':'purine',
+                     'preq1':'preQ_1',
+                     'raia':'unknown',
+                     'sam':'SAM',
+                     'sam_alpha':'SAM',
+                     'serine':'serine',
+                     'synthetic':'synthetic',
+                     'sul1':'unknown',
+                     'tetracycline':'tetracycline',
+                     'tetrahydrofolate':'tetrahydrofolate',
+                     'thf':'tetrahydrofolate',
+                     'thfa':'tetrahydrofolate',
+                     'threonine':'threonine',
+                     'thiamine':'TPP',
+                     'tpp':'TPP',
+                     'trna':'tRNA',
+                     'tryptophan':'tryptophan',
+                     'tyrosine':'tyrosine',
+                     'valine':'valine',
+                     'ydao':'cyclic-di-AMP',
+                     'ydao-yuaa':'cyclic-di-AMP',
+                     'ykok':'Mg2+',
+                     'yybp-ykoy':'Mn2+',
+                     'zmp':'zmp-ztp',
+                     'zmp-ztp':'zmp-ztp',
+                     'ztp':'zmp-ztp',
+                     'fmn':'FMN',
+                     'fluoride':'fluoride',
+                     'alanine':'alanine',
+                     'aminoglycoside':'aminoglycoside',
+                     }
+
+
+
+amino_acids = ['arginine','histidine','lysine','aspartate','glutamine','serine','threonine','asparagine','cystine','glycine','proline',
+               'alanine','valine','isoleucine','leucine','methionine','phenylalanine','tyrosine','tryptophan']
+aa = False
+clean_ligand_data = {}
+
+for item in ligand_data.items():
+    key,val = item
+    if aa == True:
+        clean_val = ligand_alias_dict[val]
+        if clean_val in amino_acids:
+            clean_val = 'Amino Acid'
+        clean_ligand_data[key] = clean_val
+       
+    else:
+        clean_val = ligand_alias_dict[val]
+        clean_ligand_data[key] = clean_val      
+    
+    
+    
+    
+    
+    
+    
