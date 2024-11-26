@@ -97,7 +97,7 @@ from pulearn import ElkanotoPuClassifier, BaggingPuClassifier
 from sklearn.svm import SVC
 from joblib import dump, load
 from sklearn.inspection import permutation_importance
-
+import sklearn
 from rs_functions import * #functions to do feature extraction and other things
 
 import pulearn
@@ -1527,6 +1527,8 @@ gene_hits = UTR_db[UTR_db['ID'].isin(UTR_hit_list)]['GENE'].values.tolist()
 ###############################################################################
 # PLOT THE GO PROCESS RESULTS
 ###############################################################################
+with open('./GO/process.json', 'r') as f:
+    process = json.load(f)
 
 overall_labels = []
 go_ids = []
@@ -1656,7 +1658,7 @@ if save_plots:
 # PLOT THE GO FUNCTION RESULTS
 ###############################################################################
 
-with open('/content/drive/MyDrive/function.json', 'r') as f:
+with open('./GO/function.json', 'r') as f:
     function = json.load(f)
 overall_labels = []
 go_ids = []
@@ -1774,6 +1776,64 @@ if save_plots:
     plt.savefig('./plots/function_go_plot.svg')
 
 
+
+
+###############################################################################
+# Generate X_RAND for FPR analysis
+###############################################################################
+
+if reload_X_RAND:
+    X_RAND = np.load('./feature_npy_files/X_RAND.npy')
+else:
+    import random
+    random.seed(42)
+    def generate_key(): # function to make random RNA sequences
+        STR_KEY_GEN = 'augc'
+        return ''.join(random.choice(STR_KEY_GEN) for _ in range(600))
+    
+    rand_30 = [generate_key() for i in range(60000)] #generate 60000, 600nt random sequences
+    
+    # cut the random sequences into lengths that match the RS data set
+    h,xx = np.histogram(RS_lens, bins = np.max(RS_lens), density=True);
+    cdf = np.cumsum(h*np.diff(xx)) 
+    rand_lens = []
+    for i in range(60000):
+        rand_lens.append(np.where(np.random.rand() > cdf)[0][-1] + 25)
+    plt.hist(lens,bins = 100, density=True, alpha=.4)
+    plt.hist(RS_lens, bins=100, density=True, alpha=.4)
+    
+    # Convert the sequences to feature sets
+    RAND_RS_features = []
+    for i in range(len(rand_30)):
+      mfe,hr = get_mfe_nupack(rand_30[i][:rand_lens[i]])
+      RAND_RS_features.append([rand_30[i][:rand_lens[i]], str(mfe[0][0]), mfe[0][1]])
+    
+    X_RAND =np.zeros([len(rand_30), 66+8])
+    k = 0
+    for i in range(len(rand_30)):
+      seq = clean_seq(rand_30[i])
+      if len(seq) > 25:
+    
+        #seq = clean_seq(RS_df['SEQ'].iloc[i])
+        kmerf = kmer_freq(seq)
+        X_RAND[k,:64] = kmerf/np.sum(kmerf)
+        X_RAND[k,64] = RAND_RS_features[i][-1]/max_mfe
+        X_RAND[k,65] = get_gc(seq)
+        #ds_RS.append(RS_df['ID'].iloc[i])
+        #dot_RS.append(RS_df['NUPACK_DOT'].iloc[i])
+        X_RAND[k,-8:] = be.annoated_feature_vector(RAND_RS_features[i][-2])
+    
+        X_RAND[k,66] = X_RAND[k,66]/max_ubs
+        X_RAND[k,67] = X_RAND[k,67]/max_bs
+        X_RAND[k,68] = X_RAND[k,68]/max_ill
+        X_RAND[k,69] = X_RAND[k,69]/max_ilr
+        X_RAND[k,70] = X_RAND[k,70]/max_lp
+        X_RAND[k,71] = X_RAND[k,71]/max_lb
+        X_RAND[k,72] = X_RAND[k,72]/max_rb
+    
+        k+=1
+        
+        
 ###############################################################################
 # 20 fold k cross validation without structural holdouts
 ###############################################################################
@@ -1781,8 +1841,6 @@ if save_plots:
 #Here is an optional ensemble without structural cross validation, instead it uses
 # a 20 fold cross validation with all structures scrambled. Asked as a reviewer question
 # for the original submission
-
-import sklearn
 
 print('__________________________')
 print('Training an ensemble with no structural cross validation, using random 20 fold cross validation...')
@@ -1830,6 +1888,10 @@ structured_ens2_acc = []
 
 rands_2 = []
 exons_2 = []
+
+
+X_RAND = np.load('./feature_npy_files/X_RAND.npy')
+X_EXONS = np.load('./feature_npy_files/X_EXONS.npy')
 
 print('Running ensemble on all data to construct plot....')
 # for each cross fold get its performance on the data
@@ -1902,64 +1964,6 @@ ax.set_yticklabels(['', 'Train', 'Test', 'UTR', 'RAND', 'EXON'])
 ax.set_xlabel('Ensemble w/ random 20 fold cross validation training and testing results on all groups')
 
 #ax.set_xticklabels( witheld_ligands + ['-'.join(x) for x in pairs] + ['other'], rotation=90)
-
-
-
-
-###############################################################################
-# Generate X_RAND for FPR analysis
-###############################################################################
-
-if reload_X_RAND:
-    X_RAND = np.load('./feature_npy_files/X_RAND.npy')
-else:
-    import random
-    random.seed(42)
-    def generate_key(): # function to make random RNA sequences
-        STR_KEY_GEN = 'augc'
-        return ''.join(random.choice(STR_KEY_GEN) for _ in range(600))
-    
-    rand_30 = [generate_key() for i in range(60000)] #generate 60000, 600nt random sequences
-    
-    # cut the random sequences into lengths that match the RS data set
-    h,xx = np.histogram(RS_lens, bins = np.max(RS_lens), density=True);
-    cdf = np.cumsum(h*np.diff(xx)) 
-    rand_lens = []
-    for i in range(60000):
-        rand_lens.append(np.where(np.random.rand() > cdf)[0][-1] + 25)
-    plt.hist(lens,bins = 100, density=True, alpha=.4)
-    plt.hist(RS_lens, bins=100, density=True, alpha=.4)
-    
-    # Convert the sequences to feature sets
-    RAND_RS_features = []
-    for i in range(len(rand_30)):
-      mfe,hr = get_mfe_nupack(rand_30[i][:rand_lens[i]])
-      RAND_RS_features.append([rand_30[i][:rand_lens[i]], str(mfe[0][0]), mfe[0][1]])
-    
-    X_RAND =np.zeros([len(rand_30), 66+8])
-    k = 0
-    for i in range(len(rand_30)):
-      seq = clean_seq(rand_30[i])
-      if len(seq) > 25:
-    
-        #seq = clean_seq(RS_df['SEQ'].iloc[i])
-        kmerf = kmer_freq(seq)
-        X_RAND[k,:64] = kmerf/np.sum(kmerf)
-        X_RAND[k,64] = RAND_RS_features[i][-1]/max_mfe
-        X_RAND[k,65] = get_gc(seq)
-        #ds_RS.append(RS_df['ID'].iloc[i])
-        #dot_RS.append(RS_df['NUPACK_DOT'].iloc[i])
-        X_RAND[k,-8:] = be.annoated_feature_vector(RAND_RS_features[i][-2])
-    
-        X_RAND[k,66] = X_RAND[k,66]/max_ubs
-        X_RAND[k,67] = X_RAND[k,67]/max_bs
-        X_RAND[k,68] = X_RAND[k,68]/max_ill
-        X_RAND[k,69] = X_RAND[k,69]/max_ilr
-        X_RAND[k,70] = X_RAND[k,70]/max_lp
-        X_RAND[k,71] = X_RAND[k,71]/max_lb
-        X_RAND[k,72] = X_RAND[k,72]/max_rb
-    
-        k+=1
 
 
 
@@ -2178,6 +2182,9 @@ for (i, j), z in np.ndenumerate(mat):
 ax.set_xticks(np.arange(-.5,4,1), minor=True)
 ax.set_yticks(np.arange(-.5,5,1), minor=True)
 ax.grid(which='minor')
+ax.set_yticklabels(['','N total','Average percent detected as RS (.5 threshold)',
+                    'N detected as RS (.5 threshold)','Average percent detected as RS (.95 threshold)',
+                    'N detected as RS (.95 threshold)'],size=6)
 if save_plots:
     plt.savefig('./plots/False_positive_rate_table_w_rand_exon_ensemble.svg')
         
@@ -2305,7 +2312,7 @@ g = g + ['Beta vulgaris subsp. vulgaris TPP riboswitch (THI element)',
  'TPP-specific riboswitch from Arabidopsis thaliana (PDB 3D2G, chain B)']
 
 #CHECK THAT ALL DESCRIPTIONS ARE LABELED
-print('Percent of descriptions that are not labeled by keywords:')
+print('Percent of descriptions that are labeled by keywords:')
 print(len(set(g + c)) / len(set(a)))
 
 # make a boolean list to add to the data frame
@@ -2378,3 +2385,6 @@ plt.legend(['UTR','RS'])
 plt.xlabel(f'PC1 ({pca.explained_variance_ratio_[0]*100:.3f}%)')
 plt.ylabel(f'PC2 ({pca.explained_variance_ratio_[1]*100:.3f}%)')
 
+print('Average accuracy on eukaryotic RS sequences: %f'%np.mean(euk_acc))
+print('Accuracy across all classifiers:')
+print(euk_acc)

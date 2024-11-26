@@ -337,6 +337,6 @@ class kmer_DataProcessor():
 
 if __name__ == "__main__":
     utr5_db = kmer_DataProcessor()
-    utr5_db.create_database('./5UTRaspic.Hum.fasta')
+    utr5_db.create_database('./data_files/5UTRaspic.Hum.fasta')
     utr5_db.get_all_kmers(3)
-    utr5_db.export_to_csv('./test.csv') 
+    utr5_db.export_to_csv('./data_files/test.csv') 

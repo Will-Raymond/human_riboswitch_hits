@@ -25,7 +25,7 @@ import subprocess
 
 ## All riboswitches were pulled from RNAcentral on 8.19.22, any entry with the tag "riboswitch"
 ## data was filtered for duplicates leaving (n = 73119)
-## all ligands were extracted and added to a database (RSid_to_ligand.json)
+## all ligands were extracted from RNAcentral and added to a database (RSid_to_ligand.json)
 
 # this code parses them all to the same molecule names and then plots them.
 
