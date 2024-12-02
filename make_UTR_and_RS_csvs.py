@@ -338,14 +338,18 @@ class kmer_DataProcessor():
 
 ################## Make the UTR csv ###########################################
 
+utr5_file = './data_files/5UTRaspic.Hum.fasta'
+
 utr5_db = kmer_DataProcessor()
-utr5_db.create_database('./data_files/5UTRaspic.Hum.fasta')
+print('Creating 5primeUTR csv from the following file: %s'%utr_file )
+utr5_db.create_database(utr_file)
 utr5_db.get_all_kmers(3)
-utr5_db.export_to_csv('./data_files/test') 
+
 
 
 
 import json
+import tqdm
 UTR_db = pd.read_csv('./data_files/test.csv')
 utr_id_to_gene = json.load(open('./data_files/UTR_ID_to_gene.json','r'))
 UTR_db['GENE'] =''
@@ -359,21 +363,24 @@ cols =  [cols[-1]] + cols[1:3]  + cols[3:-1]
 UTR_db = UTR_db[cols]
 UTR_db = UTR_db[UTR_db['GENE'] != 'duplicate']
 UTR_db = UTR_db.reset_index(drop=True) #reset the indexes
-UTR_db.columns()
+UTR_db.columns
 
 # Match the CCDS
-ccds_file = "/content/drive/MyDrive/ccds_2018/CCDS_nucleotide.current.fna" # @param {type:"string"}
-ccds_text_file = "/content/drive/MyDrive/ccds_2018/CCDS.current.txt" # @param {type:"string"}
+ccds_file = "./data_files/ccds_2018/CCDS_nucleotide.current.fna" # @param {type:"string"}
+ccds_text_file = "./data_files/ccds_2018/CCDS.current.txt" # @param {type:"string"}
 
 
 ccds_attributes = pd.read_csv(ccds_text_file, delimiter='\t')
 
+UTR_db['CCDS_ID'] = ''
+UTR_db['CCDS'] = ''
+
 r = []
-for record in tqdm(SeqIO.parse(ccds_file,'fasta')):
+for record in tqdm.tqdm(SeqIO.parse(ccds_file,'fasta')):
     r.append(record)
 
 ccds_list = ccds_attributes['ccds_id'].values
-for record in tqdm(r):
+for record in tqdm.tqdm(r):
     ccds_id = record.id.split('|')[0]
     if ccds_id in ccds_list:
         if ccds_attributes[ccds_attributes['ccds_id'] == ccds_id]['ccds_status'].values[0] != 'Withdrawn':
@@ -394,6 +401,64 @@ cols =  cols[0:3]  + [cols[-3]] + [cols[-2]]+ [cols[-1]] + [cols[-5]] + [cols[-4
 UTR_db = UTR_db[cols]
 UTR_db.head()
 
+
+
+
+# DETECT IF NUPACK IS INSTALLED
+try: 
+    import nupack
+    nupack_installed = True
+except:
+    nupack_installed = False
+
+if nupack_installed:
+    def get_mfe_nupack(seq, n=100):
+    
+      model1 = Model(material='rna', celsius=37)
+      example_hit = seq
+      example_hit = Strand(example_hit, name='example_hit')
+      t1 = Tube(strands={example_hit: 1e-8}, complexes=SetSpec(max_size=1), name='t1')
+      hit_results = tube_analysis(tubes=[t1], model=model1,
+          compute=['pairs', 'mfe', 'sample', 'ensemble_size'],
+          options={'num_sample': n}) # max_size=1 default
+      mfe = hit_results[list(hit_results.complexes.keys())[0]].mfe
+      return mfe, hit_results
+
+      
+  
+else:
+    print('proceeding with dummy dot structures....')
+    
+    def get_mfe_nupack(seq):
+        return [['....(...)....', -10]], 'test'
+
+
+energies = []
+dots = []
+mfes = []
+
+k = 0
+
+max_window = 300
+for i in tqdm.tqdm(range(0,len(UTR_db))):
+  utr_seq = UTR_db['SEQ'][i]
+  if len(UTR_db['CCDS'][i]) != 0:
+    ccds = UTR_db['CCDS'][i]
+    mature_mrna = utr_seq + ccds
+    ### UTR + 25 NT near start
+    if len(utr_seq) > max_window-25:
+      seq = utr_seq[-max_window+25:] + ccds[:25]
+    else:
+      seq = utr_seq + ccds[:25]
+    mfe,hr =  get_mfe_nupack(seq)
+    mfes.append(mfe)
+    UTR_db.iloc[i,3] = seq
+    UTR_db.iloc[i,4] = str(mfe[0][0])
+    UTR_db.iloc[i,5]  = mfe[0][1]
+  k+=1
+
+
+UTR_db.to_csv('./data_files/test.csv',index=False) 
 
 1/0
 ################# Make the RS csv #############################################
