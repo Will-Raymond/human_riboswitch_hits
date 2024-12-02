@@ -5,7 +5,22 @@ Created on Thu Nov 16 11:05:50 2023
 @author: willi
 """
 
+##############################################################################
+# This file makes the two CSV databases used for machine learning
+# It takes the original RNA central json download to make the Riboswitch dataset
+# and it takes the ccds (2018) and the 5'UTR human fasta file taken from UTRdb 1.0
+##############################################################################
 
+utr5_file = './data_files/5UTRaspic.Hum.fasta'
+RS_file = './data_files/riboswitch_RNAcentral_8.19.21.json.json'
+RS_ligand_file = './data_files/RSid_to_ligand.json'
+
+UTR_csv_name = './data_files/test_UTR.csv'
+RS_csv_name = './data_files/test_RS.csv'
+
+##############################################################################
+# Imports
+##############################################################################
 from Bio import SeqIO  #BIOPYTHON
 from Bio import pairwise2
 
@@ -20,8 +35,8 @@ import matplotlib.pyplot as plt
 import itertools
 import warnings
 import time
-
-
+import json
+import tqdm
 import joblib 
 import pickle
 
@@ -338,25 +353,24 @@ class kmer_DataProcessor():
 
 ################## Make the UTR csv ###########################################
 
-utr5_file = './data_files/5UTRaspic.Hum.fasta'
+
 
 utr5_db = kmer_DataProcessor()
-print('Creating 5primeUTR csv from the following file: %s'%utr_file )
-utr5_db.create_database(utr_file)
+print('Creating 5primeUTR csv from the following file: %s'%utr5_file )
+utr5_db.create_database(utr5_file)
 utr5_db.get_all_kmers(3)
+utr5_db.export_to_csv(UTR_csv_name[:-4])
 
 
-
-
-import json
-import tqdm
-UTR_db = pd.read_csv('./data_files/test.csv')
+print('connecting the genes to the UTRdb IDs....')
+UTR_db = pd.read_csv(UTR_csv_name)
 utr_id_to_gene = json.load(open('./data_files/UTR_ID_to_gene.json','r'))
 UTR_db['GENE'] =''
 g_list = []
 for i in range(len(UTR_db)):
   g_list.append(utr_id_to_gene[UTR_db['ID'].iloc[i]])
 UTR_db['GENE'] = g_list
+print('removing duplicate entries....')
 #parse out duplicates
 cols = UTR_db.columns.tolist()
 cols =  [cols[-1]] + cols[1:3]  + cols[3:-1]
@@ -365,6 +379,8 @@ UTR_db = UTR_db[UTR_db['GENE'] != 'duplicate']
 UTR_db = UTR_db.reset_index(drop=True) #reset the indexes
 UTR_db.columns
 
+
+print('matching the ccds to the utrs....')
 # Match the CCDS
 ccds_file = "./data_files/ccds_2018/CCDS_nucleotide.current.fna" # @param {type:"string"}
 ccds_text_file = "./data_files/ccds_2018/CCDS.current.txt" # @param {type:"string"}
@@ -393,6 +409,7 @@ for record in tqdm.tqdm(r):
                     UTR_db.iloc[ind,-2] = ccds_id
 
 
+
 UTR_db['STARTPLUS25'] = ''
 UTR_db['NUPACK_25'] = ''
 UTR_db['NUPACK_25_MFE'] = ''
@@ -403,14 +420,15 @@ UTR_db.head()
 
 
 
-
+print('generating dot structures with nupack THIS WILL TAKE A WHILE....')
 # DETECT IF NUPACK IS INSTALLED
 try: 
     import nupack
     nupack_installed = True
 except:
     nupack_installed = False
-
+    print('NUPACK is not installed on your system!! Please go to https://www.nupack.org/ and obtain a liscence to install it in your environment.')
+    print('Generating the csv with dummy sequences.....')
 if nupack_installed:
     def get_mfe_nupack(seq, n=100):
     
@@ -458,9 +476,10 @@ for i in tqdm.tqdm(range(0,len(UTR_db))):
   k+=1
 
 
-UTR_db.to_csv('./data_files/test.csv',index=False) 
+UTR_db.to_csv(UTR_csv_name,index=False) 
+print('final database size UTR: ')
+print(UTR_db.shape)
 
-1/0
 ################# Make the RS csv #############################################
 
 from Bio import SeqIO  #BIOPYTHON
@@ -480,7 +499,7 @@ import matplotlib.cm as cm
 
 import subprocess 
 
-
+print('Generating RS csv....')
 
 ## All riboswitches were pulled from RNAcentral on 8.19.22, any entry with the tag "riboswitch"
 ## data was filtered for duplicates leaving (n = 73119)
@@ -491,9 +510,9 @@ import subprocess
 # riboswitches considered speculative and thus labeled unknown: nhA-I motif, duf1646, raiA, synthetic, sul1,
 #
 
-RS_data = json.load(open('./riboswitch_RNAcentral_8.19.21.json.json'))
+RS_data = json.load(open(RS_file))
 
-ligand_data = json.load(open('./RSid_to_ligand.json'))
+ligand_data = json.load(open(RS_ligand_file))
 
 unique_RS_ids = list(ligand_data.keys())
 
@@ -599,9 +618,219 @@ for item in ligand_data.items():
         clean_val = ligand_alias_dict[val]
         clean_ligand_data[key] = clean_val      
     
+ids = []
+seqs = []
+descs = []
+ligands = []
+columns = ['ID','DESC','LIGAND','SEQ']
+for item in RS_data:
+    tmpid = item['id']
+    if tmpid not in ligands:
+        seq = item['sequence']
+        if seq not in seqs:
+            descs.append(item['description'])
+            ids.append(item['id'])
+            seqs.append(item['sequence'])
+            ligands.append(clean_ligand_data[tmpid])
+    
+
+
+RS_df = pd.DataFrame(list(zip(ids,descs,ligands,seqs)), columns=columns)    
     
     
+# DETECT IF NUPACK IS INSTALLED
+try: 
+    import nupack
+    nupack_installed = True
+except:
+    nupack_installed = False
+    print('NUPACK is not installed on your system!! Please go to https://www.nupack.org/ and obtain a liscence to install it in your environment.')
+    print('Generating the csv with dummy sequences.....')
     
+if nupack_installed:
+    def get_mfe_nupack(seq, n=100):
     
-    
-    
+      model1 = Model(material='rna', celsius=37)
+      example_hit = seq
+      example_hit = Strand(example_hit, name='example_hit')
+      t1 = Tube(strands={example_hit: 1e-8}, complexes=SetSpec(max_size=1), name='t1')
+      hit_results = tube_analysis(tubes=[t1], model=model1,
+          compute=['pairs', 'mfe', 'sample', 'ensemble_size'],
+          options={'num_sample': n}) # max_size=1 default
+      mfe = hit_results[list(hit_results.complexes.keys())[0]].mfe
+      return mfe, hit_results
+
+      
+  
+else:
+    print('proceeding with dummy dot structures....')
+    def get_mfe_nupack(seq):
+        return [['....(...)....', -10]], 'test'
+
+
+energies = []
+dots = []
+mfes = []
+
+k = 0
+ns_dict = {'m':'a','w':'a','r':'g','y':'t','k':'g','s':'g','w':'a','h':'a','n':'a','x':'a'}
+
+def clean_seq(seq):
+    '''
+    clean the sequences to lowercase only a, u, g, c
+    '''
+    seq = seq.lower()
+    for key in ns_dict.keys():
+        seq = seq.replace(key,ns_dict[key])
+
+    seq = seq.replace('t','u')
+    return seq
+
+def kmer_list(k):
+    combos =[x for x in it.product(['a','c','u','g'], repeat=k)]
+    kmer = [''.join(y) for y in combos]
+    return kmer
+
+def kmer_freq(seq,k=3):
+    '''
+    calculate the kmer frequences of k size for seq
+    '''
+    kmer_ind = kmer_list(k)
+    kmer_freq_vec = np.zeros((4**k)).astype(int)
+    for i in range(len(seq)-k):
+        kmer_freq_vec[kmer_ind.index(seq[i:i+k])] += 1
+
+    return kmer_freq_vec
+
+RS_df['NUPACK_DOT'] = ''
+RS_df['NUPACK_MFE'] = ''
+
+for k in kmer_list(3):
+    RS_df[k] = '' 
+
+for i in tqdm.tqdm(range(0,len(RS_df))):
+  seq = clean_seq(RS_df['SEQ'][i])
+  mfe,hr =  get_mfe_nupack(seq)
+  mer3 = kmer_freq(seq.lower())
+
+  RS_df.iloc[i,4] = str(mfe[0][0])
+  RS_df.iloc[i,5]  = mfe[0][1]
+  RS_df.iloc[i,6:6+64] = mer3
+
+print('inserting eukaryotic flag...')
+RS_df.insert(2,'EUKARYOTIC',0)
+
+# Manual sorting of key words that split up the RS csv
+# below are keywords to label as eukaryotic
+eukaryote_list = ['TPP-specific','Phaeoacremonium','TPP-specific riboswitch from Arabidopsis','Paracoccidioides','Ophiocordyceps','Hyphopichia','Neonectria','Fibulorhizoctonia','Beta vulgaris', 'Caenorhabditis','Cinara','Seminavis', 'Thalictrum','Drosophila', 'Olea', 'Salix', 'Hymenolepis','Bathymodiolus','Steinernema','Zymoseptoria', 'Serpula', 'Rhizophagus', 'Dichanthelium', 'Gaeumannomyces','Yarrowia', 'Amazona','Ipomoea','Helianthus','Taphrina','Emergomyces','Picea', 'Fibroporia','Picea','Malassezia','Arthrobotrys', 'Poa','Lupinus','Tuber', 'Magnaporthe','Thielavia','Arthroderma',  'Lawsonia','Geomyces', 'Aedes','Debaryomyces','Hyaloperonospora', 'Theobroma','Acyrthosiphon', 'Komagataella', 'Solanum','Populus','Xylona','Podospora', 'Setaria',  'Leucosporidiella', 'Ricinus','Rhodnius','Brugia', 'Scheffersomyces', 'Microbotryum', 'Spathaspora', 'Anopheles', 'Chlamydomonas','Volvox','Zea', 'Coprinopsis', 'Wickerhamomyces', 'Myceliophthora', 'Pythium','Exidia', 'Byssochlamys','Madurella','Micromonas', 'Chaetomium','Meyerozyma','Botrytis', 'Setosphaeria', 'Daedalea','Prunus','Calocera', 'Fomitiporia', 'Lichtheimia','Brachypodium', 'Physcomitrella','Scedosporium','Pachysolen', 'Dactylellina','Grosmannia','Cajanus','Trichophyton', 'Perkinsus', 'Phaeodactylum','Piloderma', 'Jatropha',  'Pleurotus', 'Fragilariopsis', 'Fragilariopsis', 'Morus','Cyphellophora', 'Protochlamydia','Galerina', 'Kuraishia','Dothistroma','Capsicum', 'Heterobasidion', 'Lipomyces', 'Pyrenophora','Selaginella', 'Selaginella','Sphaeroforma', 'Nitzschia', 'Lucilia','Plasmopara','Babjeviella', 'Cyberlindnera', 'Reticulomyxa', 'Drechmeria', 'Pochonia', 'Coccomyxa','Escovopsis', 'Baudoinia','Escovopsis','Serendipita','Valsa','Parasitella','Cylindrobasidium', 'Ascoidea', 'Mortierella','Wallemia', 'Moniliophthora', 'Agaricus','Neurospora', 'Nasonia','Ciona','Ajellomyces','Phaeosphaeria','Ogataea','Rhinocladiella','Polyangium','Pyronema','Laccaria','Capsella','Gymnopus','Hypocrea','Hyphodontia','Rosa','Guillardia','Diplodia','Didymella','Paxillus','Clonorchis','Kwoniella','Claviceps','Hordeum','Stachybotrys','Neofusicoccum', 'Gossypium','Rasamsonia','Sphaerulina','Dichomitus','Punica','Eutrema','Suillus', 'Rosellinia', 'Diaporthe', 'Torrubiella', 'Nadsonia','fungal', 'Ochroconis','Toxocara', 'Coniosporium','Tortispora', 'Phaseolus','Verticillium', 'Klebsormidium', 'Glarea', 'Pneumocystis', 'Aphanomyces','Phytophthora','Cucumis','Parastrongyloides','Botryosphaeria','Rhizopogon','Chroococcidiopsis','Vitis','Emmonsia','Oidiodendron', 'Metschnikowia', 'Microdochium','Mimulus','Kribbella','Saitoella','Acremonium','Brassica','Eutypa', 'Trichoderma', 'Tolypocladium','Pisolithus','Protomyces','Monoraphidium','Citrus','Lobosporangium','Leucoagaricus','Pestalotiopsis','Schwartzia','Ananas', 'Fonsecaea','Paraphaeosphaeria','Stagonospora', 'Leptonema','Phialophora','Talaromyces','Citreicella','Penicilliopsis','Pyrenochaeta','Purpureocillium','Cladophialophora','Basidiobolus','Uncinocarpus','Neolecta','Thalassiosira','Coccidioides','Rhynchosporium','Fistulifera','Daucus','arabidopsis','aspergillus', 'Zostera','Aschersonia','Eucalyptus','Beauveria','Stemphylium',
+                  'Sclerotinia','Penicillium','Marchantia','Pseudocercospora','Amborella','Mucor','Triticum',
+                  'Corchorus','Colletotrichum','Cephalotus','Spinacia','Phialocephala','Absidia','Coniochaeta',
+                  'Gibberella','Oryza','Capronia','Candida','Lasallia','Rachicladosporium','Nectria','Phycomyces',
+                  'Rhizopus','Neosartorya','Fusarium','Exophiala','Metarhizium','Leersia','Brettanomyces','Marssonina',
+                  'Mycosphaerella','Rhizoclosmatium','Lentinula','Glossina','Cicer','Thiomicrospira','Rhizoctonia','Blastomonas', 'Arabis',
+                  'Macleaya','Kordiimonas','Gonium','Aureobasidium','Cordyceps','Ustilaginoidea','Saprolegnia','Choanephora','Hirsutella',
+                  'Trachymyrmex','Musa','Pichia','Isaria','Alternaria','Sporothrix','Alternaria','Acidomyces','Medicago',
+                  'Phaeomoniella','Hortaea','Hammondia','Macrophomina','Vigna','Clohesyomyces','Ophiostoma','Symbiodinium','Bipolaris']
+
+elist = [y.lower() for y in eukaryote_list]
+
+#things to remove if they are prokaryotic
+remove_list = ['[Polyangium]','[Polyangium] brachysporum','candidate division KSB1','Syntrophotalea','Longilinea','Histophilus','Weeksella','Marinoscillum','Osedax symbiont','Plautia stali symbiont','Stappia','proteobacterium','Methanosalsum','artificial','Sediminimonas','spirochete','Oceanivirga', 'Nautella', 'Salibaculum', 'Kandeliimicrobium', 'Cribrihabitans', 'Pontibaca', 'Endomicrobium', 'Flavimaricola','Litorimicrobium','Lachnoanaerobaculum','Desulfatiglans','Tranquillimonas','Hyella','Kyrpidia','Citreimonas', 'Gracilimonas', 'Kordia', 'Kordia', 'Brevefilum', 'Brevefilum','Georgfuchsia', 'Wolbachia', 'Vannielia','Pleomorphomonas','Tabrizicola', 'Planktotalea', 'Albidovulum', 'Jhaorihella', 'Salinihabitans', 'Micropruina', 'Ammonifex', 'Tabrizicola', 'Meinhardsimonia', 'Pelagimonas', 'Bieblia', 'Roseicitreum', 'Poseidonocella', 'Limimaricola', 'Pontivivens','Holophaga', 'Ascidiaceihabitans', 'Holophaga', 'Romboutsia', 'Petrocella', 'Mameliella', 'Nioella', 'Oceaniglobus','Brevirhabdus', 'Romboutsia',  'Roseibaca', 'Yoonia', 'Thalassobium', 'Singulisphaera', 'Wolinella', 'Plasmodium', 'Mariprofundus', 'Thiorhodospira', 'Elusimicrobium','Kouleothrix', 'Sulfuritalea', 'Thermogutta', 'Hydrocarboniphaga', 'Singulisphaera','Alcanivorax', 'Alcanivorax', 'Desulfobacca', 'Sorangium', 'Paludisphaera', 'Sorangium', 'Alcanivorax', 'Planctomyces', 'Advenella', 'Cycloclasticus','Allochromatium', 'Thermobaculum', 'Pelotomaculum', 'Rhodomicrobium', 'Intestinimonas','Ectothiorhodospira','Magnetospira', 'Pedosphaera', 'Microterricola', 'Schleiferia', 'Phaeospirillum',  'Halomicronema', 'Sinomicrobium','Soonwooa','Methylomagnum','Verrucomicrobium', 'Yonghaparkia', 'Crinalium','Kozakia','Streptacidiphilus','Alkanindiges', 'Simkania', 'Streptacidiphilus', 'Methyloprofundus','Tangfeifania','Syntrophaceticus', 'Sunxiuqinia','Trichodesmium', 'Thermovirga', 'Methylorubrum', 'Methylorubrum', 'Microcystis', 'Clostridioides','Sneathiella', 'Gallionella','Hirschia', 'Stackebrandtia', 'Stackebrandtia','Dechlorosoma', 'Leptothrix', 'Nodularia', 'Sulfurihydrogenibium', 'Sideroxydans', 'Planktothrix', 'Scardovia', 'Aminomonas', 'Plesiocystis', 'Aromatoleum','Petrimonas', 'Microscilla', 'Scardovia', 'Mesotoga',  'Citromicrobium', 'Maricaulis', 'Dickeya', 'Sagittula', 'Microscilla''Petrimonas', 'Clostridiales', 'Pusillimonas','Thiocapsa','Alicycliphilus','Herpetosiphon','Synechocystis','Boseongicola', 'Chloroherpeton', 'Raphidiopsis','Polymorphum', 'Filifactor', 'Lautropia', 'Reinekea', 'Roseibium', 'Thalassiobium','Shigella', 'Ketogulonicigenium','Couchioplanes', 'Orenia','Zhouia','Thiohalocapsa','Fulvimarina', 'Zobellia', 'Kiritimatiella','Halothermothrix', 'Bulleidia', 'Confluentimicrobium', 'Saccharicrinis','Ethanoligenens', 'Bilophila', 'Catenulispora', 'Robiginitalea', 'Verrucosispora','Crocosphaera', 'Methylocella','Oscillochloris','Luteitalea', 'Dictyoglomus', 'Roseisalinus','Marvinbryantia', 'Gillisia', 'Pelistega', 'Hahella', 'Saccharophagus', 'Coraliomargarita', 'Actinosynnema','Abiotrophia', 'Eikenella', 'Morganella', 'Tolumonas','Sebaldella', 'Parvimonas', 'Truepera', 'Methylacidiphilum','Lacunisphaera', 'Desulfobacula', 'Ferrimicrobium', 'Acetohalobium', 'Halorhodospira','Serpens','Salinisphaera', 'Tannerella', 'Dokdonella', 'Jonquetella', 'Oligotropha','Thermobifida', 'Kingella','Thioalkalimicrobium', 'Haliangium', 'Hydrogenivirga', 'Stigmatella', 'Runella', 'Microcoleus','Pseudohaliea', 'Desulfocapsa', 'Agarivorans','Elstera','Rhodospirillum', 'Flexistipes', 'Palleronia','Desertifilum', 'Arthrospira', 'Granulicatella','Thermomonospora', 'Marichromatium', 'Thermus','Bizionia', 'Anaerofustis', 'Limnoraphis', 'Anaerophaga', 'Beijerinckia','Tepidicaulis','Rahnella', 'Aequorivita','Fimbriimonas', 'Thermodesulfobium','Crenothrix', 'Thermosinus','Brucella','Desulfarculus', 'Roseiflexus','Fischerella', 'Intrasporangium', 'Rickettsiella', 'Mesoplasma', 'Photorhabdus', 'Segniliparus', 'Cyanothece','Syntrophus', 'Desulfobulbus', 'Syntrophothermus','Oligella', 'Inquilinus', 'Thermomicrobium','Methylotenera', 'Methylomicrobium','Edwardsiella', 'Marinithermus','Starkeya', 'Maliponia', 'Marinithermus''Edwardsiella','Enhygromyxa','Acidithrix','Rhodoplanes', 'Labilithrix','Frischella', 'Isoptericola','Tamlana','Slackia', 'Bermanella', 'Jonesia', 'Pelodictyon', 'Methanocorpusculum', 'Lacinutrix', 'Thermincola', 'Cylindrospermum', 'Mumia', 'Tamlana''Thermosipho', 'Thermotoga', 'Desulfurispirillum','Shuttleworthia', 'Thermobispora','Parvularcula', 'Thermosipho','Catonella', 'Hylemonella', 'Acaryochloris', 'Picrophilus', 'Chelativorans', 'Mahella','Delftia', 'Parvibaculum',  'Prochlorothrix', 'Dechloromonas', 'Propionimicrobium', 'Ventosimonas','Desulfotignum', 'Alcaligenes', 'Thiocystis', 'Hyalangium', 'Sarcina','Halothece', 'Atopobium', 'Halothece' 'Marinitoga','Mucinivorans','synthetic','Gemella', 'Achromatium', 'Marinitoga','Elizabethkingia','Desulfatitalea','Salinispira','Nitrospina', 'Varibaculum','Hassallia','Sedimenticola', 'Thermoanaerobaculum', 'Plesiomonas','Gardnerella', 'Dehalococcoides','Haloplasma', 'Johnsonella', 'Desulfohalobium', 'Veillonella', 'Succinatimonas','Cellulophaga', 'Desmospora', 'Beutenbergia','Idiomarina','Cytophaga','Acetonema', 'Kosmotoga', 'Thermoplasma','Oceanicella', 'Desulfonatronospira', 'Desulfatibacillum','bacillum','Trueperella','Rothia', 'Zymomonas', 'Rothia', 'Salinispora','Propionispora', 'Thalassolituus', 'Pelagibaca', 'Anaeroglobus','Collimonas','Chamaesiphon', 'Robinsoniella','Chania','Eggerthia','Phycisphaera', 'Dethiosulfatarculus', 'Cyanobium', 'Scytonema','Agreia', 'Lacimicrobium', 'Bellilinea','Psychromonas', 'Barnesiella', 'Pelagicola', 'Thiolapillus', 'Oleiphilus', 'Methyloversatilis', 'Oleispira','Thalassomonas','Tistrella', 'Leminorella', 'Tateyamaria', 'Turicella', 'Rivularia','Chthonomonas','Psychroflexus','Archangium','Rhodonellum', 'Asticcacaulis', 'Stanieria', 'Lentimicrobium', 'Kaistia', 'Leisingera', 'Spiroplasma', 'Nitritalea', 'Marmoricola', 'Christensenella', 'Defluviimonas', 'Desulfuromonas','Desulfomicrobium','Caldithrix','Basilea', 'Lasius','Balneola', 'Phormidesmis', 'Fulvivirga', 'Halioglobus', 'Fervidicella','Ideonella', 'Yangia', 'Buttiauxella','Beggiatoa','Adlercreutzia', 'Moellerella', 'Proteus', 'Gallaecimonas','Mannheimia', 'Formosa','Marinactinospora', 'Aestuariivita', 'Marinactinospora','Salmonella', 'Anaerolinea', 'Pragia', 'Alloactinosynnema', 'Alkaliphilus', 'Atopostipes', 'Collinsella', 'Methylibium', 'Oceanicaulis', 'Bibersteinia', 'Methylophilus', 'Bhargavaea','Saprospira', 'Ottowia', 'Kandleria','Gynuella', 'Oceanibulbus','Actinopolyspora', 'Flammeovirga','Brochothrix', 'Pseudogulbenkiania', 'Acetomicrobium','Desulfamplus', 'Phlebia', 'Finegoldia', 'Caldicellulosiruptor', 'Desulfocarbo', 'Fimbriiglobus', 'Candidimonas', 'Malonomonas', 'Azonexus', 'Prosthecomicrobium', 'Megamonas', 'Mangrovimonas','Wohlfahrtiimonas', 'Geofilum','Austwickia', 'Caldisericum', 'Joostella','Alistipes', 'Pleurocapsa','Dysgonomonas', 'Magnetospirillum','Desulfonispora', 'Desulfonispora', 'archaeon', 'Desulfacinum', 'Bartonella', 'Chondromyces', 'Carboxydocella', 'Fibrella', 'Dubosiella', 'Xuhuaishuia','Neptunomonas','Thermanaerothrix', 'Lechevalieria', 'Brachyspira', 'Thiomonas', 'Hafnia', 'Enterorhabdus','Acholeplasma', 'Tatlockia','Escherichia','Sutterella','Sharpea', 'Izhakiella', 'Sulfurovum', 'Saccharopolyspora', 'Dyella','Tenacibaculum','Flagellimonas', 'Jeongeupia','Oceanospirillum','Yersinia','Oceanimonas','Halotalea', 'Catenovulum', 'Kutzneria', 'Snodgrassella', 'Thermoplasmatales', 'Subdoligranulum','Kineosphaera','Thiohalorhabdus', 'Ralstonia', 'Fervidicola', 'Actinobaculum', 'Oceanibaculum','Nonlabens', 'Acidiphilium', 'Eggerthella', 'Salipiger', 'Thermovenabulum', 'Salipiger', 'Sandarakinotalea','Chloroflexus', 'Cupriavidus', 'Xylanimonas', 'Calothrix', 'Megasphaera', 'Thioploca','Leclercia', 'Vitreoscilla', 'Reichenbachiella', 'Sulfurivirga', 'Thiobacimonas','Aquitalea', 'Roseivivax', 'Thiothrix', 'Arenimonas', 'Caldanaerobius', 'Marininema', 'Hapalosiphon','Sedimentitalea', 'metagenome', 'Tsukamurella', 'Limnothrix', 'Grimontia', 'Faecalibaculum', 'Desulfoplanes','Aeromonas', 'Aliifodinibius', 'Nelumbo', 'Prosthecochloris', 'Mobiluncus', 'Sulfurospirillum', 'Thermanaeromonas', 'Leptospira','Globicatella','Tropicimonas','Flaviramulus','Roseateles','Actinoalloteichus','Rubritalea','Actinomadura','Leeuwenhoekiella','Selenomonas','molybdenum','Dietzia','Syntrophomonas','Silvanigrella','Pseudorhodoplanes','Roseomonas','Seinonella','Klebsiella','Flavonifractor','Xylophilus','Methylomonas','Thermacetogenium','Insolitospirillum','Proteiniborus','Leadbetterella','Gramella','Croceivirga','Xylella','Cruoricaptor','Natranaerobius','Nakamurella','Tissierella','Mariniphaga','Nonomuraea','Friedmanniella','Fluviicola','Ornithinimicrobium','Chitinimonas','Maribius','Cedecea','Cobetia','Chlorobium', 'Sodalis','Garciella','Sandaracinus','Zhihengliuella','Wenxinia','coccus', 'bacillus','bascillus', 'unknown', 'bacterium', 'clostridium', 'sinorhizobium','streptosporangium', 'bacter', 'subtilis', 'coli', 'streptomyces', 'pseudolabrys', 'desulfovibrio',
+               'unclassified', 'porphyromonas', 'azoarcus', 'Caloramator', 'Pseudonocardia', 'Pseudacidovorax','Oceanicola','Tolypothrix', 'Gloeocapsa', 'Leptotrichia','Thermoactinomyces', 'Paraglaciecola','Shinella','Saccharomonospora','Cecembia','Kurthia','Rhizobium','Burkholderia','Leptolinea','Novosphingobium','Limnochorda', 'Methylosinus','Kibdelosporangium','Actinotalea','Francisella','Microlunatus','Gemmatimonas','Woeseia','Nocardioides','Actinoplanes','Halomonas','Blautia','Bosea','Acidisphaera','Desulfosporosinus','Sphingobium','Oerskovia','Pseudomonas','Erwinia','Thermobrachium',
+               'Kiloniella','Kiloniella','Thioclava','Nesterenkonia','Duganella','Hydrogenovibrio','Bordetella','Kerstersia','Aureimonas','human gut','Mitsuokella','Nocardiopsis','Bernardetia','Thalassospira','Donghicola','Williamsia','Cellulosimicrobium','Dorea','Noviherbaspirillum','Nitrosomonas',
+               'Lyngbya','Gordonia','Georgenia','Listeria','Pandoraea','Loktanella','Skermanella','Vibrio','Sphingomonas',
+               'Alishewanella','Kluyvera','Solemya', 'Caenispirillum','bioreactor','Brevundimonas','Mycoplasma','Luteimonas',
+               'Pseudorhodoferax','Nitratireductor','Acidovorax','Spirochaeta','Shewanella','Ornatilinea','Marinomonas',
+               'Legionella','Kitasatospora','Winogradskyella','Caballeronia','Pelosinus','Frondihabitans','Branchiibius',
+               'Pseudogymnoascus','Pseudoxanthomonas','Devosia', 'Anaerosporomusa','Mitsuaria','Caryophanon','Holdemania',
+               'Variovorax','Actinomyces','Thermotalea','Niastella','Methanomicrobiales','Shimia','Nocardia','Sinomonas',
+               'Prevotella','Sphaerotilus','Mariniradius','Agromyces','Sinomonas','Endozoicomonas',
+               'Frateuria','Pseudoalteromonas','Lawsonella','Geomicrobium','fluoride','cobalamin','purine',
+               'SAM riboswitch','Castellaniella','endosymbiont','Castellaniella','Moraxella',
+               'Halanaerobium','ZMP','Hydrogenophaga','Asaia','Myroides','Neisseria','Lentisphaera',
+               'Thauera','Acidomonas','Nitrincola','glycine','FMN','PreQ1','Labrenzia','Limnohabitans',
+               'lysine','Micromonospora','Oblitimonas','Methylocystis','di-GMP-II','Mastigocoleus',
+               'Planomonospora','Thalassobius','Proteiniphilum','Rhodovulum','Lutispora','Alteromonas','Chitinophaga',
+               'Acidimicrobium','Ochrobactrum','Treponema','Blastochloris','NiCo','Sporosarcina','Filimonas','Marivita',
+               'Actinophytocola','Lactonifactor','Spirosoma','Desulfotomaculum','Gilliamella','agariphila','SAM-I','SAM/SAH','Afipia',
+               'Algoriphagus','Salimicrobium','Planomicrobium','Brenneria','Hathewaya','Raoultella','Epulopiscium',
+               'Anaerosphaera','Xanthomonas','Marinospirillum','Nitrospira','Saccharothrix','Mesonia','Comamonas',
+               'Massilia','Xenorhabdus','glutamine','Lampropedia','Streptoalloteichus','Actinokineospora',
+               'Nitrosospira','Planktothricoides','Oscillatoria','Anaerocolumna','Peptoniphilus','Vogesella',
+               'Candidatus', 'Geodermatophilus','Roseovarius','Akkermansia','Seonamhaeicola','Pseudozobellia','Cnuella',
+               'Luteipulveratus','Muricauda','Pantoea','Jatrophihabitans','Albidiferax','Cellulomonas','Olsenella',
+               'Aurantimonas','Herbinix','Roseofilum','Lonsdalea','Kushneria','Frankia','Tatumella','Solibius','Orrella',
+               'Levilinea','Marinovum','Gemmata','Smithella','Tepidimonas','Hyphomicrobium','Stenotrophomonas','Hoeflea',
+               'Mastigocladus','Rubellimicrobium','Emticicia','Herbaspirillum','Weissella','Sulfuricella','Synergistes',
+               'Ensifer','Knoellia','Niabella','Microbulbifer','Leifsonia','Ferroplasma','Microvirga','Siansivirga',
+               'Ruegeria','Sphingorhabdus','Facklamia','Belliella','Sporomusa','Dehalogenimonas','Nitrolancea','Criblamydia',
+               'Prauserella','Tetrasphaera','Thalassotalea','Yokenella','Azospirillum','Acidocella','Anaerotruncus',
+               'Aeromicrobium','Pelomonas','Wenyingzhuangia','Jannaschia','Rheinheimera','Piscirickettsia',
+               'Piscirickettsia','Desulfotalea','Zunongwangia','Providencia','Opitutus','Methylophaga','Pasteurella',
+               'Rhodoferax','Actinopolymorpha','Microbispora','Serratia','Mycetocola','Geminocystis','Trabulsiella',
+               'Aquaspirillum','Anaerobium','Martelella','Aquimixticola','Colwellia','Ferrithrix','Roseburia',
+               'Andreprevotia','Desulfopila','Anaerostipes','Chishuiella','Sphingopyxis','Lentzea','Euryarchaeota','Gloeomargarita',
+               'Hespellia','Jiangella','Marivirga','Ferrimonas','Haemophilus','Amycolatopsis','Asanoa','Phormidium',
+               'Fibrisoma','Aquiflexum','Cryptosporangium','Caminicella','Jeotgalibaca','Tanticharoenia','Aquamicrobium',
+               'Dialister','Owenweeksia','Haematospirillum','Kocuria','Glaciecola','Coxiella','Oleiagrimonas','Ahrensia',
+               'Streptomonospora','Cohnella','Hyphomonas','Rubrivivax','Moorella','Kangiella','Nostoc','Moritella',
+               'Aquimarina', 'Nereida','Aphanizomenon', 'Methylovorus',
+               'Wenzhouxiangella', 'Riemerella', 'Lunatimonas', 'Solirubrum', 'Geitlerinema',
+               'Polaromonas','Actinospica','Anabaena','Roseivirga','Aliterella','Richelia','Erysipelothrix','Crenarchaeota',
+               'Solitalea','Dolosigranulum','Methylobrevis', 'Oceaniovalibus', 'Simiduia', 'Methylobrevis','Pacificimonas','Caldilinea']
+
+# sort the remaining descriptions
+a = RS_df['DESC'] 
+b = [x for x in a if True in [y.lower()  in x.lower() for y in eukaryote_list ]]
+c = [x for x in a if True in [y.lower()  in x.lower() for y in remove_list ]]
+d = [x for x in a if True not in [y.lower()  in x.lower() for y in remove_list ]]
+e = [x for x in d if True not in [y.lower() in x.lower() for y in eukaryote_list ]]
+
+#manual removing of beta vulgaris 
+f = []
+for i in range(len(b)):
+    if b[i].split(' ')[0].lower() in elist:
+        f.append(b[i])
+    if b[i].split(' ')[0].lower() in ['beta']:
+        if 'beta vulgaris' in b[i].split(' ')[0].lower() :
+            f.append(b[i])
+
+g = []
+h = []
+for i in range(len(f)):
+    if f[i] not in c:
+        g.append(f[i]) #final eukaryotic descriptions
+    else:
+        h.append(f[i]) #final prokaryotic descriptions
+        
+# manually add some specific tags that were missed to the eukaryotic
+        
+g = g + ['Beta vulgaris subsp. vulgaris TPP riboswitch (THI element)',
+ 'Beta vulgaris subsp. vulgaris yybP-ykoY manganese riboswitch',
+ 'Dendroctonus ponderosae (mountain pine beetle) TPP riboswitch (THI element)',
+ 'Fibulorhizoctonia sp. CBS 109695 TPP riboswitch (THI element)',
+ 'Hyphopichia burtonii NRRL Y-1933 TPP riboswitch (THI element)',
+ 'Neonectria ditissima TPP riboswitch (THI element)',
+ 'Ophiocordyceps unilateralis TPP riboswitch (THI element)',
+ 'Paracoccidioides brasiliensis Pb01 TPP riboswitch (THI element)',
+ 'Paracoccidioides brasiliensis Pb18 TPP riboswitch (THI element)',
+ 'Phaeoacremonium minimum UCRPA7 TPP riboswitch (THI element)',
+ 'TPP-specific riboswitch from Arabidopsis thaliana (PDB 3D2G, chain B)']
+
+#CHECK THAT ALL DESCRIPTIONS ARE LABELED
+print('Percent of descriptions that are labeled by keywords:')
+print(len(set(g + c)) / len(set(a)))
+
+# make a boolean list to add to the data frame
+eukaryotic = []
+for i in range(len(a)):
+    if a[i] in g:
+        eukaryotic.append(1)
+    if a[i] in c:
+        eukaryotic.append(0)
+RS_df['EUKARYOTIC'] = eukaryotic
+
+
+RS_df.to_csv(RS_csv_name, index=False)
+print('final database size RS: ')
+print(RS_df.shape)
