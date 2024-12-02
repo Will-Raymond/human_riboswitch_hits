@@ -341,14 +341,13 @@ class kmer_DataProcessor():
 utr5_db = kmer_DataProcessor()
 utr5_db.create_database('./data_files/5UTRaspic.Hum.fasta')
 utr5_db.get_all_kmers(3)
-utr5_db.export_to_csv('./data_files/test.csv') 
+utr5_db.export_to_csv('./data_files/test') 
 
 
 
 import json
 UTR_db = pd.read_csv('./data_files/test.csv')
 utr_id_to_gene = json.load(open('./data_files/UTR_ID_to_gene.json','r'))
-UTR_db = pd.read_csv(db_file)
 UTR_db['GENE'] =''
 g_list = []
 for i in range(len(UTR_db)):
@@ -360,7 +359,40 @@ cols =  [cols[-1]] + cols[1:3]  + cols[3:-1]
 UTR_db = UTR_db[cols]
 UTR_db = UTR_db[UTR_db['GENE'] != 'duplicate']
 UTR_db = UTR_db.reset_index(drop=True) #reset the indexes
-UTR_db
+UTR_db.columns()
+
+# Match the CCDS
+ccds_file = "/content/drive/MyDrive/ccds_2018/CCDS_nucleotide.current.fna" # @param {type:"string"}
+ccds_text_file = "/content/drive/MyDrive/ccds_2018/CCDS.current.txt" # @param {type:"string"}
+
+
+ccds_attributes = pd.read_csv(ccds_text_file, delimiter='\t')
+
+r = []
+for record in tqdm(SeqIO.parse(ccds_file,'fasta')):
+    r.append(record)
+
+ccds_list = ccds_attributes['ccds_id'].values
+for record in tqdm(r):
+    ccds_id = record.id.split('|')[0]
+    if ccds_id in ccds_list:
+        if ccds_attributes[ccds_attributes['ccds_id'] == ccds_id]['ccds_status'].values[0] != 'Withdrawn':
+
+            gene = ccds_attributes[ccds_attributes['ccds_id'] == ccds_id]['gene'].values[0]
+            if len(UTR_db[UTR_db['GENE'] == gene]['CCDS_ID']) != 0:
+                #new_utr_data[new_utr_data['GENE'] == gene[0]]['CCDS_ID'] = record.id.split('|')[0]
+                for ind in UTR_db[UTR_db['GENE'] == gene]['CCDS'].index:
+                    UTR_db.iloc[ind,-1] = str(record.seq).lower().replace('t','u')
+                    UTR_db.iloc[ind,-2] = ccds_id
+
+
+UTR_db['STARTPLUS25'] = ''
+UTR_db['NUPACK_25'] = ''
+UTR_db['NUPACK_25_MFE'] = ''
+cols = UTR_db.columns.tolist()
+cols =  cols[0:3]  + [cols[-3]] + [cols[-2]]+ [cols[-1]] + [cols[-5]] + [cols[-4]]+cols[3:-5]
+UTR_db = UTR_db[cols]
+UTR_db.head()
 
 
 1/0
