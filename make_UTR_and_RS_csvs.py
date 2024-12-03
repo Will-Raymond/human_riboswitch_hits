@@ -449,7 +449,7 @@ else:
     print('proceeding with dummy dot structures....')
     
     def get_mfe_nupack(seq):
-        return [['....(...)....', -10]], 'test'
+        return [['....(...)....', -10.]], 'test'
 
 
 energies = []
@@ -493,7 +493,7 @@ for i in range(len(UTR_db)):
       ids_to_update[UTR_db['ID'].iloc[i]] =  ids_to_update[UTR_db['ID'].iloc[i]] +  [i,]
 for id in ids_to_update.keys():
  for i in range(len(ids_to_update[id])):
-  UTR_db.iloc[ids_to_update[id][i],4] = id + '-' + str(i)
+  UTR_db.iloc[ids_to_update[id][i],1] = id + '-' + str(i)
 
 
 # Check the integrety of the file:
@@ -502,15 +502,21 @@ print('errors in IDs: %i'%len([x for x in UTR_db['ID'] if x[0] !='5']))
 
 print('Blank Genes: %i'%len([x for x in UTR_db['GENE'] if not isinstance(x,str)]))
 print('errors in Genes: %i'%len([x for x in [y for y in UTR_db['GENE'] if isinstance(y,str)] if not x.replace('-','').replace('.','').replace('_','').isalnum()]))
-      
-    
+allowed = set(['a','g','u','c'])
+print('sequences with incorrect char: %i'%len([x for x in UTR_db['SEQ'] if not set(x) <= allowed]))     
+print('CCDS with incorrect char: %i'%len([x for x in UTR_db['CCDS'] if not set(x) <= allowed])) 
+print('STARTPLUS25 with incorrect char: %i'%len([x for x in UTR_db['STARTPLUS25'] if not set(x) <= allowed])) 
+
+allowed = set([')','.','('])
+#print('NUPACK_DOT with incorrect char: %i'%len([x for x in UTR_db['NUPACK_DOT'] if not set(x) <= allowed]))     
+print('NUPACK_25 with incorrect char: %i'%len([x for x in UTR_db['NUPACK_25'] if not set(x) <= allowed]))     
+print('NUPACK_25_MFE with invalid values: %i'%len([x for x in UTR_db['NUPACK_25_MFE'] if not isinstance(x,float)]))
 
 
 UTR_db.to_csv(UTR_csv_name,index=False) 
 print('final database size UTR: ')
 print(UTR_db.shape)
 
-1/0
 ################# Make the RS csv #############################################
 
 from Bio import SeqIO  #BIOPYTHON
@@ -648,7 +654,9 @@ for item in ligand_data.items():
     else:
         clean_val = ligand_alias_dict[val]
         clean_ligand_data[key] = clean_val      
-    
+
+
+# Create the columns for the CSV
 ids = []
 seqs = []
 descs = []
@@ -665,7 +673,7 @@ for item in RS_data:
             ligands.append(clean_ligand_data[tmpid])
     
 
-
+# create a pandas data frame
 RS_df = pd.DataFrame(list(zip(ids,descs,ligands,seqs)), columns=columns)    
     
     
@@ -733,6 +741,8 @@ def kmer_freq(seq,k=3):
 
     return kmer_freq_vec
 
+# Calculate and add the dot structures
+
 RS_df['NUPACK_DOT'] = ''
 RS_df['NUPACK_MFE'] = ''
 
@@ -751,8 +761,9 @@ for i in tqdm.tqdm(range(0,len(RS_df))):
 print('inserting eukaryotic flag...')
 RS_df.insert(2,'EUKARYOTIC',0)
 
-# Manual sorting of key words that split up the RS csv
-# below are keywords to label as eukaryotic
+# Manual sorting of key words that split up the RS csv, we are going to look
+# for the key words in the description scraped from the RNA central entries
+# below are keywords to label as eukaryotic:
 eukaryote_list = ['TPP-specific','Phaeoacremonium','TPP-specific riboswitch from Arabidopsis','Paracoccidioides','Ophiocordyceps','Hyphopichia','Neonectria','Fibulorhizoctonia','Beta vulgaris', 'Caenorhabditis','Cinara','Seminavis', 'Thalictrum','Drosophila', 'Olea', 'Salix', 'Hymenolepis','Bathymodiolus','Steinernema','Zymoseptoria', 'Serpula', 'Rhizophagus', 'Dichanthelium', 'Gaeumannomyces','Yarrowia', 'Amazona','Ipomoea','Helianthus','Taphrina','Emergomyces','Picea', 'Fibroporia','Picea','Malassezia','Arthrobotrys', 'Poa','Lupinus','Tuber', 'Magnaporthe','Thielavia','Arthroderma',  'Lawsonia','Geomyces', 'Aedes','Debaryomyces','Hyaloperonospora', 'Theobroma','Acyrthosiphon', 'Komagataella', 'Solanum','Populus','Xylona','Podospora', 'Setaria',  'Leucosporidiella', 'Ricinus','Rhodnius','Brugia', 'Scheffersomyces', 'Microbotryum', 'Spathaspora', 'Anopheles', 'Chlamydomonas','Volvox','Zea', 'Coprinopsis', 'Wickerhamomyces', 'Myceliophthora', 'Pythium','Exidia', 'Byssochlamys','Madurella','Micromonas', 'Chaetomium','Meyerozyma','Botrytis', 'Setosphaeria', 'Daedalea','Prunus','Calocera', 'Fomitiporia', 'Lichtheimia','Brachypodium', 'Physcomitrella','Scedosporium','Pachysolen', 'Dactylellina','Grosmannia','Cajanus','Trichophyton', 'Perkinsus', 'Phaeodactylum','Piloderma', 'Jatropha',  'Pleurotus', 'Fragilariopsis', 'Fragilariopsis', 'Morus','Cyphellophora', 'Protochlamydia','Galerina', 'Kuraishia','Dothistroma','Capsicum', 'Heterobasidion', 'Lipomyces', 'Pyrenophora','Selaginella', 'Selaginella','Sphaeroforma', 'Nitzschia', 'Lucilia','Plasmopara','Babjeviella', 'Cyberlindnera', 'Reticulomyxa', 'Drechmeria', 'Pochonia', 'Coccomyxa','Escovopsis', 'Baudoinia','Escovopsis','Serendipita','Valsa','Parasitella','Cylindrobasidium', 'Ascoidea', 'Mortierella','Wallemia', 'Moniliophthora', 'Agaricus','Neurospora', 'Nasonia','Ciona','Ajellomyces','Phaeosphaeria','Ogataea','Rhinocladiella','Polyangium','Pyronema','Laccaria','Capsella','Gymnopus','Hypocrea','Hyphodontia','Rosa','Guillardia','Diplodia','Didymella','Paxillus','Clonorchis','Kwoniella','Claviceps','Hordeum','Stachybotrys','Neofusicoccum', 'Gossypium','Rasamsonia','Sphaerulina','Dichomitus','Punica','Eutrema','Suillus', 'Rosellinia', 'Diaporthe', 'Torrubiella', 'Nadsonia','fungal', 'Ochroconis','Toxocara', 'Coniosporium','Tortispora', 'Phaseolus','Verticillium', 'Klebsormidium', 'Glarea', 'Pneumocystis', 'Aphanomyces','Phytophthora','Cucumis','Parastrongyloides','Botryosphaeria','Rhizopogon','Chroococcidiopsis','Vitis','Emmonsia','Oidiodendron', 'Metschnikowia', 'Microdochium','Mimulus','Kribbella','Saitoella','Acremonium','Brassica','Eutypa', 'Trichoderma', 'Tolypocladium','Pisolithus','Protomyces','Monoraphidium','Citrus','Lobosporangium','Leucoagaricus','Pestalotiopsis','Schwartzia','Ananas', 'Fonsecaea','Paraphaeosphaeria','Stagonospora', 'Leptonema','Phialophora','Talaromyces','Citreicella','Penicilliopsis','Pyrenochaeta','Purpureocillium','Cladophialophora','Basidiobolus','Uncinocarpus','Neolecta','Thalassiosira','Coccidioides','Rhynchosporium','Fistulifera','Daucus','arabidopsis','aspergillus', 'Zostera','Aschersonia','Eucalyptus','Beauveria','Stemphylium',
                   'Sclerotinia','Penicillium','Marchantia','Pseudocercospora','Amborella','Mucor','Triticum',
                   'Corchorus','Colletotrichum','Cephalotus','Spinacia','Phialocephala','Absidia','Coniochaeta',
@@ -848,9 +859,9 @@ g = g + ['Beta vulgaris subsp. vulgaris TPP riboswitch (THI element)',
  'Phaeoacremonium minimum UCRPA7 TPP riboswitch (THI element)',
  'TPP-specific riboswitch from Arabidopsis thaliana (PDB 3D2G, chain B)']
 
-#CHECK THAT ALL DESCRIPTIONS ARE LABELED
+#CHECK THAT ALL DESCRIPTIONS ARE LABELED, this should be 100% if done correctly
 print('Percent of descriptions that are labeled by keywords:')
-print(len(set(g + c)) / len(set(a)))
+print(len(set(g + c)) / len(set(a)) *100)
 
 # make a boolean list to add to the data frame
 eukaryotic = []
@@ -862,6 +873,7 @@ for i in range(len(a)):
 RS_df['EUKARYOTIC'] = eukaryotic
 
 
+# write the final RS data frame to use for machine learning
 RS_df.to_csv(RS_csv_name, index=False)
 print('final database size RS: ')
 print(RS_df.shape)
