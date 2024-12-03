@@ -403,6 +403,7 @@ for record in tqdm.tqdm(r):
 
             gene = ccds_attributes[ccds_attributes['ccds_id'] == ccds_id]['gene'].values[0]
             if len(UTR_db[UTR_db['GENE'] == gene]['CCDS_ID']) != 0:
+ 
                 #new_utr_data[new_utr_data['GENE'] == gene[0]]['CCDS_ID'] = record.id.split('|')[0]
                 for ind in UTR_db[UTR_db['GENE'] == gene]['CCDS'].index:
                     UTR_db.iloc[ind,-1] = str(record.seq).lower().replace('t','u')
@@ -476,10 +477,40 @@ for i in tqdm.tqdm(range(0,len(UTR_db))):
   k+=1
 
 
+# Patch out some things that were missed (3'UTRs)
+# remove 3prime sequences
+UTR_db = UTR_db[['3' != x[0] for x in  UTR_db['ID']]]
+
+# rename duplicate ids to ID-N
+ids_to_update = {}
+
+ids = UTR_db['ID'].values.tolist()
+for i in range(len(UTR_db)):
+  if ids.count(UTR_db['ID'].iloc[i]) > 1:
+    if UTR_db['ID'].iloc[i] not in ids_to_update.keys():
+      ids_to_update[UTR_db['ID'].iloc[i]] = [i,]
+    else:
+      ids_to_update[UTR_db['ID'].iloc[i]] =  ids_to_update[UTR_db['ID'].iloc[i]] +  [i,]
+for id in ids_to_update.keys():
+ for i in range(len(ids_to_update[id])):
+  UTR_db.iloc[ids_to_update[id][i],4] = id + '-' + str(i)
+
+
+# Check the integrety of the file:
+
+print('errors in IDs: %i'%len([x for x in UTR_db['ID'] if x[0] !='5']))
+
+print('Blank Genes: %i'%len([x for x in UTR_db['GENE'] if not isinstance(x,str)]))
+print('errors in Genes: %i'%len([x for x in [y for y in UTR_db['GENE'] if isinstance(y,str)] if not x.replace('-','').replace('.','').replace('_','').isalnum()]))
+      
+    
+
+
 UTR_db.to_csv(UTR_csv_name,index=False) 
 print('final database size UTR: ')
 print(UTR_db.shape)
 
+1/0
 ################# Make the RS csv #############################################
 
 from Bio import SeqIO  #BIOPYTHON

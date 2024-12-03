@@ -46,11 +46,14 @@ retrain_main_ensemble  = False #retrain the ensemble
 save_main_ensemble  = False  #save the ensemble after retraining
 main_ensemble_name = "EKmodel_witheld_w_struct_features_9_26" #name for the model files, they will add "_ligand" to the end for each
 save_feature_sets = False #save the X_UTR and X_RS and their maxes to feature_npy_files
+resave_ensemble_hits = False # resave/remake all the hit data files and alignment matrices
+
 plot_format = '.png' #format to save the plots, either .svg or .png, you need the period!
 
 # remake feature sets or reload them?
 reload_X_syn = False
 reload_X_RAND = True
+
 
 # Redo the feature importances (SI Figure 2) with sklearn, otherwise load in the saved run. 
 # Redoing this will take a very long time, up to a week.
@@ -729,6 +732,91 @@ witheld_acc_all = witheld_acc + witheld_acc_2 + witheld_acc_other
 
 #normalization vector for the outputs to the max of the training
 ensemble_norm = np.load('./%utr_proba_norm.npy'%model_norm)
+
+
+###############################################################################
+# Save the ensemble outputs
+###############################################################################
+
+1/0
+
+if resave_ensemble_hits:
+
+  all_set = hits1533
+
+  with open('/content/drive/MyDrive/final_set_1533.json','w') as f:
+    json.dump(all_set,f)
+
+  UTR_hit_list = all_set
+
+  utr_proba = all_utr_predicitions[[ids_UTR.index(x) for x in UTR_hit_list],:]
+  np.save('/content/drive/MyDrive/utr_proba_1533.npy', utr_proba.T)
+  np.save('/content/drive/MyDrive/ENS_count.npy',np.sum(all_utr_predicitions[[ids_UTR.index(x) for x in UTR_hit_list],:] > .95, axis=1))
+  encode_bear_RS = []
+
+
+
+
+  print('saving bear_rs_dots, bear_utr_dots....')
+  be = BEARencoder()
+  encoded_bears_hits = []
+  encoded_array_hits = []
+  for id in tqdm(range(len(UTR_hit_list))):
+    en = be.encode(UTR_db[UTR_db['ID'] == UTR_hit_list[id]]['NUPACK_25'].iloc[0])
+    a = be.annoated_feature_vector(UTR_db[UTR_db['ID'] == UTR_hit_list[id]]['NUPACK_25'].iloc[0], encode_stems_per_bp=True)
+    encoded_bears_hits.append(en)
+    encoded_array_hits.append(a)
+
+
+
+  with open('/content/drive/MyDrive/bear_encoded_hits_1533.json','w') as f:
+    json.dump(encoded_bears_hits,f)
+
+  np.save('/content/drive/MyDrive/encode_array_hits_1533.npy',encoded_array_hits)
+
+
+  UTR_hit_list = all_set
+
+  be = BEARencoder()
+  encoded_bears_hits = []
+  encoded_array_hits = []
+  for id in tqdm(range(len(UTR_hit_list))):
+    en = UTR_db[UTR_db['ID'] == UTR_hit_list[id]]['NUPACK_25'].iloc[0]
+    a = be.annoated_feature_vector(UTR_db[UTR_db['ID'] == UTR_hit_list[id]]['NUPACK_25'].iloc[0], encode_stems_per_bp=True)
+    encoded_bears_hits.append(en)
+    encoded_array_hits.append(a)
+
+
+  with open('/content/drive/MyDrive/utr_dot_hits_1533.json','w') as f:
+    json.dump(encoded_bears_hits,f)
+
+  encode_bear_RS = []
+  encoded_array_RS = []
+  for id in tqdm(range(len(ids_RS_full))):
+    en = RS_db[RS_db['ID'] == ids_RS_full[id]]['NUPACK_DOT'].iloc[0]
+    a = be.annoated_feature_vector(RS_db[RS_db['ID'] == ids_RS_full[id]]['NUPACK_DOT'].iloc[0], encode_stems_per_bp=True)
+    encode_bear_RS.append(en)
+    encoded_array_RS.append(a)
+
+  mses = np.zeros([len(UTR_hit_list), len(encoded_array_RS)])
+  for i in tqdm(range(len(encoded_array_hits))):
+    mses[i,:] = np.sum( np.square(np.subtract(encoded_array_RS,encoded_array_hits[i])) ,axis=1)
+  np.save('/content/drive/MyDrive/utr_hits_mse_1533.npy',mses)
+
+  len_hits = []
+  len_RS = []
+  for id in tqdm(range(len(UTR_hit_list))):
+    len_hits.append(len(UTR_db[UTR_db['ID'] == UTR_hit_list[id]]['NUPACK_25'].iloc[0]))
+
+  for id in tqdm(range(len(ids_RS_full))):
+    len_RS.append(len(RS_db[RS_db['ID'] == ids_RS_full[id]]['NUPACK_DOT'].iloc[0]))
+
+  ldiff = np.zeros([len(UTR_hit_list), len(encoded_array_RS)])
+  len_hits = np.array(len_hits)
+  len_RS = np.array(len_RS)
+  for i in tqdm(range(len(encoded_array_hits))):
+    ldiff[i,:] = np.square(len_RS -  len_hits[i])
+  np.save('/content/drive/MyDrive/utr_hits_ldiff_mse_1533.npy',ldiff)
 
 
 ###############################################################################
