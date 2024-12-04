@@ -366,25 +366,25 @@ X_RS = np.zeros([X_RS_size, 66+8])
 
 for i in tqdm(range(len(RS_df))):
     seq = clean_seq(RS_df['SEQ'].iloc[i])
-        if len(seq) > 25:
-            seq = clean_seq(RS_df['SEQ'].iloc[i])
-            kmerf = kmer_freq(seq)
-            X_RS[k,:64] = kmerf/np.sum(kmerf)
-            X_RS[k,64] = RS_df['NUPACK_MFE'].iloc[i]/max_mfe
-            X_RS[k,65] = get_gc(seq)
-            ids_RS.append(RS_df['ID'].iloc[i])
-            dot_RS.append(RS_df['NUPACK_DOT'].iloc[i])
-            X_RS[k,-8:] = be.annoated_feature_vector(RS_df['NUPACK_DOT'].iloc[i], encode_stems_per_bp=True)
-          
-            X_RS[k,66] = X_RS[k,66]/max_ubs
-            X_RS[k,67] = X_RS[k,67]/max_bs
-            X_RS[k,68] = X_RS[k,68]/max_ill
-            X_RS[k,69] = X_RS[k,69]/max_ilr
-            X_RS[k,70] = X_RS[k,70]/max_lp
-            X_RS[k,71] = X_RS[k,71]/max_lb
-            X_RS[k,72] = X_RS[k,72]/max_rb
-          
-            k+=1
+    if len(seq) > 25:
+        seq = clean_seq(RS_df['SEQ'].iloc[i])
+        kmerf = kmer_freq(seq)
+        X_RS[k,:64] = kmerf/np.sum(kmerf)
+        X_RS[k,64] = RS_df['NUPACK_MFE'].iloc[i]/max_mfe
+        X_RS[k,65] = get_gc(seq)
+        ids_RS.append(RS_df['ID'].iloc[i])
+        dot_RS.append(RS_df['NUPACK_DOT'].iloc[i])
+        X_RS[k,-8:] = be.annoated_feature_vector(RS_df['NUPACK_DOT'].iloc[i], encode_stems_per_bp=True)
+      
+        X_RS[k,66] = X_RS[k,66]/max_ubs
+        X_RS[k,67] = X_RS[k,67]/max_bs
+        X_RS[k,68] = X_RS[k,68]/max_ill
+        X_RS[k,69] = X_RS[k,69]/max_ilr
+        X_RS[k,70] = X_RS[k,70]/max_lp
+        X_RS[k,71] = X_RS[k,71]/max_lb
+        X_RS[k,72] = X_RS[k,72]/max_rb
+      
+        k+=1
       
 
 if save_feature_sets:
@@ -772,199 +772,201 @@ def lev_dist(token1, token2):
 
 if resave_ensemble_hits:
  
-  match_indexes = [np.where(all_utr_predicitions[:,i] >.95)[0].tolist() for i in range(20)]
-  all_hits_indexes = list(set([item for sublist in match_indexes for item in sublist]))
-  hits1533 = sorted([ids_UTR[x] for x in list(all_hits_indexes)])
-  all_set = hits1533
-  print('total hits: %i'%len(all_set))
-  with open('./ensemble_predictions/final_set_1533.json','w') as f:
-    json.dump(all_set,f)
-
-  UTR_hit_list = all_set
-
-  utr_proba = all_utr_predicitions[[ids_UTR.index(x) for x in UTR_hit_list],:]
-  np.save('./ensemble_predictions/utr_proba_1533.npy', utr_proba.T)
-  np.save('./ensemble_predictions/ENS_count.npy',np.sum(all_utr_predicitions[[ids_UTR.index(x) for x in UTR_hit_list],:] > .95, axis=1))
-  encode_bear_RS = []
-
-
-
-
-  print('saving bear_rs_dots, bear_utr_dots....')
-  be = BEARencoder()
-  encoded_bears_hits = []
-  encoded_array_hits = []
-  for id in tqdm(range(len(UTR_hit_list))):
-    en = be.encode(UTR_db[UTR_db['ID'] == UTR_hit_list[id]]['NUPACK_25'].iloc[0])
-    a = be.annoated_feature_vector(UTR_db[UTR_db['ID'] == UTR_hit_list[id]]['NUPACK_25'].iloc[0], encode_stems_per_bp=True)
-    encoded_bears_hits.append(en)
-    encoded_array_hits.append(a)
-
-
-
-  with open('./ensemble_predictions/bear_encoded_hits_1533.json','w') as f:
-    json.dump(encoded_bears_hits,f)
-
-  np.save('./ensemble_predictions/encode_array_hits_1533.npy',encoded_array_hits)
-
-
-  UTR_hit_list = all_set
-
-  be = BEARencoder()
-  encoded_bears_hits = []
-  encoded_array_hits = []
-  for id in tqdm(range(len(UTR_hit_list))):
-    en = UTR_db[UTR_db['ID'] == UTR_hit_list[id]]['NUPACK_25'].iloc[0]
-    a = be.annoated_feature_vector(UTR_db[UTR_db['ID'] == UTR_hit_list[id]]['NUPACK_25'].iloc[0], encode_stems_per_bp=True)
-    encoded_bears_hits.append(en)
-    encoded_array_hits.append(a)
-
-
-
-  with open('./ensemble_predictions/utr_dot_hits_1533.json','w') as f:
-    json.dump(encoded_bears_hits,f)
-
-  encode_bear_RS = []
-  encoded_array_RS = []
-  for id in tqdm(range(len(ids_RS_full))):
-    en = RS_db[RS_db['ID'] == ids_RS_full[id]]['NUPACK_DOT'].iloc[0]
-    a = be.annoated_feature_vector(RS_db[RS_db['ID'] == ids_RS_full[id]]['NUPACK_DOT'].iloc[0], encode_stems_per_bp=True)
-    encode_bear_RS.append(en)
-    encoded_array_RS.append(a)
-
-  mses = np.zeros([len(UTR_hit_list), len(encoded_array_RS)])
-  for i in tqdm(range(len(encoded_array_hits))):
-    mses[i,:] = np.sum( np.square(np.subtract(encoded_array_RS,encoded_array_hits[i])) ,axis=1)
-  np.save('./alignment_matrices/utr_hits_mse_1533.npy',mses)
-
-  len_hits = []
-  len_RS = []
-  for id in tqdm(range(len(UTR_hit_list))):
-    len_hits.append(len(UTR_db[UTR_db['ID'] == UTR_hit_list[id]]['NUPACK_25'].iloc[0]))
-
-  for id in tqdm(range(len(ids_RS_full))):
-    len_RS.append(len(RS_db[RS_db['ID'] == ids_RS_full[id]]['NUPACK_DOT'].iloc[0]))
-
-  ldiff = np.zeros([len(UTR_hit_list), len(encoded_array_RS)])
-  len_hits = np.array(len_hits)
-  len_RS = np.array(len_RS)
-  for i in tqdm(range(len(encoded_array_hits))):
-    ldiff[i,:] = np.square(len_RS -  len_hits[i])
-  np.save('./alignment_matrices/utr_hits_ldiff_mse_1533.npy',ldiff)
-
-
-  if redo_levdist:
-    levdists = np.zeros([len(UTR_hit_list), len(encoded_array_RS)])
+    match_indexes = [np.where(all_utr_predicitions[:,i] >.95)[0].tolist() for i in range(20)]
+    all_hits_indexes = list(set([item for sublist in match_indexes for item in sublist]))
+    hits1533 = sorted([ids_UTR[x] for x in list(all_hits_indexes)])
+    all_set = hits1533
+    print('total hits: %i'%len(all_set))
+    with open('./ensemble_predictions/final_set_1533.json','w') as f:
+        json.dump(all_set,f)
+    
+    UTR_hit_list = all_set
+    
+    utr_proba = all_utr_predicitions[[ids_UTR.index(x) for x in UTR_hit_list],:]
+    np.save('./ensemble_predictions/utr_proba_1533.npy', utr_proba.T)
+    np.save('./ensemble_predictions/ENS_count.npy',np.sum(all_utr_predicitions[[ids_UTR.index(x) for x in UTR_hit_list],:] > .95, axis=1))
+    encode_bear_RS = []
+    
+    
+    
+    
+    print('saving bear_rs_dots, bear_utr_dots....')
+    be = BEARencoder()
+    encoded_bears_hits = []
+    encoded_array_hits = []
+    for id in tqdm(range(len(UTR_hit_list))):
+        en = be.encode(UTR_db[UTR_db['ID'] == UTR_hit_list[id]]['NUPACK_25'].iloc[0])
+        a = be.annoated_feature_vector(UTR_db[UTR_db['ID'] == UTR_hit_list[id]]['NUPACK_25'].iloc[0], encode_stems_per_bp=True)
+        encoded_bears_hits.append(en)
+        encoded_array_hits.append(a)
+    
+    
+    
+    with open('./ensemble_predictions/bear_encoded_hits_1533.json','w') as f:
+        json.dump(encoded_bears_hits,f)
+    
+    np.save('./ensemble_predictions/encode_array_hits_1533.npy',encoded_array_hits)
+    
+    
+    UTR_hit_list = all_set
+    
+    be = BEARencoder()
+    encoded_bears_hits = []
+    encoded_array_hits = []
+    for id in tqdm(range(len(UTR_hit_list))):
+        en = UTR_db[UTR_db['ID'] == UTR_hit_list[id]]['NUPACK_25'].iloc[0]
+        a = be.annoated_feature_vector(UTR_db[UTR_db['ID'] == UTR_hit_list[id]]['NUPACK_25'].iloc[0], encode_stems_per_bp=True)
+        encoded_bears_hits.append(en)
+        encoded_array_hits.append(a)
+    
+    
+    
+    with open('./ensemble_predictions/utr_dot_hits_1533.json','w') as f:
+        json.dump(encoded_bears_hits,f)
+    
+    encode_bear_RS = []
+    encoded_array_RS = []
+    for id in tqdm(range(len(ids_RS_full))):
+        en = RS_db[RS_db['ID'] == ids_RS_full[id]]['NUPACK_DOT'].iloc[0]
+        a = be.annoated_feature_vector(RS_db[RS_db['ID'] == ids_RS_full[id]]['NUPACK_DOT'].iloc[0], encode_stems_per_bp=True)
+        encode_bear_RS.append(en)
+        encoded_array_RS.append(a)
+    
+    mses = np.zeros([len(UTR_hit_list), len(encoded_array_RS)])
+    for i in tqdm(range(len(encoded_array_hits))):
+        mses[i,:] = np.sum( np.square(np.subtract(encoded_array_RS,encoded_array_hits[i])) ,axis=1)
+    np.save('./alignment_matrices/utr_hits_mse_1533.npy',mses)
+    
+    len_hits = []
+    len_RS = []
+    for id in tqdm(range(len(UTR_hit_list))):
+        len_hits.append(len(UTR_db[UTR_db['ID'] == UTR_hit_list[id]]['NUPACK_25'].iloc[0]))
+    
+    for id in tqdm(range(len(ids_RS_full))):
+        len_RS.append(len(RS_db[RS_db['ID'] == ids_RS_full[id]]['NUPACK_DOT'].iloc[0]))
+    
+    ldiff = np.zeros([len(UTR_hit_list), len(encoded_array_RS)])
     len_hits = np.array(len_hits)
     len_RS = np.array(len_RS)
-    for i in tqdm(range(len(UTR_hit_list))):
-      for j in range(len(encoded_array_hits)):
-        ldiff[i,j] = lev_dist(encoded_bears_hits[i],encode_bear_RS[j])
-    np.save('./alignment_matrices/utr_hits_ldiff_mse_1533.npy',ldiff)      
+    for i in tqdm(range(len(encoded_array_hits))):
+        ldiff[i,:] = np.square(len_RS -  len_hits[i])
+    np.save('./alignment_matrices/utr_hits_ldiff_mse_1533.npy',ldiff)
     
     
-    # DETECT IF NUPACK IS INSTALLED
-    try: 
-        import nupack
-        nupack_installed = True
-    except:
-        nupack_installed = False
-        print('NUPACK is not installed on your system!! Please go to https://www.nupack.org/ and obtain a liscence to install it in your environment.')
-        print('skipping the base pair matrices')
+    if redo_levdist:
+        levdists = np.zeros([len(UTR_hit_list), len(encoded_array_RS)])
+        len_hits = np.array(len_hits)
+        len_RS = np.array(len_RS)
+        for i in tqdm(range(len(UTR_hit_list))):
+            for j in range(len(encoded_array_hits)):
+                ldiff[i,j] = lev_dist(encoded_bears_hits[i],encode_bear_RS[j])
+        np.save('./alignment_matrices/utr_hits_ldiff_mse_1533.npy',ldiff)      
+      
+      
+        # DETECT IF NUPACK IS INSTALLED
+        try: 
+            import nupack
+            nupack_installed = True
+        except:
+            nupack_installed = False
+            print('NUPACK is not installed on your system!! Please go to https://www.nupack.org/ and obtain a liscence to install it in your environment.')
+            print('skipping the base pair matrices')
+            
+        if nupack_installed:
+            def get_mfe_nupack(seq, n=100):
+            
+              model1 = Model(material='rna', celsius=37)
+              example_hit = seq
+              example_hit = Strand(example_hit, name='example_hit')
+              t1 = Tube(strands={example_hit: 1e-8}, complexes=SetSpec(max_size=1), name='t1')
+              hit_results = tube_analysis(tubes=[t1], model=model1,
+                  compute=['pairs', 'mfe', 'sample', 'ensemble_size'],
+                  options={'num_sample': n}) # max_size=1 default
+              mfe = hit_results[list(hit_results.complexes.keys())[0]].mfe
+              return mfe, hit_results
         
-    if nupack_installed:
-        def get_mfe_nupack(seq, n=100):
-        
-          model1 = Model(material='rna', celsius=37)
-          example_hit = seq
-          example_hit = Strand(example_hit, name='example_hit')
-          t1 = Tube(strands={example_hit: 1e-8}, complexes=SetSpec(max_size=1), name='t1')
-          hit_results = tube_analysis(tubes=[t1], model=model1,
-              compute=['pairs', 'mfe', 'sample', 'ensemble_size'],
-              options={'num_sample': n}) # max_size=1 default
-          mfe = hit_results[list(hit_results.complexes.keys())[0]].mfe
-          return mfe, hit_results
-    
-        def matching_parentheses(string, idx):
-            if idx < len(string) and string[idx] == "(":
-                opening = [i for i, c in enumerate(string[idx + 1 :]) if c == "("]
-                closing = [i for i, c in enumerate(string[idx + 1 :]) if c == ")"]
-                for i, j in enumerate(closing):
-                    if i >= len(opening) or j < opening[i]:
-                        return j + idx + 1
-            return -1
-        
-        k = 0
-        # save the base pair matrices for every hit
-        outputs = []
-        hrs = []
-        bp_strs = []
-        bp_arr = np.ones([len(UTR_hit_list),300,300])*-1
-        bp_ids = []
-        max_window = 300
-        mfes = []
-        bpm_bound_all = np.ones([len(UTR_hit_list),300,300])*-1
-        bpm_unbound_all = np.ones([len(UTR_hit_list),300,300])*-1
-        for i in trange(0,len(UTR_hit_list)):
-          sdf = UTR_db[UTR_db['ID'] == UTR_hit_list[i]]
-        
-          utr_seq = sdf['SEQ'].iloc[0]
-          if not pd.isnull(sdf['CCDS'].iloc[0]):
-            ccds = sdf['CCDS'].iloc[0]
-            mature_mrna = utr_seq + ccds
-            ### UTR + 25 NT near start
-            if len(utr_seq) > max_window-25:
-              seq = utr_seq[-max_window+25:] + ccds[:25]
-            else:
-              seq = utr_seq + ccds[:25]
-            mfe,hr =  get_mfe_nupack(seq, n=1000)
-        
-            bp_m = hr.complexes[list(hr.complexes.keys())[0]].pairs.to_array()
-            bp_arr[k,:len(bp_m),:len(bp_m)] = bp_m
-            bp_ids.append(sdf['ID'].iloc[0])
-            mfes.append(mfe)
-        
-        
-           # SPLIT INTO Bound unbound
-            dots = [str(x) for x in hr.complexes[list(hr.complexes.keys())[0]].sample]
-            aug_bound = []
-            aug_unbound = []
-            for i in range(len(dots)):
-              if '(' in dots[i][-25:-22] or ')' in dots[i][-25:-22] :
-                aug_bound.append(dots[i])
-              else:
-                aug_unbound.append(dots[i])
-        
-            L = len(dots[i])
-            bound_bpm = np.zeros([L,L])
-            unbound_bpm = np.zeros([L,L])
-            for j in range(len(aug_bound)):
-              for n in range(L):
-                m = matching_parentheses(aug_bound[j], n)
-                if m != -1:
-                  bound_bpm[n,m] += 1
-                  bound_bpm[m,n] += 1
-                else:
-                  bound_bpm[n,n] += 1
-        
-            for j in range(len(aug_unbound)):
-              for n in range(L):
-                m = matching_parentheses(aug_unbound[j], n)
-                if m != -1:
-                  unbound_bpm[n,m] += 1
-                  unbound_bpm[m,n] += 1
-                else:
-                  unbound_bpm[n,n] += 1
-        
-            bpm_unbound_all[k,:L,:L] = unbound_bpm
-            bpm_bound_all[k,:L,:L] = bound_bpm
-            k+=1
-        
-        
-        np.save('./ensemble_predictions/hits_1533_bpmat.npy',bp_arr)
-        np.save('./ensemble_predictions/hits_1533_bpmat_unbound.npy',bpm_unbound_all)
-        np.save('./ensemble_predictions/hits_1533_bpmat_bound.npy',bpm_bound_all)
+            def matching_parentheses(string, idx):
+                if idx < len(string) and string[idx] == "(":
+                    opening = [i for i, c in enumerate(string[idx + 1 :]) if c == "("]
+                    closing = [i for i, c in enumerate(string[idx + 1 :]) if c == ")"]
+                    for i, j in enumerate(closing):
+                        if i >= len(opening) or j < opening[i]:
+                            return j + idx + 1
+                return -1
+          
+            k = 0
+            # save the base pair matrices for every hit
+            outputs = []
+            hrs = []
+            bp_strs = []
+            bp_arr = np.ones([len(UTR_hit_list),300,300])*-1
+            bp_ids = []
+            max_window = 300
+            mfes = []
+            bpm_bound_all = np.ones([len(UTR_hit_list),300,300])*-1
+            bpm_unbound_all = np.ones([len(UTR_hit_list),300,300])*-1
+            for i in trange(0,len(UTR_hit_list)):
+                sdf = UTR_db[UTR_db['ID'] == UTR_hit_list[i]]
+                
+                utr_seq = sdf['SEQ'].iloc[0]
+                if not pd.isnull(sdf['CCDS'].iloc[0]):
+                    ccds = sdf['CCDS'].iloc[0]
+                    mature_mrna = utr_seq + ccds
+                    ### UTR + 25 NT near start
+                    if len(utr_seq) > max_window-25:
+                        seq = utr_seq[-max_window+25:] + ccds[:25]
+                    else:
+                        seq = utr_seq + ccds[:25]
+                    mfe,hr =  get_mfe_nupack(seq, n=1000)
+                  
+                    bp_m = hr.complexes[list(hr.complexes.keys())[0]].pairs.to_array()
+                    bp_arr[k,:len(bp_m),:len(bp_m)] = bp_m
+                    bp_ids.append(sdf['ID'].iloc[0])
+                    mfes.append(mfe)
+                  
+                
+                 # SPLIT INTO Bound unbound
+                    dots = [str(x) for x in hr.complexes[list(hr.complexes.keys())[0]].sample]
+                    aug_bound = []
+                    aug_unbound = []
+                    for i in range(len(dots)):
+                        if '(' in dots[i][-25:-22] or ')' in dots[i][-25:-22] :
+                            aug_bound.append(dots[i])
+                        else:
+                            aug_unbound.append(dots[i])
+                
+                    L = len(dots[i])
+                    bound_bpm = np.zeros([L,L])
+                    unbound_bpm = np.zeros([L,L])
+                    
+                    for j in range(len(aug_bound)):
+                        for n in range(L):
+                            m = matching_parentheses(aug_bound[j], n)
+                            if m != -1:
+                                bound_bpm[n,m] += 1
+                                bound_bpm[m,n] += 1
+                            else:
+                                bound_bpm[n,n] += 1
+                  
+                    for j in range(len(aug_unbound)):
+                        for n in range(L):
+                            m = matching_parentheses(aug_unbound[j], n)
+                            if m != -1:
+                                unbound_bpm[n,m] += 1
+                                unbound_bpm[m,n] += 1
+                            else:
+                                unbound_bpm[n,n] += 1
+                
+                    bpm_unbound_all[k,:L,:L] = unbound_bpm
+                    bpm_bound_all[k,:L,:L] = bound_bpm
+                    k+=1          
+            np.save('./ensemble_predictions/hits_1533_bpmat.npy',bp_arr)
+            np.save('./ensemble_predictions/hits_1533_bpmat_unbound.npy',bpm_unbound_all)
+            np.save('./ensemble_predictions/hits_1533_bpmat_bound.npy',bpm_bound_all)
 
+
+
+          
 ###############################################################################
 # LEARN SINGULAR FEATURE IMPORTANCES
 ###############################################################################
@@ -1134,48 +1136,44 @@ all_utr_predicitions = np.array(predicted_UTRs + predicted_UTRs_2 + predicted_UT
 id_set = []
 
 for i in range(len(predicted_UTRs)):
-  subset = []
-  matches = predicted_UTRs[i][:,1] > .95
-  for j in range(len(matches)):
-    if matches[j]:
-      subset.append(ids_UTR[j])
-  id_set.append(subset)
-  if i == 0:
-    total_set =set(subset)
-  else:
-    total_set = total_set.intersection(set(subset))
+    subset = []
+    matches = predicted_UTRs[i][:,1] > .95
+    for j in range(len(matches)):
+        if matches[j]:
+            subset.append(ids_UTR[j])
+    id_set.append(subset)
+    if i == 0:
+        total_set =set(subset)
+    else:
+        total_set = total_set.intersection(set(subset))
 
 id_set = []
 
 for i in range(len(predicted_UTRs_2)):
-  subset = []
-  matches = predicted_UTRs_2[i][:,1] > .95
-  for j in range(len(matches)):
-    if matches[j]:
-      subset.append(ids_UTR[j])
-
-  id_set.append(subset)
-  if i == 0:
-
-    total_set_2 =set(subset)
-  else:
-    total_set_2 = total_set_2.intersection(set(subset))
+    subset = []
+    matches = predicted_UTRs_2[i][:,1] > .95
+    for j in range(len(matches)):
+        if matches[j]:
+            subset.append(ids_UTR[j])
+    id_set.append(subset)
+    if i == 0:
+        total_set_2 =set(subset)
+    else:
+        total_set_2 = total_set_2.intersection(set(subset))
 
 id_set = []
 
 for i in range(len(predicted_UTRs_other)):
-  subset = []
-  matches = predicted_UTRs_other[i][:,1] > .95
-  for j in range(len(matches)):
-    if matches[j]:
-      subset.append(ids_UTR[j])
-
-  id_set.append(subset)
-  if i == 0:
-
-    total_set_3 =set(subset)
-  else:
-    total_set_3 = total_set_3.intersection(set(subset))
+    subset = []
+    matches = predicted_UTRs_other[i][:,1] > .95
+    for j in range(len(matches)):
+        if matches[j]:
+            subset.append(ids_UTR[j])
+    id_set.append(subset)
+    if i == 0:
+        total_set_3 =set(subset)
+    else:
+        total_set_3 = total_set_3.intersection(set(subset))
 
 
 
@@ -1245,41 +1243,41 @@ r = 1.1
 dr = 360/nn
 angle = dr/2
 for i in range(nn):
-
-  flippers = [0,1,2,3,4, 10,11,12,13]
-  x,y = r * np.sin(np.radians(angle)), r* np.cos(np.radians(angle))
-  #plt.plot([0,x],[0,y],'r-', zorder=1)
-
-  s = .1
-  x1,y1 = (r-.1) * np.sin(np.radians(angle)), (r-.1)* np.cos(np.radians(angle))
-  x2,y2 = (r-.3) * np.sin(np.radians(angle)), (r-.3)* np.cos(np.radians(angle))
-  x3,y3 = (r-.5) * np.sin(np.radians(angle)), (r-.5)* np.cos(np.radians(angle))
-
-  #plt.scatter([x1,x2,x3],[y1,y2,y3], zorder=3)
-  angle +=dr
-
-  fs = 5
-
-  # insane matplotlib rotation fix I hate matplotlib with the burning passion of
-  # 10000 firey suns.
-  # https://stackoverflow.com/questions/51028431/calculating-matplotlib-text-rotation
-
-  dx = x2-x1
-  dy = y2-y1
-  Dx = dx * fig_x / (x_max - x_min)
-  Dy = dy * fig_y / (y_max - y_min)
-
-
-  if i not in flippers:
-    aa = 90+ (180/np.pi)*np.arctan( Dy / Dx)
-  else:
-    aa = 270+ (180/np.pi)*np.arctan( Dy / Dx)
-
-
-
-  plt.text(*(x1,y1),s='%0.2f'%r_acc[0][i], ha='center', va='center', fontsize=fs, rotation=aa, rotation_mode='anchor'  )
-  plt.text(*(x2,y2),s='%0.2f'%val_acc[0][i], ha='center', va='center',fontsize=fs, rotation=aa, rotation_mode='anchor'  )
-  plt.text(*(x3,y3),s='%0.0f'%UTR_pred[0][i], ha='center', va='center',fontsize=fs, rotation =aa, rotation_mode='anchor'  )
+    
+    flippers = [0,1,2,3,4, 10,11,12,13] # which text to flip so its right side up on the circ
+    x,y = r * np.sin(np.radians(angle)), r* np.cos(np.radians(angle))
+    #plt.plot([0,x],[0,y],'r-', zorder=1)
+    
+    s = .1
+    x1,y1 = (r-.1) * np.sin(np.radians(angle)), (r-.1)* np.cos(np.radians(angle))
+    x2,y2 = (r-.3) * np.sin(np.radians(angle)), (r-.3)* np.cos(np.radians(angle))
+    x3,y3 = (r-.5) * np.sin(np.radians(angle)), (r-.5)* np.cos(np.radians(angle))
+    
+    #plt.scatter([x1,x2,x3],[y1,y2,y3], zorder=3)
+    angle +=dr
+    
+    fs = 5
+    
+    # insane matplotlib rotation fix I hate matplotlib with the burning passion of
+    # 10000 firey suns.
+    # https://stackoverflow.com/questions/51028431/calculating-matplotlib-text-rotation
+    
+    dx = x2-x1
+    dy = y2-y1
+    Dx = dx * fig_x / (x_max - x_min)
+    Dy = dy * fig_y / (y_max - y_min)
+    
+    
+    if i not in flippers:
+        aa = 90+ (180/np.pi)*np.arctan( Dy / Dx)
+    else:
+        aa = 270+ (180/np.pi)*np.arctan( Dy / Dx)
+    
+    
+    
+    plt.text(*(x1,y1),s='%0.2f'%r_acc[0][i], ha='center', va='center', fontsize=fs, rotation=aa, rotation_mode='anchor'  )
+    plt.text(*(x2,y2),s='%0.2f'%val_acc[0][i], ha='center', va='center',fontsize=fs, rotation=aa, rotation_mode='anchor'  )
+    plt.text(*(x3,y3),s='%0.0f'%UTR_pred[0][i], ha='center', va='center',fontsize=fs, rotation =aa, rotation_mode='anchor'  )
 
 if save_plots:
     plt.savefig('./plots/main_ensemble_result_circle_plot%s'%plot_format)
@@ -1298,37 +1296,37 @@ else:
     print('generating sub strings...')
     k = 0
     for i in tqdm(range(len(UTR_db))):
-      if not pd.isna(UTR_db[ccds_length].iloc[i]):
-        seq = clean_seq(UTR_db[ccds_length].iloc[i])
-        if len(seq) > 25:
-          if np.sum(X_SUB[k]) == 0:
-            print(k)
-    
-            subs = np.linspace(30,len(seq),n_substrings+1).astype(int)
-            substrs = [seq[-x:] for x in subs]  + [seq,]
-            for j in range(n_substrings+1):
-              mfe,hr = get_mfe_nupack(substrs[j])
-              kmerf = kmer_freq(substrs[j])
-              X_SUB[k,j,:64] = kmerf/np.sum(kmerf)
-    
-              X_SUB[k,j,64] = mfe[0][1]/max_mfe
-    
-              X_SUB[k,j,65] = get_gc(seq)
-    
-              X_SUB[k,j,-8:] = be.annoated_feature_vector(str(mfe[0][0]), encode_stems_per_bp=True)
-    
-              X_SUB[k,j,66] = X_SUB[k,j,66]/max_ubs
-              X_SUB[k,j,67] = X_SUB[k,j,67]/max_bs
-              X_SUB[k,j,68] = X_SUB[k,j,68]/max_ill
-              X_SUB[k,j,69] = X_SUB[k,j,69]/max_ilr
-              X_SUB[k,j,70] = X_SUB[k,j,70]/max_lp
-              X_SUB[k,j,71] = X_SUB[k,j,71]/max_lb
-              X_SUB[k,j,72] = X_SUB[k,j,72]/max_rb
-    
-          k+=1
-          if save_substrings:
-              if k%1000 == 0:
-                np.save('./feature_npy_files/X_SUB.npy', X_SUB)
+        if not pd.isna(UTR_db[ccds_length].iloc[i]):
+            seq = clean_seq(UTR_db[ccds_length].iloc[i])
+            if len(seq) > 25:
+                if np.sum(X_SUB[k]) == 0:
+                    print(k)
+            
+                    subs = np.linspace(30,len(seq),n_substrings+1).astype(int)
+                    substrs = [seq[-x:] for x in subs]  + [seq,]
+                    for j in range(n_substrings+1):
+                        mfe,hr = get_mfe_nupack(substrs[j])
+                        kmerf = kmer_freq(substrs[j])
+                        X_SUB[k,j,:64] = kmerf/np.sum(kmerf)
+              
+                        X_SUB[k,j,64] = mfe[0][1]/max_mfe
+              
+                        X_SUB[k,j,65] = get_gc(seq)
+              
+                        X_SUB[k,j,-8:] = be.annoated_feature_vector(str(mfe[0][0]), encode_stems_per_bp=True)
+              
+                        X_SUB[k,j,66] = X_SUB[k,j,66]/max_ubs
+                        X_SUB[k,j,67] = X_SUB[k,j,67]/max_bs
+                        X_SUB[k,j,68] = X_SUB[k,j,68]/max_ill
+                        X_SUB[k,j,69] = X_SUB[k,j,69]/max_ilr
+                        X_SUB[k,j,70] = X_SUB[k,j,70]/max_lp
+                        X_SUB[k,j,71] = X_SUB[k,j,71]/max_lb
+                        X_SUB[k,j,72] = X_SUB[k,j,72]/max_rb
+        
+                    k+=1
+            if save_substrings:
+                if k%1000 == 0:
+                  np.save('./feature_npy_files/X_SUB.npy', X_SUB)
                
 if reload_prediction_sub:
     predicted_sub = np.load('./ensemble_predictions/predicted_sub.npy')
@@ -1432,6 +1430,7 @@ if save_plots:
 # Testing on synthethic riboswitches
 ###############################################################################
 
+# 25 theophylline switches taken from wang 2023: https://pubmed.ncbi.nlm.nih.gov/36688639/
 theophylline_RSes = [ '''UAUGUUGAUACU
 UAAUUUAAAGAU
 UAAACAAAAGAU
@@ -1688,6 +1687,7 @@ AACAAUG
 
 theophylline_RS = [x.replace('\n','').lower() for x in theophylline_RSes] + [ 'TCTAGAGACCGCTAAAGGAGATACCAGCATCGTCTTGATGCCCTTGGCAGCTCCGGTTCAGCGCCGAGGAATATAGGAGGTAATCCC'.replace('T','U').lower()]
 
+# Other random synthetic designs, not actually used in the paper but you can use them here.
 Thyroxine_RS = ['GACGTCCTTAACGCGGGATAACATAGTCACGGTTTGTGGGAGGCTGTGGAGGCGAGACCGTGACCCCGGCAGCACCCAGGAGGAATACT'.replace('T','U').lower()]
 TMR_RS = ['GCAGGCTCCCACGGATCGCGACTGGCGAGAGCCAGGTAACGAATCGATCCAGTACCCACGATTCGTTAAGGAGGTAATCC'.replace('T','U').lower()]
 Dopamine_RS = ['GACGTCCTACCGCATTTCGGACATAGGGAATTCCGCGTGTGCGCCGCGGAAGACGTTGGAAGGATAGATACCTACAACGGGGAATATAGAGGCCAGCACATAGTGAGGCCCTCCTCCCCCCGGACGTACACGGGAGGCAGTTT'.replace('T','U').lower(),
@@ -1706,33 +1706,33 @@ syn_RS = theophylline_RS  + Thyroxine_RS + TMR_RS + Dopamine_RS + Synthetic_Fluo
 if reload_X_syn:
     syn_RS_features = []
     for i in range(len(syn_RS)):
-      mfe,hr = get_mfe_nupack(syn_RS[i])
-      syn_RS_features.append([syn_RS[i], str(mfe[0][0]), mfe[0][1]])
+        mfe,hr = get_mfe_nupack(syn_RS[i])
+        syn_RS_features.append([syn_RS[i], str(mfe[0][0]), mfe[0][1]])
     
     X_SYN =np.zeros([len(syn_RS), 66+8])
     k = 0
     for i in range(len(syn_RS)):
-      seq = clean_seq(syn_RS[i])
-      if len(seq) > 25:
-    
-        #seq = clean_seq(RS_df['SEQ'].iloc[i])
-        kmerf = kmer_freq(seq)
-        X_SYN[k,:64] = kmerf/np.sum(kmerf)
-        X_SYN[k,64] = syn_RS_features[i][-1]/max_mfe
-        X_SYN[k,65] = get_gc(seq)
-        #ds_RS.append(RS_df['ID'].iloc[i])
-        #dot_RS.append(RS_df['NUPACK_DOT'].iloc[i])
-        X_SYN[k,-8:] = be.annoated_feature_vector(syn_RS_features[i][-2], encode_stems_per_bp=True)
-    
-        X_SYN[k,66] = X_SYN[k,66]/max_ubs
-        X_SYN[k,67] = X_SYN[k,67]/max_bs
-        X_SYN[k,68] = X_SYN[k,68]/max_ill
-        X_SYN[k,69] = X_SYN[k,69]/max_ilr
-        X_SYN[k,70] = X_SYN[k,70]/max_lp
-        X_SYN[k,71] = X_SYN[k,71]/max_lb
-        X_SYN[k,72] = X_SYN[k,72]/max_rb
-    
-        k+=1
+        seq = clean_seq(syn_RS[i])
+        if len(seq) > 25:
+        
+            #seq = clean_seq(RS_df['SEQ'].iloc[i])
+            kmerf = kmer_freq(seq)
+            X_SYN[k,:64] = kmerf/np.sum(kmerf)
+            X_SYN[k,64] = syn_RS_features[i][-1]/max_mfe
+            X_SYN[k,65] = get_gc(seq)
+            #ds_RS.append(RS_df['ID'].iloc[i])
+            #dot_RS.append(RS_df['NUPACK_DOT'].iloc[i])
+            X_SYN[k,-8:] = be.annoated_feature_vector(syn_RS_features[i][-2], encode_stems_per_bp=True)
+        
+            X_SYN[k,66] = X_SYN[k,66]/max_ubs
+            X_SYN[k,67] = X_SYN[k,67]/max_bs
+            X_SYN[k,68] = X_SYN[k,68]/max_ill
+            X_SYN[k,69] = X_SYN[k,69]/max_ilr
+            X_SYN[k,70] = X_SYN[k,70]/max_lp
+            X_SYN[k,71] = X_SYN[k,71]/max_lb
+            X_SYN[k,72] = X_SYN[k,72]/max_rb
+        
+            k+=1
 else:
     X_SYN = np.load('./data_files/X_SYN.npy')
 
@@ -1740,7 +1740,7 @@ else:
 predicted_syn = np.zeros([len(syn_RS), 2, 20])
 ensemble = estimators + estimators_2 + estimators_other
 for j in range(20):
-  predicted_syn[:,:,j] = ensemble[j].predict_proba(X_SYN)
+    predicted_syn[:,:,j] = ensemble[j].predict_proba(X_SYN)
   
   
 print('Accuracy on all synthetic riboswitches, .95 threshold: %f'%(np.sum(((np.sum(predicted_syn[:,1,:] > .5, axis =-1)/20)[:]) > .95)/37 ))
@@ -1777,40 +1777,40 @@ sub_fold = []
 sub_pvals = []
 levels = []
 for i in range(len(process['overrepresentation']['group'])):
-
-  if i != 15:
-    try:
-      overall_labels.append(process['overrepresentation']['group'][i]['result'][0]['term']['label'])
-      go_ids.append([process['overrepresentation']['group'][i]['result'][x]['term']['id'] for x in range(len(process['overrepresentation']['group'][i]['result']))][0])
-      folds.append(process['overrepresentation']['group'][i]['result'][0]['input_list']['fold_enrichment'])
-      pvals.append(process['overrepresentation']['group'][i]['result'][0]['input_list']['pValue'])
-      genes.append(process['overrepresentation']['group'][i]['result'][0]['input_list']['mapped_id_list']['mapped_id'])
-
-
-      sublabels.append([process['overrepresentation']['group'][i]['result'][x]['term']['label'] for x in range(len(process['overrepresentation']['group'][i]['result']))][0:])
-      sub_gos.append([process['overrepresentation']['group'][i]['result'][x]['term']['id'] for x in range(len(process['overrepresentation']['group'][i]['result']))][0:])
-      subgenes.append([process['overrepresentation']['group'][i]['result'][x]['input_list']['mapped_id_list']['mapped_id'] for x in range(len(process['overrepresentation']['group'][i]['result']))][0:])
-      sub_fold.append([process['overrepresentation']['group'][i]['result'][x]['input_list']['fold_enrichment'] for x in range(len(process['overrepresentation']['group'][i]['result']))][0:])
-      sub_pvals.append([process['overrepresentation']['group'][i]['result'][x]['input_list']['pValue'] for x in range(len(process['overrepresentation']['group'][i]['result']))][0:])
-      levels.append([process['overrepresentation']['group'][i]['result'][x]['term']['level'] for x in range(len(process['overrepresentation']['group'][i]['result']))][0:])
-    except:
-      overall_labels.append(process['overrepresentation']['group'][i]['result']['term']['label'])
-      go_ids.append(process['overrepresentation']['group'][i]['result']['term']['id'])
-      folds.append(process['overrepresentation']['group'][i]['result']['input_list']['fold_enrichment'])
-      pvals.append(process['overrepresentation']['group'][i]['result']['input_list']['pValue'])
-      if i<16:
-        genes.append(process['overrepresentation']['group'][i]['result']['input_list']['mapped_id_list']['mapped_id'])
-        subgenes.append([process['overrepresentation']['group'][i]['result']['input_list']['mapped_id_list']['mapped_id']])
-      else:
-        genes.append([])
-        subgenes.append(['None', ])
-
-
-      sublabels.append([process['overrepresentation']['group'][i]['result']['term']['label']])
-      sub_gos.append([process['overrepresentation']['group'][i]['result']['term']['id']])
-      levels.append([0,])
-      sub_fold.append([process['overrepresentation']['group'][i]['result']['input_list']['fold_enrichment']])
-      sub_pvals.append([process['overrepresentation']['group'][i]['result']['input_list']['pValue']])
+    
+    if i != 15:
+        try:
+            overall_labels.append(process['overrepresentation']['group'][i]['result'][0]['term']['label'])
+            go_ids.append([process['overrepresentation']['group'][i]['result'][x]['term']['id'] for x in range(len(process['overrepresentation']['group'][i]['result']))][0])
+            folds.append(process['overrepresentation']['group'][i]['result'][0]['input_list']['fold_enrichment'])
+            pvals.append(process['overrepresentation']['group'][i]['result'][0]['input_list']['pValue'])
+            genes.append(process['overrepresentation']['group'][i]['result'][0]['input_list']['mapped_id_list']['mapped_id'])
+        
+        
+            sublabels.append([process['overrepresentation']['group'][i]['result'][x]['term']['label'] for x in range(len(process['overrepresentation']['group'][i]['result']))][0:])
+            sub_gos.append([process['overrepresentation']['group'][i]['result'][x]['term']['id'] for x in range(len(process['overrepresentation']['group'][i]['result']))][0:])
+            subgenes.append([process['overrepresentation']['group'][i]['result'][x]['input_list']['mapped_id_list']['mapped_id'] for x in range(len(process['overrepresentation']['group'][i]['result']))][0:])
+            sub_fold.append([process['overrepresentation']['group'][i]['result'][x]['input_list']['fold_enrichment'] for x in range(len(process['overrepresentation']['group'][i]['result']))][0:])
+            sub_pvals.append([process['overrepresentation']['group'][i]['result'][x]['input_list']['pValue'] for x in range(len(process['overrepresentation']['group'][i]['result']))][0:])
+            levels.append([process['overrepresentation']['group'][i]['result'][x]['term']['level'] for x in range(len(process['overrepresentation']['group'][i]['result']))][0:])
+        except:
+            overall_labels.append(process['overrepresentation']['group'][i]['result']['term']['label'])
+            go_ids.append(process['overrepresentation']['group'][i]['result']['term']['id'])
+            folds.append(process['overrepresentation']['group'][i]['result']['input_list']['fold_enrichment'])
+            pvals.append(process['overrepresentation']['group'][i]['result']['input_list']['pValue'])
+            if i<16:
+                genes.append(process['overrepresentation']['group'][i]['result']['input_list']['mapped_id_list']['mapped_id'])
+                subgenes.append([process['overrepresentation']['group'][i]['result']['input_list']['mapped_id_list']['mapped_id']])
+            else:
+                genes.append([])
+                subgenes.append(['None', ])
+        
+        
+            sublabels.append([process['overrepresentation']['group'][i]['result']['term']['label']])
+            sub_gos.append([process['overrepresentation']['group'][i]['result']['term']['id']])
+            levels.append([0,])
+            sub_fold.append([process['overrepresentation']['group'][i]['result']['input_list']['fold_enrichment']])
+            sub_pvals.append([process['overrepresentation']['group'][i]['result']['input_list']['pValue']])
 
 sublabels = [item for sublist in sublabels for item in sublist][::-1]
 levels = [item for sublist in levels for item in sublist][::-1]
@@ -1862,15 +1862,15 @@ axes[1].plot([-101,-2],[0-.5,0-.5],'k-',lw=.5, clip_on=False, zorder=100)
 k = 0
 c = colors[k]
 for i in range(len(levels)):
-  bars[i].set_color(colors[k])
-  b2[i].set_color(colors[k])
-  if levels[i] == 0:
-    a = axes[1].plot([-101,-2],[i+.5,i+.5],'k-',lw=.5, clip_on=False, zorder=100)
-    k+=1
-    k = k%len(colors)
+    bars[i].set_color(colors[k])
+    b2[i].set_color(colors[k])
+    if levels[i] == 0:
+        a = axes[1].plot([-101,-2],[i+.5,i+.5],'k-',lw=.5, clip_on=False, zorder=100)
+        k+=1
+        k = k%len(colors)
 
 for i in range(len(ask)):
-  axes[0].text(sub_fold[i]+1  ,i,s=ask[i], fontsize=3, ha='center',va='center')
+    axes[0].text(sub_fold[i]+1  ,i,s=ask[i], fontsize=3, ha='center',va='center')
 
 axes[0].set_ylim([-1, len(levels)+1])
 axes[1].set_ylim([-1, len(levels)+1])
@@ -1907,40 +1907,40 @@ sub_fold = []
 sub_pvals = []
 levels = []
 for i in range(len(function['overrepresentation']['group'])):
-
-  if i != 5: #unclassified is 5
-    try:
-      overall_labels.append(function['overrepresentation']['group'][i]['result'][0]['term']['label'])
-      go_ids.append([function['overrepresentation']['group'][i]['result'][x]['term']['id'] for x in range(len(function['overrepresentation']['group'][i]['result']))][0])
-      folds.append(function['overrepresentation']['group'][i]['result'][0]['input_list']['fold_enrichment'])
-      pvals.append(function['overrepresentation']['group'][i]['result'][0]['input_list']['pValue'])
-      genes.append(function['overrepresentation']['group'][i]['result'][0]['input_list']['mapped_id_list']['mapped_id'])
-
-
-      sublabels.append([function['overrepresentation']['group'][i]['result'][x]['term']['label'] for x in range(len(function['overrepresentation']['group'][i]['result']))][0:])
-      sub_gos.append([function['overrepresentation']['group'][i]['result'][x]['term']['id'] for x in range(len(function['overrepresentation']['group'][i]['result']))][0:])
-      subgenes.append([function['overrepresentation']['group'][i]['result'][x]['input_list']['mapped_id_list']['mapped_id'] for x in range(len(function['overrepresentation']['group'][i]['result']))][0:])
-      sub_fold.append([function['overrepresentation']['group'][i]['result'][x]['input_list']['fold_enrichment'] for x in range(len(function['overrepresentation']['group'][i]['result']))][0:])
-      sub_pvals.append([function['overrepresentation']['group'][i]['result'][x]['input_list']['pValue'] for x in range(len(function['overrepresentation']['group'][i]['result']))][0:])
-      levels.append([function['overrepresentation']['group'][i]['result'][x]['term']['level'] for x in range(len(function['overrepresentation']['group'][i]['result']))][0:])
-    except:
-      overall_labels.append(function['overrepresentation']['group'][i]['result']['term']['label'])
-      go_ids.append(function['overrepresentation']['group'][i]['result']['term']['id'])
-      folds.append(function['overrepresentation']['group'][i]['result']['input_list']['fold_enrichment'])
-      pvals.append(function['overrepresentation']['group'][i]['result']['input_list']['pValue'])
-      if i<16:
-        genes.append(function['overrepresentation']['group'][i]['result']['input_list']['mapped_id_list']['mapped_id'])
-        subgenes.append([function['overrepresentation']['group'][i]['result']['input_list']['mapped_id_list']['mapped_id']])
-      else:
-        genes.append([])
-        subgenes.append(['None', ])
-
-
-      sublabels.append([function['overrepresentation']['group'][i]['result']['term']['label']])
-      sub_gos.append([function['overrepresentation']['group'][i]['result']['term']['id']])
-      levels.append([0,])
-      sub_fold.append([function['overrepresentation']['group'][i]['result']['input_list']['fold_enrichment']])
-      sub_pvals.append([function['overrepresentation']['group'][i]['result']['input_list']['pValue']])
+    
+    if i != 5: #unclassified is 5
+        try:
+            overall_labels.append(function['overrepresentation']['group'][i]['result'][0]['term']['label'])
+            go_ids.append([function['overrepresentation']['group'][i]['result'][x]['term']['id'] for x in range(len(function['overrepresentation']['group'][i]['result']))][0])
+            folds.append(function['overrepresentation']['group'][i]['result'][0]['input_list']['fold_enrichment'])
+            pvals.append(function['overrepresentation']['group'][i]['result'][0]['input_list']['pValue'])
+            genes.append(function['overrepresentation']['group'][i]['result'][0]['input_list']['mapped_id_list']['mapped_id'])
+        
+        
+            sublabels.append([function['overrepresentation']['group'][i]['result'][x]['term']['label'] for x in range(len(function['overrepresentation']['group'][i]['result']))][0:])
+            sub_gos.append([function['overrepresentation']['group'][i]['result'][x]['term']['id'] for x in range(len(function['overrepresentation']['group'][i]['result']))][0:])
+            subgenes.append([function['overrepresentation']['group'][i]['result'][x]['input_list']['mapped_id_list']['mapped_id'] for x in range(len(function['overrepresentation']['group'][i]['result']))][0:])
+            sub_fold.append([function['overrepresentation']['group'][i]['result'][x]['input_list']['fold_enrichment'] for x in range(len(function['overrepresentation']['group'][i]['result']))][0:])
+            sub_pvals.append([function['overrepresentation']['group'][i]['result'][x]['input_list']['pValue'] for x in range(len(function['overrepresentation']['group'][i]['result']))][0:])
+            levels.append([function['overrepresentation']['group'][i]['result'][x]['term']['level'] for x in range(len(function['overrepresentation']['group'][i]['result']))][0:])
+        except:
+            overall_labels.append(function['overrepresentation']['group'][i]['result']['term']['label'])
+            go_ids.append(function['overrepresentation']['group'][i]['result']['term']['id'])
+            folds.append(function['overrepresentation']['group'][i]['result']['input_list']['fold_enrichment'])
+            pvals.append(function['overrepresentation']['group'][i]['result']['input_list']['pValue'])
+            if i<16:
+                genes.append(function['overrepresentation']['group'][i]['result']['input_list']['mapped_id_list']['mapped_id'])
+                subgenes.append([function['overrepresentation']['group'][i]['result']['input_list']['mapped_id_list']['mapped_id']])
+            else:
+                genes.append([])
+                subgenes.append(['None', ])
+        
+        
+            sublabels.append([function['overrepresentation']['group'][i]['result']['term']['label']])
+            sub_gos.append([function['overrepresentation']['group'][i]['result']['term']['id']])
+            levels.append([0,])
+            sub_fold.append([function['overrepresentation']['group'][i]['result']['input_list']['fold_enrichment']])
+            sub_pvals.append([function['overrepresentation']['group'][i]['result']['input_list']['pValue']])
 
 sublabels = [item for sublist in sublabels for item in sublist][::-1]
 levels = [item for sublist in levels for item in sublist][::-1]
@@ -1983,15 +1983,15 @@ axes[1].plot([-75,-2],[0-.5,0-.5],'k-',lw=.5, clip_on=False, zorder=100)
 k = 0
 c = colors[k]
 for i in range(len(levels)):
-  bars[i].set_color(colors[k])
-  b2[i].set_color(colors[k])
-  if levels[i] == 0:
-    a = axes[1].plot([-75,-2],[i+.5,i+.5],'k-',lw=.5, clip_on=False, zorder=100)
-    k+=1
-    k = k%len(colors)
+    bars[i].set_color(colors[k])
+    b2[i].set_color(colors[k])
+    if levels[i] == 0:
+        a = axes[1].plot([-75,-2],[i+.5,i+.5],'k-',lw=.5, clip_on=False, zorder=100)
+        k+=1
+        k = k%len(colors)
 
 for i in range(len(ask)):
-  axes[0].text(sub_fold[i]+1  ,i,s=ask[i], fontsize=3, ha='center',va='center')
+    axes[0].text(sub_fold[i]+1  ,i,s=ask[i], fontsize=3, ha='center',va='center')
 
 axes[0].set_ylim([-1, len(levels)+1])
 axes[1].set_ylim([-1, len(levels)+1])
@@ -2039,33 +2039,33 @@ else:
     # Convert the sequences to feature sets
     RAND_RS_features = []
     for i in range(len(rand_30)):
-      mfe,hr = get_mfe_nupack(rand_30[i][:rand_lens[i]])
-      RAND_RS_features.append([rand_30[i][:rand_lens[i]], str(mfe[0][0]), mfe[0][1]])
+        mfe,hr = get_mfe_nupack(rand_30[i][:rand_lens[i]])
+        RAND_RS_features.append([rand_30[i][:rand_lens[i]], str(mfe[0][0]), mfe[0][1]])
     
     X_RAND =np.zeros([len(rand_30), 66+8])
     k = 0
     for i in range(len(rand_30)):
-      seq = clean_seq(rand_30[i])
-      if len(seq) > 25:
-    
-        #seq = clean_seq(RS_df['SEQ'].iloc[i])
-        kmerf = kmer_freq(seq)
-        X_RAND[k,:64] = kmerf/np.sum(kmerf)
-        X_RAND[k,64] = RAND_RS_features[i][-1]/max_mfe
-        X_RAND[k,65] = get_gc(seq)
-        #ds_RS.append(RS_df['ID'].iloc[i])
-        #dot_RS.append(RS_df['NUPACK_DOT'].iloc[i])
-        X_RAND[k,-8:] = be.annoated_feature_vector(RAND_RS_features[i][-2])
-    
-        X_RAND[k,66] = X_RAND[k,66]/max_ubs
-        X_RAND[k,67] = X_RAND[k,67]/max_bs
-        X_RAND[k,68] = X_RAND[k,68]/max_ill
-        X_RAND[k,69] = X_RAND[k,69]/max_ilr
-        X_RAND[k,70] = X_RAND[k,70]/max_lp
-        X_RAND[k,71] = X_RAND[k,71]/max_lb
-        X_RAND[k,72] = X_RAND[k,72]/max_rb
-    
-        k+=1
+        seq = clean_seq(rand_30[i])
+        if len(seq) > 25:
+        
+            #seq = clean_seq(RS_df['SEQ'].iloc[i])
+            kmerf = kmer_freq(seq)
+            X_RAND[k,:64] = kmerf/np.sum(kmerf)
+            X_RAND[k,64] = RAND_RS_features[i][-1]/max_mfe
+            X_RAND[k,65] = get_gc(seq)
+            #ds_RS.append(RS_df['ID'].iloc[i])
+            #dot_RS.append(RS_df['NUPACK_DOT'].iloc[i])
+            X_RAND[k,-8:] = be.annoated_feature_vector(RAND_RS_features[i][-2])
+        
+            X_RAND[k,66] = X_RAND[k,66]/max_ubs
+            X_RAND[k,67] = X_RAND[k,67]/max_bs
+            X_RAND[k,68] = X_RAND[k,68]/max_ill
+            X_RAND[k,69] = X_RAND[k,69]/max_ilr
+            X_RAND[k,70] = X_RAND[k,70]/max_lp
+            X_RAND[k,71] = X_RAND[k,71]/max_lb
+            X_RAND[k,72] = X_RAND[k,72]/max_rb
+        
+            k+=1
         
         
 ###############################################################################
@@ -2247,85 +2247,85 @@ estimators= []
 # for all 20 classifiers
 for i in tqdm(range(20)):
     
-  # Maxe X the feature vector and X witheld
-  if pairs[i][0] != 'other': #if its not the <2% set
-      if len(pairs[i]) == 1:  #if its a single drop out
-          X = np.vstack([X_UTR, X_RAND, X_EXONS, X_RS, ] + [x[0] for x in ligand_dfs[:i]] + [x[0] for x in ligand_dfs[i+1:]] )
-          X_witheld = ligand_dfs[i][0]
-          X_t = np.vstack([ X_RS, ] + [x[0] for x in ligand_dfs[:i]] + [x[0] for x in ligand_dfs[i+1:]] )
-          name =  pairs[i][0]
-      else: #if its a double drop out ligand
-          witheld_1 = pairs[i][0]
-          witheld_2 = pairs[i][1]
-
-          ind_1 = witheld_ligands.index(witheld_1)
-          ind_2 = witheld_ligands.index(witheld_2)
-
-          X = np.vstack([X_UTR, X_RAND, X_EXONS, X_RS,] + [ligand_dfs[i][0] for i in range(len(ligand_dfs)) if i not in [ind_1,ind_2]])
-          X_witheld = np.vstack([ligand_dfs[ind_1][0], ligand_dfs[ind_2][0]])
-          X_t = np.vstack([ X_RS, ] + [ligand_dfs[i][0] for i in range(len(ligand_dfs)) if i not in [ind_1,ind_2]])
-          name = witheld_1 + '_' + witheld_2
-  else:
-      X = np.vstack([X_UTR, X_RAND, X_EXONS,] + [x[0] for x in ligand_dfs]  )
-      X_witheld = X_RS
-      X_t = np.vstack([ X_RS, ] + [x[0] for x in ligand_dfs]  )
-      name = 'other'
+    # Maxe X the feature vector and X witheld
+    if pairs[i][0] != 'other': #if its not the <2% set
+        if len(pairs[i]) == 1:  #if its a single drop out
+            X = np.vstack([X_UTR, X_RAND, X_EXONS, X_RS, ] + [x[0] for x in ligand_dfs[:i]] + [x[0] for x in ligand_dfs[i+1:]] )
+            X_witheld = ligand_dfs[i][0]
+            X_t = np.vstack([ X_RS, ] + [x[0] for x in ligand_dfs[:i]] + [x[0] for x in ligand_dfs[i+1:]] )
+            name =  pairs[i][0]
+        else: #if its a double drop out ligand
+            witheld_1 = pairs[i][0]
+            witheld_2 = pairs[i][1]
+    
+            ind_1 = witheld_ligands.index(witheld_1)
+            ind_2 = witheld_ligands.index(witheld_2)
+    
+            X = np.vstack([X_UTR, X_RAND, X_EXONS, X_RS,] + [ligand_dfs[i][0] for i in range(len(ligand_dfs)) if i not in [ind_1,ind_2]])
+            X_witheld = np.vstack([ligand_dfs[ind_1][0], ligand_dfs[ind_2][0]])
+            X_t = np.vstack([ X_RS, ] + [ligand_dfs[i][0] for i in range(len(ligand_dfs)) if i not in [ind_1,ind_2]])
+            name = witheld_1 + '_' + witheld_2
+    else:
+        X = np.vstack([X_UTR, X_RAND, X_EXONS,] + [x[0] for x in ligand_dfs]  )
+        X_witheld = X_RS
+        X_t = np.vstack([ X_RS, ] + [x[0] for x in ligand_dfs]  )
+        name = 'other'
         
-  print('___________________________')
-  print('Training:')
-  print(pairs[i])
-  print('X shape: ')
-  print(X.shape)
-  print('X_witheld:')
-  print(X_witheld.shape)
+    print('___________________________')
+    print('Training:')
+    print(pairs[i])
+    print('X shape: ')
+    print(X.shape)
+    print('X_witheld:')
+    print(X_witheld.shape)
 
     
-  if retrain_rand_exon_ensemble:
-     # if we are not reloading the ensemble, retrain it
-    svc = SVC(C=10, kernel='rbf', gamma=0.4, probability=True)
-    pu_estimator = ElkanotoPuClassifier(estimator=svc, hold_out_ratio=0.2)
-    y = np.zeros(len(X))
-    y[len(X_UTR)+len(X_RAND)+len(X_EXONS):] = 1
-    pu_estimator.fit(X, y)
-  else:
-    pu_estimator =load('./elkanoto_models/%s_%s.joblib'%(rand_exon_model_name, name))
+    if retrain_rand_exon_ensemble:
+        # if we are not reloading the ensemble, retrain it
+        svc = SVC(C=10, kernel='rbf', gamma=0.4, probability=True)
+        pu_estimator = ElkanotoPuClassifier(estimator=svc, hold_out_ratio=0.2)
+        y = np.zeros(len(X))
+        y[len(X_UTR)+len(X_RAND)+len(X_EXONS):] = 1
+        pu_estimator.fit(X, y)
+    else:
+        pu_estimator =load('./elkanoto_models/%s_%s.joblib'%(rand_exon_model_name, name))
 
-
-  predicted_RS = pu_estimator.predict_proba(X_t)
-  predicted_witheld= pu_estimator.predict_proba(X_witheld)
-  predicted_UTR = pu_estimator.predict_proba(X_UTR)
-  predicted_RAND = pu_estimator.predict_proba(X_RAND)
-  predicted_EXON = pu_estimator.predict_proba(X_EXONS)
-  predicted_RS_all = pu_estimator.predict_proba(X_RS_full)
-
-  UTR_acc.append( np.sum((predicted_UTR[:,1] < .5))/len(X_UTR) )
-  RS_acc.append( np.sum((predicted_RS[:,1] > .5))/len(X_t) )
-  witheld_acc.append( np.sum((predicted_witheld[:,1] > .5))/len(X_witheld)  )
-  Rand_acc.append(np.sum((predicted_RAND[:,1] > .5))/len(X_RAND)  )
-  Exon_acc.append(np.sum((predicted_EXON[:,1] > .5))/len(X_EXONS)  )
-  RS_all_acc.append(np.sum((predicted_RS_all[:,1] > .5))/len(predicted_RS_all)  )
-  
-  print('UTR accuracy:')
-  print( np.sum((predicted_UTR[:,1] < .5))/len(X_UTR) )
-  print('RS accuracy:')
-  print(np.sum((predicted_RS[:,1] > .5))/len(X_t) )
-  print('Witheld accuracy:')
-  print( np.sum((predicted_witheld[:,1] > .5))/len(X_witheld))
-  print('Rand accuracy:')
-  print(np.sum((predicted_RAND[:,1] > .5))/len(X_RAND) )
-  print('Exon accuracy:')
-  print(np.sum((predicted_EXON[:,1] > .5))/len(X_EXONS) )
-  
-  predicted_RSs.append(predicted_RS)
-  predicted_withelds.append(predicted_witheld)
-  predicted_UTRs.append(predicted_UTR)
-  predicted_Exons.append(predicted_EXON)
-  predicted_rands.append(predicted_RAND)
-  predicted_RSs_all.append(predicted_RS_all)
-  if retrain_rand_exon_ensemble:
-    if save_rand_exon_ensemble:
-      dump(pu_estimator,'./elkanoto_models/%s_%s.joblib'%(rand_exon_model_name, name))
-  estimators.append(pu_estimator)
+    
+    predicted_RS = pu_estimator.predict_proba(X_t)
+    predicted_witheld= pu_estimator.predict_proba(X_witheld)
+    predicted_UTR = pu_estimator.predict_proba(X_UTR)
+    predicted_RAND = pu_estimator.predict_proba(X_RAND)
+    predicted_EXON = pu_estimator.predict_proba(X_EXONS)
+    predicted_RS_all = pu_estimator.predict_proba(X_RS_full)
+    
+    UTR_acc.append( np.sum((predicted_UTR[:,1] < .5))/len(X_UTR) )
+    RS_acc.append( np.sum((predicted_RS[:,1] > .5))/len(X_t) )
+    witheld_acc.append( np.sum((predicted_witheld[:,1] > .5))/len(X_witheld)  )
+    Rand_acc.append(np.sum((predicted_RAND[:,1] > .5))/len(X_RAND)  )
+    Exon_acc.append(np.sum((predicted_EXON[:,1] > .5))/len(X_EXONS)  )
+    RS_all_acc.append(np.sum((predicted_RS_all[:,1] > .5))/len(predicted_RS_all)  )
+    
+    print('UTR accuracy:')
+    print( np.sum((predicted_UTR[:,1] < .5))/len(X_UTR) )
+    print('RS accuracy:')
+    print(np.sum((predicted_RS[:,1] > .5))/len(X_t) )
+    print('Witheld accuracy:')
+    print( np.sum((predicted_witheld[:,1] > .5))/len(X_witheld))
+    print('Rand accuracy:')
+    print(np.sum((predicted_RAND[:,1] > .5))/len(X_RAND) )
+    print('Exon accuracy:')
+    print(np.sum((predicted_EXON[:,1] > .5))/len(X_EXONS) )
+    
+    predicted_RSs.append(predicted_RS)
+    predicted_withelds.append(predicted_witheld)
+    predicted_UTRs.append(predicted_UTR)
+    predicted_Exons.append(predicted_EXON)
+    predicted_rands.append(predicted_RAND)
+    predicted_RSs_all.append(predicted_RS_all)
+    if retrain_rand_exon_ensemble:
+        if save_rand_exon_ensemble:
+            dump(pu_estimator,'./elkanoto_models/%s_%s.joblib'%(rand_exon_model_name, name))
+    estimators.append(pu_estimator)
 
 
 witheld_acc = []
