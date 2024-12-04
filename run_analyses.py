@@ -862,7 +862,109 @@ if resave_ensemble_hits:
       for j in range(len(encoded_array_hits)):
         ldiff[i,j] = lev_dist(encoded_bears_hits[i],encode_bear_RS[j])
     np.save('./alignment_matrices/utr_hits_ldiff_mse_1533.npy',ldiff)      
-
+    
+    
+    # DETECT IF NUPACK IS INSTALLED
+    try: 
+        import nupack
+        nupack_installed = True
+    except:
+        nupack_installed = False
+        print('NUPACK is not installed on your system!! Please go to https://www.nupack.org/ and obtain a liscence to install it in your environment.')
+        print('skipping the base pair matrices')
+        
+    if nupack_installed:
+        def get_mfe_nupack(seq, n=100):
+        
+          model1 = Model(material='rna', celsius=37)
+          example_hit = seq
+          example_hit = Strand(example_hit, name='example_hit')
+          t1 = Tube(strands={example_hit: 1e-8}, complexes=SetSpec(max_size=1), name='t1')
+          hit_results = tube_analysis(tubes=[t1], model=model1,
+              compute=['pairs', 'mfe', 'sample', 'ensemble_size'],
+              options={'num_sample': n}) # max_size=1 default
+          mfe = hit_results[list(hit_results.complexes.keys())[0]].mfe
+          return mfe, hit_results
+    
+        def matching_parentheses(string, idx):
+            if idx < len(string) and string[idx] == "(":
+                opening = [i for i, c in enumerate(string[idx + 1 :]) if c == "("]
+                closing = [i for i, c in enumerate(string[idx + 1 :]) if c == ")"]
+                for i, j in enumerate(closing):
+                    if i >= len(opening) or j < opening[i]:
+                        return j + idx + 1
+            return -1
+        
+        k = 0
+        # save the base pair matrices for every hit
+        outputs = []
+        hrs = []
+        bp_strs = []
+        bp_arr = np.ones([len(UTR_hit_list),300,300])*-1
+        bp_ids = []
+        max_window = 300
+        mfes = []
+        bpm_bound_all = np.ones([len(UTR_hit_list),300,300])*-1
+        bpm_unbound_all = np.ones([len(UTR_hit_list),300,300])*-1
+        for i in trange(0,len(UTR_hit_list)):
+          sdf = UTR_db[UTR_db['ID'] == UTR_hit_list[i]]
+        
+          utr_seq = sdf['SEQ'].iloc[0]
+          if not pd.isnull(sdf['CCDS'].iloc[0]):
+            ccds = sdf['CCDS'].iloc[0]
+            mature_mrna = utr_seq + ccds
+            ### UTR + 25 NT near start
+            if len(utr_seq) > max_window-25:
+              seq = utr_seq[-max_window+25:] + ccds[:25]
+            else:
+              seq = utr_seq + ccds[:25]
+            mfe,hr =  get_mfe_nupack(seq, n=1000)
+        
+            bp_m = hr.complexes[list(hr.complexes.keys())[0]].pairs.to_array()
+            bp_arr[k,:len(bp_m),:len(bp_m)] = bp_m
+            bp_ids.append(sdf['ID'].iloc[0])
+            mfes.append(mfe)
+        
+        
+           # SPLIT INTO Bound unbound
+            dots = [str(x) for x in hr.complexes[list(hr.complexes.keys())[0]].sample]
+            aug_bound = []
+            aug_unbound = []
+            for i in range(len(dots)):
+              if '(' in dots[i][-25:-22] or ')' in dots[i][-25:-22] :
+                aug_bound.append(dots[i])
+              else:
+                aug_unbound.append(dots[i])
+        
+            L = len(dots[i])
+            bound_bpm = np.zeros([L,L])
+            unbound_bpm = np.zeros([L,L])
+            for j in range(len(aug_bound)):
+              for n in range(L):
+                m = matching_parentheses(aug_bound[j], n)
+                if m != -1:
+                  bound_bpm[n,m] += 1
+                  bound_bpm[m,n] += 1
+                else:
+                  bound_bpm[n,n] += 1
+        
+            for j in range(len(aug_unbound)):
+              for n in range(L):
+                m = matching_parentheses(aug_unbound[j], n)
+                if m != -1:
+                  unbound_bpm[n,m] += 1
+                  unbound_bpm[m,n] += 1
+                else:
+                  unbound_bpm[n,n] += 1
+        
+            bpm_unbound_all[k,:L,:L] = unbound_bpm
+            bpm_bound_all[k,:L,:L] = bound_bpm
+            k+=1
+        
+        
+        np.save('./ensemble_predictions/hits_1533_bpmat.npy',bp_arr)
+        np.save('./ensemble_predictions/hits_1533_bpmat_unbound.npy',bpm_unbound_all)
+        np.save('./ensemble_predictions/hits_1533_bpmat_bound.npy',bpm_bound_all)
 
 ###############################################################################
 # LEARN SINGULAR FEATURE IMPORTANCES
