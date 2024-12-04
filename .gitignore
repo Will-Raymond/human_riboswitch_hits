@@ -163,3 +163,4 @@ cython_debug/
 
 #remove nupack installations as its propritary and needs a liscence
 /nupack*
+/defunct*
