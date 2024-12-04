@@ -156,24 +156,24 @@ ids_to_update = {}
 
 ids = UTR_db['ID'].values.tolist()
 for i in range(len(UTR_db)):
-  if ids.count(UTR_db['ID'].iloc[i]) > 1:
-    if UTR_db['ID'].iloc[i] not in ids_to_update.keys():
-      ids_to_update[UTR_db['ID'].iloc[i]] = [i,]
-    else:
-      ids_to_update[UTR_db['ID'].iloc[i]] =  ids_to_update[UTR_db['ID'].iloc[i]] +  [i,]
-for id in ids_to_update.keys():
- for i in range(len(ids_to_update[id])):
-  UTR_db.iloc[ids_to_update[id][i],4] = id + '-' + str(i)
+    if ids.count(UTR_db['ID'].iloc[i]) > 1:
+        if UTR_db['ID'].iloc[i] not in ids_to_update.keys():
+            ids_to_update[UTR_db['ID'].iloc[i]] = [i,]
+        else:
+            ids_to_update[UTR_db['ID'].iloc[i]] =  ids_to_update[UTR_db['ID'].iloc[i]] +  [i,]
+for idx in ids_to_update.keys():
+    for i in range(len(ids_to_update[idx])):
+        UTR_db.iloc[ids_to_update[idx][i],4] = idx + '-' + str(i)
 
 ## patch out a typo space in guanidine
 for i in range(len(RS_db)):
-  if RS_db.iloc[i,2] == 'guanidine ':
-    RS_db.iloc[i,2] = 'guanidine'
+    if RS_db.iloc[i,2] == 'guanidine ':
+            RS_db.iloc[i,2] = 'guanidine'
 
 ## patch to combine adocobalamin with cobalamin since these are very similar
 for i in range(len(RS_db)):
-  if RS_db.iloc[i,2] == 'adocbl':
-    RS_db.iloc[i,2] = 'cobalamin'
+    if RS_db.iloc[i,2] == 'adocbl':
+        RS_db.iloc[i,2] = 'cobalamin'
     
 print('Riboswitch database size:' + str(RS_db.shape))
 print('UTR database size:' + str(UTR_db.shape))
@@ -209,25 +209,25 @@ k = 0
 # get the size first X_UTR
 X_utr_size = 0
 for i in range(len(UTR_db)):
-  if not pd.isna(UTR_db[ccds_length].iloc[i]):
-    if len(clean_seq(UTR_db[ccds_length].iloc[i])) > 25:
-      X_utr_size+=1
+    if not pd.isna(UTR_db[ccds_length].iloc[i]):
+        if len(clean_seq(UTR_db[ccds_length].iloc[i])) > 25:
+            X_utr_size+=1
 
 # fill up the X_UTR with extracted features
 X_UTR =np.zeros([X_utr_size, 66+8])
 
 for i in tqdm(range(len(UTR_db))):
-  if not pd.isna(UTR_db[ccds_length].iloc[i]):
-    seq = clean_seq(UTR_db[ccds_length].iloc[i])
-    if len(seq) > 25:
-      kmerf = kmer_freq(seq)
-      X_UTR[k,:64] = kmerf/np.sum(kmerf)
-      X_UTR[k,64] = UTR_db['NUPACK_25_MFE'].iloc[i]
-      X_UTR[k,65] = get_gc(seq)
-      ids_UTR.append(UTR_db['ID'].iloc[i])
-      dot_UTR.append(UTR_db['NUPACK_25'].iloc[i])
-      X_UTR[k,-8:] = be.annoated_feature_vector(UTR_db['NUPACK_25'].iloc[i], encode_stems_per_bp=True)
-      k+=1
+    if not pd.isna(UTR_db[ccds_length].iloc[i]):
+        seq = clean_seq(UTR_db[ccds_length].iloc[i])
+        if len(seq) > 25:
+          kmerf = kmer_freq(seq)
+          X_UTR[k,:64] = kmerf/np.sum(kmerf)
+          X_UTR[k,64] = UTR_db['NUPACK_25_MFE'].iloc[i]
+          X_UTR[k,65] = get_gc(seq)
+          ids_UTR.append(UTR_db['ID'].iloc[i])
+          dot_UTR.append(UTR_db['NUPACK_25'].iloc[i])
+          X_UTR[k,-8:] = be.annoated_feature_vector(UTR_db['NUPACK_25'].iloc[i], encode_stems_per_bp=True)
+          k+=1
 
 
 
@@ -246,25 +246,25 @@ k = 0
 # get the size first X_RS
 X_RS_size = 0
 for i in range(len(full_RS_df)):
-  seq = clean_seq(full_RS_df['SEQ'].iloc[i])
-  if len(seq) > 25:
-    X_RS_size+=1
+    seq = clean_seq(full_RS_df['SEQ'].iloc[i])
+    if len(seq) > 25:
+        X_RS_size+=1
 
 X_RS_full = np.zeros([X_RS_size, 66+8])
 
 # fill up the X_UTR with extracted features
 for i in tqdm(range(len(full_RS_df))):
-  seq = clean_seq(full_RS_df['SEQ'].iloc[i])
-  if len(seq) > 25:
     seq = clean_seq(full_RS_df['SEQ'].iloc[i])
-    kmerf = kmer_freq(seq)
-    X_RS_full[k,:64] = kmerf/np.sum(kmerf)
-    X_RS_full[k,64] = full_RS_df['NUPACK_MFE'].iloc[i]
-    X_RS_full[k,65] = get_gc(seq)
-    ids_RS_full.append(full_RS_df['ID'].iloc[i])
-    dot_RS_full.append(full_RS_df['NUPACK_DOT'].iloc[i])
-    X_RS_full[k,-8:] = be.annoated_feature_vector(full_RS_df['NUPACK_DOT'].iloc[i], encode_stems_per_bp=True)
-    k+=1
+    if len(seq) > 25:
+        seq = clean_seq(full_RS_df['SEQ'].iloc[i])
+        kmerf = kmer_freq(seq)
+        X_RS_full[k,:64] = kmerf/np.sum(kmerf)
+        X_RS_full[k,64] = full_RS_df['NUPACK_MFE'].iloc[i]
+        X_RS_full[k,65] = get_gc(seq)
+        ids_RS_full.append(full_RS_df['ID'].iloc[i])
+        dot_RS_full.append(full_RS_df['NUPACK_DOT'].iloc[i])
+        X_RS_full[k,-8:] = be.annoated_feature_vector(full_RS_df['NUPACK_DOT'].iloc[i], encode_stems_per_bp=True)
+        k+=1
 
 
 # Get the maximum values (minimum for mfe) across thte dataset to normalize against
@@ -306,39 +306,39 @@ X_RS_full[:,72] = X_RS_full[:,72]/max_rb
 
 print('Generating RS Ligand DFs......')
 def make_ligand_df(df, ligand):
-  witheld_df =  RS_db[RS_db['LIGAND'] ==ligand]
-  X_witheld = np.zeros([len(witheld_df),66+8])
-  dot_witheld = []
-  ids_witheld = []
-  k = 0
-  for i in tqdm(range(len(witheld_df))):
-    seq = clean_seq(witheld_df['SEQ'].iloc[i])
-    if len(seq) > 25:
-      if i == 0:
-        X_witheld = np.zeros([1,66+8])
-      else:
-        X_witheld = np.vstack( [X_witheld, np.zeros([1,66+8]) ])
-
-      seq = clean_seq(witheld_df['SEQ'].iloc[i])
-      kmerf = kmer_freq(seq)
-      X_witheld[k,:64] = kmerf/np.sum(kmerf)
-      X_witheld[k,64] = witheld_df['NUPACK_MFE'].iloc[i]/max_mfe
-      X_witheld[k,65] = get_gc(seq)
-      ids_witheld.append(witheld_df['ID'].iloc[i])
-      dot_witheld.append(witheld_df['NUPACK_DOT'].iloc[i])
-      X_witheld[k,-8:] = be.annoated_feature_vector(witheld_df['NUPACK_DOT'].iloc[i], encode_stems_per_bp=True)
-
-
-      X_witheld[k,66] = X_witheld[k,66]/max_ubs
-      X_witheld[k,67] = X_witheld[k,67]/max_bs
-      X_witheld[k,68] = X_witheld[k,68]/max_ill
-      X_witheld[k,69] = X_witheld[k,69]/max_ilr
-      X_witheld[k,70] = X_witheld[k,70]/max_lp
-      X_witheld[k,71] = X_witheld[k,71]/max_lb
-      X_witheld[k,72] = X_witheld[k,72]/max_rb
-
-      k+=1
-  return X_witheld, ids_witheld, dot_witheld
+    witheld_df =  RS_db[RS_db['LIGAND'] ==ligand]
+    X_witheld = np.zeros([len(witheld_df),66+8])
+    dot_witheld = []
+    ids_witheld = []
+    k = 0
+    for i in tqdm(range(len(witheld_df))):
+        seq = clean_seq(witheld_df['SEQ'].iloc[i])
+        if len(seq) > 25:
+            if i == 0:
+                X_witheld = np.zeros([1,66+8])
+            else:
+                X_witheld = np.vstack( [X_witheld, np.zeros([1,66+8]) ])
+        
+            seq = clean_seq(witheld_df['SEQ'].iloc[i])
+            kmerf = kmer_freq(seq)
+            X_witheld[k,:64] = kmerf/np.sum(kmerf)
+            X_witheld[k,64] = witheld_df['NUPACK_MFE'].iloc[i]/max_mfe
+            X_witheld[k,65] = get_gc(seq)
+            ids_witheld.append(witheld_df['ID'].iloc[i])
+            dot_witheld.append(witheld_df['NUPACK_DOT'].iloc[i])
+            X_witheld[k,-8:] = be.annoated_feature_vector(witheld_df['NUPACK_DOT'].iloc[i], encode_stems_per_bp=True)
+        
+        
+            X_witheld[k,66] = X_witheld[k,66]/max_ubs
+            X_witheld[k,67] = X_witheld[k,67]/max_bs
+            X_witheld[k,68] = X_witheld[k,68]/max_ill
+            X_witheld[k,69] = X_witheld[k,69]/max_ilr
+            X_witheld[k,70] = X_witheld[k,70]/max_lp
+            X_witheld[k,71] = X_witheld[k,71]/max_lb
+            X_witheld[k,72] = X_witheld[k,72]/max_rb
+        
+            k+=1
+    return X_witheld, ids_witheld, dot_witheld
 
 set(RS_db['LIGAND'])
 witheld_ligands = ['cobalamin', 'guanidine', 'TPP','SAM','glycine','FMN','purine','lysine','fluoride','zmp-ztp',]
@@ -348,8 +348,8 @@ print(len(RS_df))
 
 ligand_dfs = []
 for i in range(len(witheld_ligands)):
-  print('making %s....'%witheld_ligands[i])
-  ligand_dfs.append(make_ligand_df(RS_db, witheld_ligands[i]))
+    print('making %s....'%witheld_ligands[i])
+    ligand_dfs.append(make_ligand_df(RS_db, witheld_ligands[i]))
 
 X_RS = np.zeros([len(RS_df),66+8])
 dot_RS = []
@@ -358,35 +358,34 @@ k = 0
 
 X_RS_size = 0
 for i in range(len(RS_df)):
-  seq = clean_seq(RS_df['SEQ'].iloc[i])
-  if len(seq) > 25:
-    X_RS_size+=1
+    seq = clean_seq(RS_df['SEQ'].iloc[i])
+    if len(seq) > 25:
+        X_RS_size+=1
 
 X_RS = np.zeros([X_RS_size, 66+8])
 
 for i in tqdm(range(len(RS_df))):
-  seq = clean_seq(RS_df['SEQ'].iloc[i])
-  if len(seq) > 25:
-
     seq = clean_seq(RS_df['SEQ'].iloc[i])
-    kmerf = kmer_freq(seq)
-    X_RS[k,:64] = kmerf/np.sum(kmerf)
-    X_RS[k,64] = RS_df['NUPACK_MFE'].iloc[i]/max_mfe
-    X_RS[k,65] = get_gc(seq)
-    ids_RS.append(RS_df['ID'].iloc[i])
-    dot_RS.append(RS_df['NUPACK_DOT'].iloc[i])
-    X_RS[k,-8:] = be.annoated_feature_vector(RS_df['NUPACK_DOT'].iloc[i], encode_stems_per_bp=True)
-
-    X_RS[k,66] = X_RS[k,66]/max_ubs
-    X_RS[k,67] = X_RS[k,67]/max_bs
-    X_RS[k,68] = X_RS[k,68]/max_ill
-    X_RS[k,69] = X_RS[k,69]/max_ilr
-    X_RS[k,70] = X_RS[k,70]/max_lp
-    X_RS[k,71] = X_RS[k,71]/max_lb
-    X_RS[k,72] = X_RS[k,72]/max_rb
-
-    k+=1
-    
+        if len(seq) > 25:
+            seq = clean_seq(RS_df['SEQ'].iloc[i])
+            kmerf = kmer_freq(seq)
+            X_RS[k,:64] = kmerf/np.sum(kmerf)
+            X_RS[k,64] = RS_df['NUPACK_MFE'].iloc[i]/max_mfe
+            X_RS[k,65] = get_gc(seq)
+            ids_RS.append(RS_df['ID'].iloc[i])
+            dot_RS.append(RS_df['NUPACK_DOT'].iloc[i])
+            X_RS[k,-8:] = be.annoated_feature_vector(RS_df['NUPACK_DOT'].iloc[i], encode_stems_per_bp=True)
+          
+            X_RS[k,66] = X_RS[k,66]/max_ubs
+            X_RS[k,67] = X_RS[k,67]/max_bs
+            X_RS[k,68] = X_RS[k,68]/max_ill
+            X_RS[k,69] = X_RS[k,69]/max_ilr
+            X_RS[k,70] = X_RS[k,70]/max_lp
+            X_RS[k,71] = X_RS[k,71]/max_lb
+            X_RS[k,72] = X_RS[k,72]/max_rb
+          
+            k+=1
+      
 
 if save_feature_sets:
     maxes = np.array([max_mfe, max_ubs, max_bs, max_ill, max_ilr, max_lp, max_lb, max_rb])
@@ -587,37 +586,37 @@ estimators_other = []
 
 for i in tqdm(range(1)):
 
-  witheld_ligands[:i]
-  X = np.vstack([X_UTR,] + [x[0] for x in ligand_dfs]) 
-  X_witheld = X_RS
-
-  if retrain_main_ensemble:
-    svc = SVC(C=10, kernel='rbf', gamma=0.4, probability=True)
-    pu_estimator = ElkanotoPuClassifier(estimator=svc, hold_out_ratio=0.2)
-    y = np.zeros(len(X))
-    y[len(X_UTR):] = 1
-    pu_estimator.fit(X, y)
-  else:
-    pu_estimator =load('./elkanoto_models/%s_%s.joblib'%(main_ensemble_name, 'other'))
-
-
-  X_t = np.vstack([ X_RS, ] + [x[0] for x in ligand_dfs]  )
-
-  predicted_RS_other = pu_estimator.predict_proba(X_t)
-  predicted_witheld_other = pu_estimator.predict_proba(X_witheld)
-  predicted_UTR_other = pu_estimator.predict_proba(X_UTR)
-
-  UTR_acc_other.append( np.sum((predicted_UTR_other[:,1] < .5))/len(X_UTR) )
-  RS_acc_other.append( np.sum((predicted_RS_other[:,1] > .5))/len(X_t) )
-  witheld_acc_other.append( np.sum((predicted_witheld_other[:,1] > .5))/len(X_witheld)  )
-
-  predicted_RSs_other.append(predicted_RS_other)
-  predicted_withelds_other.append(predicted_witheld_other)
-  predicted_UTRs_other.append(predicted_UTR_other)
-  if retrain_main_ensemble:
-    if save_main_ensemble:
-      dump(pu_estimator,'./elkanoto_models/%s_%s.joblib'%(main_ensemble_name, 'other'))
-  estimators_other.append(pu_estimator)
+    witheld_ligands[:i]
+    X = np.vstack([X_UTR,] + [x[0] for x in ligand_dfs]) 
+    X_witheld = X_RS
+    
+    if retrain_main_ensemble:
+        svc = SVC(C=10, kernel='rbf', gamma=0.4, probability=True)
+        pu_estimator = ElkanotoPuClassifier(estimator=svc, hold_out_ratio=0.2)
+        y = np.zeros(len(X))
+        y[len(X_UTR):] = 1
+        pu_estimator.fit(X, y)
+    else:
+        pu_estimator =load('./elkanoto_models/%s_%s.joblib'%(main_ensemble_name, 'other'))
+    
+    
+    X_t = np.vstack([ X_RS, ] + [x[0] for x in ligand_dfs]  )
+    
+    predicted_RS_other = pu_estimator.predict_proba(X_t)
+    predicted_witheld_other = pu_estimator.predict_proba(X_witheld)
+    predicted_UTR_other = pu_estimator.predict_proba(X_UTR)
+    
+    UTR_acc_other.append( np.sum((predicted_UTR_other[:,1] < .5))/len(X_UTR) )
+    RS_acc_other.append( np.sum((predicted_RS_other[:,1] > .5))/len(X_t) )
+    witheld_acc_other.append( np.sum((predicted_witheld_other[:,1] > .5))/len(X_witheld)  )
+    
+    predicted_RSs_other.append(predicted_RS_other)
+    predicted_withelds_other.append(predicted_witheld_other)
+    predicted_UTRs_other.append(predicted_UTR_other)
+    if retrain_main_ensemble:
+        if save_main_ensemble:
+            dump(pu_estimator,'./elkanoto_models/%s_%s.joblib'%(main_ensemble_name, 'other'))
+    estimators_other.append(pu_estimator)
 
 # Single drop out classifiers
 witheld_acc = []
@@ -631,38 +630,38 @@ estimators = []
 
 for i in tqdm(range(len(witheld_ligands))):
 
-  witheld_ligands[:i]
-  X = np.vstack([X_UTR, X_RS, ] + [x[0] for x in ligand_dfs[:i]] + [x[0] for x in ligand_dfs[i+1:]] )
-
-  X_witheld = ligand_dfs[i][0]
-
-  if retrain_main_ensemble:
-    svc = SVC(C=10, kernel='rbf', gamma=0.4, probability=True)
-    pu_estimator = ElkanotoPuClassifier(estimator=svc, hold_out_ratio=0.2)
-    y = np.zeros(len(X))
-    y[len(X_UTR):] = 1
-    pu_estimator.fit(X, y)
-  else:
-    pu_estimator =load('./elkanoto_models/%s_%s.joblib'%(main_ensemble_name, witheld_ligands[i]))
-
-
-  X_t = np.vstack([ X_RS, ] + [x[0] for x in ligand_dfs[:i]] + [x[0] for x in ligand_dfs[i+1:]] )
-
-  predicted_RS = pu_estimator.predict_proba(X_t)
-  predicted_witheld = pu_estimator.predict_proba(X_witheld)
-  predicted_UTR = pu_estimator.predict_proba(X_UTR)
-
-  UTR_acc.append( np.sum((predicted_UTR[:,1] < .5))/len(X_UTR) )
-  RS_acc.append( np.sum((predicted_RS[:,1] > .5))/len(X_t) )
-  witheld_acc.append( np.sum((predicted_witheld[:,1] > .5))/len(X_witheld)  )
-
-  predicted_RSs.append(predicted_RS)
-  predicted_withelds.append(predicted_witheld)
-  predicted_UTRs.append(predicted_UTR)
-  if retrain_main_ensemble:
-    if save_main_ensemble:
-      dump(pu_estimator,'./elkanoto_models/%s_%s.joblib'%(main_ensemble_name, witheld_ligands[i]))
-  estimators.append(pu_estimator)
+    witheld_ligands[:i]
+    X = np.vstack([X_UTR, X_RS, ] + [x[0] for x in ligand_dfs[:i]] + [x[0] for x in ligand_dfs[i+1:]] )
+    
+    X_witheld = ligand_dfs[i][0]
+    
+    if retrain_main_ensemble:
+        svc = SVC(C=10, kernel='rbf', gamma=0.4, probability=True)
+        pu_estimator = ElkanotoPuClassifier(estimator=svc, hold_out_ratio=0.2)
+        y = np.zeros(len(X))
+        y[len(X_UTR):] = 1
+        pu_estimator.fit(X, y)
+    else:
+        pu_estimator =load('./elkanoto_models/%s_%s.joblib'%(main_ensemble_name, witheld_ligands[i]))
+      
+    
+    X_t = np.vstack([ X_RS, ] + [x[0] for x in ligand_dfs[:i]] + [x[0] for x in ligand_dfs[i+1:]] )
+    
+    predicted_RS = pu_estimator.predict_proba(X_t)
+    predicted_witheld = pu_estimator.predict_proba(X_witheld)
+    predicted_UTR = pu_estimator.predict_proba(X_UTR)
+    
+    UTR_acc.append( np.sum((predicted_UTR[:,1] < .5))/len(X_UTR) )
+    RS_acc.append( np.sum((predicted_RS[:,1] > .5))/len(X_t) )
+    witheld_acc.append( np.sum((predicted_witheld[:,1] > .5))/len(X_witheld)  )
+    
+    predicted_RSs.append(predicted_RS)
+    predicted_withelds.append(predicted_witheld)
+    predicted_UTRs.append(predicted_UTR)
+    if retrain_main_ensemble:
+        if save_main_ensemble:
+            dump(pu_estimator,'./elkanoto_models/%s_%s.joblib'%(main_ensemble_name, witheld_ligands[i]))
+    estimators.append(pu_estimator)
 
 
 # Double drop out ligands
@@ -681,45 +680,45 @@ estimators_2 = []
 
 
 for i in tqdm(range(len(pairs))):
-  witheld_1 = pairs[i][0]
-  witheld_2 = pairs[i][1]
-
-  ind_1 = witheld_ligands.index(witheld_1)
-  ind_2 = witheld_ligands.index(witheld_2)
-
-
-
-  witheld_ligands[:i]
-  X = np.vstack([X_UTR, X_RS, ] + [ligand_dfs[i][0] for i in range(len(ligand_dfs)) if i not in [ind_1,ind_2]])
-
-  X_witheld = np.vstack([ligand_dfs[ind_1][0], ligand_dfs[ind_2][0]])
-
-  if retrain_main_ensemble:
-    svc = SVC(C=10, kernel='rbf', gamma=0.4, probability=True)
-    pu_estimator = ElkanotoPuClassifier(estimator=svc, hold_out_ratio=0.2)
-    y = np.zeros(len(X))
-    y[len(X_UTR):] = 1
-    pu_estimator.fit(X, y)
-  else:
-    pu_estimator =load('./elkanoto_models/%s_%s_%s.joblib'%(main_ensemble_name,witheld_1, witheld_2))
-
-  X_t = np.vstack([ X_RS, ] + [ligand_dfs[i][0] for i in range(len(ligand_dfs)) if i not in [ind_1,ind_2]])
-
-  predicted_RS_2 = pu_estimator.predict_proba(X_t)
-  predicted_witheld_2 = pu_estimator.predict_proba(X_witheld)
-  predicted_UTR_2 = pu_estimator.predict_proba(X_UTR)
-
-  UTR_acc_2.append( np.sum((predicted_UTR_2[:,1] < .5))/len(X_UTR) )
-  RS_acc_2.append( np.sum((predicted_RS_2[:,1] > .5))/len(X_t) )
-  witheld_acc_2.append( np.sum((predicted_witheld_2[:,1] > .5))/len(X_witheld)  )
-
-  predicted_RSs_2.append(predicted_RS_2)
-  predicted_withelds_2.append(predicted_witheld_2)
-  predicted_UTRs_2.append(predicted_UTR_2)
-  if retrain_main_ensemble:
-    if save_main_ensemble:
-      dump(pu_estimator,'./elkanoto_models/%s_%s_%s.joblib'%(main_ensemble_name,witheld_1, witheld_2))
-  estimators_2.append(pu_estimator)
+    witheld_1 = pairs[i][0]
+    witheld_2 = pairs[i][1]
+    
+    ind_1 = witheld_ligands.index(witheld_1)
+    ind_2 = witheld_ligands.index(witheld_2)
+    
+    
+    
+    witheld_ligands[:i]
+    X = np.vstack([X_UTR, X_RS, ] + [ligand_dfs[i][0] for i in range(len(ligand_dfs)) if i not in [ind_1,ind_2]])
+    
+    X_witheld = np.vstack([ligand_dfs[ind_1][0], ligand_dfs[ind_2][0]])
+    
+    if retrain_main_ensemble:
+        svc = SVC(C=10, kernel='rbf', gamma=0.4, probability=True)
+        pu_estimator = ElkanotoPuClassifier(estimator=svc, hold_out_ratio=0.2)
+        y = np.zeros(len(X))
+        y[len(X_UTR):] = 1
+        pu_estimator.fit(X, y)
+    else:
+        pu_estimator =load('./elkanoto_models/%s_%s_%s.joblib'%(main_ensemble_name,witheld_1, witheld_2))
+    
+    X_t = np.vstack([ X_RS, ] + [ligand_dfs[i][0] for i in range(len(ligand_dfs)) if i not in [ind_1,ind_2]])
+    
+    predicted_RS_2 = pu_estimator.predict_proba(X_t)
+    predicted_witheld_2 = pu_estimator.predict_proba(X_witheld)
+    predicted_UTR_2 = pu_estimator.predict_proba(X_UTR)
+    
+    UTR_acc_2.append( np.sum((predicted_UTR_2[:,1] < .5))/len(X_UTR) )
+    RS_acc_2.append( np.sum((predicted_RS_2[:,1] > .5))/len(X_t) )
+    witheld_acc_2.append( np.sum((predicted_witheld_2[:,1] > .5))/len(X_witheld)  )
+    
+    predicted_RSs_2.append(predicted_RS_2)
+    predicted_withelds_2.append(predicted_witheld_2)
+    predicted_UTRs_2.append(predicted_UTR_2)
+    if retrain_main_ensemble:
+        if save_main_ensemble:
+            dump(pu_estimator,'./elkanoto_models/%s_%s_%s.joblib'%(main_ensemble_name,witheld_1, witheld_2))
+    estimators_2.append(pu_estimator)
 
 
 
