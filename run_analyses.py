@@ -47,6 +47,9 @@ save_main_ensemble  = False  #save the ensemble after retraining
 main_ensemble_name = "EKmodel_witheld_w_struct_features_9_26" #name for the model files, they will add "_ligand" to the end for each
 save_feature_sets = False #save the X_UTR and X_RS and their maxes to feature_npy_files
 resave_ensemble_hits = False # resave/remake all the hit data files and alignment matrices
+redo_levdist = False # redo the levenstien distance array this is very slow.
+model_norm = 'utr_proba_norm.npy'
+
 
 plot_format = '.png' #format to save the plots, either .svg or .png, you need the period!
 
@@ -731,27 +734,58 @@ RS_acc_all = RS_acc + RS_acc_2 + RS_acc_other
 witheld_acc_all = witheld_acc + witheld_acc_2 + witheld_acc_other
 
 #normalization vector for the outputs to the max of the training
-ensemble_norm = np.load('./%utr_proba_norm.npy'%model_norm)
+ensemble_norm = np.load('./elkanoto_models/%s'%model_norm)
 
+all_utr_predicitions = np.array(predicted_UTRs + predicted_UTRs_2 + predicted_UTRs_other).T[1]
 
 ###############################################################################
-# Save the ensemble outputs
+# Save the ensemble outputs and alignment matrices (for the website)
 ###############################################################################
 
-1/0
+def lev_dist(token1, token2):
+    distances = np.zeros((len(token1) + 1, len(token2) + 1))
+
+    for t1 in range(len(token1) + 1):
+        distances[t1][0] = t1
+
+    for t2 in range(len(token2) + 1):
+        distances[0][t2] = t2
+    a = 0
+    b = 0
+    c = 0
+    for t1 in range(1, len(token1) + 1):
+        for t2 in range(1, len(token2) + 1):
+            if (token1[t1-1] == token2[t2-1]):
+                distances[t1][t2] = distances[t1 - 1][t2 - 1]
+            else:
+                a = distances[t1][t2 - 1]
+                b = distances[t1 - 1][t2]
+                c = distances[t1 - 1][t2 - 1]
+                
+                if (a <= b and a <= c):
+                    distances[t1][t2] = a + 1
+                elif (b <= a and b <= c):
+                    distances[t1][t2] = b + 1
+                else:
+                    distances[t1][t2] = c + 1
+
+    return distances[len(token1)][len(token2)]
 
 if resave_ensemble_hits:
-
+ 
+  match_indexes = [np.where(all_utr_predicitions[:,i] >.95)[0].tolist() for i in range(20)]
+  all_hits_indexes = list(set([item for sublist in match_indexes for item in sublist]))
+  hits1533 = sorted([ids_UTR[x] for x in list(all_hits_indexes)])
   all_set = hits1533
-
-  with open('/content/drive/MyDrive/final_set_1533.json','w') as f:
+  print('total hits: %i'%len(all_set))
+  with open('./ensemble_predictions/final_set_1533.json','w') as f:
     json.dump(all_set,f)
 
   UTR_hit_list = all_set
 
   utr_proba = all_utr_predicitions[[ids_UTR.index(x) for x in UTR_hit_list],:]
-  np.save('/content/drive/MyDrive/utr_proba_1533.npy', utr_proba.T)
-  np.save('/content/drive/MyDrive/ENS_count.npy',np.sum(all_utr_predicitions[[ids_UTR.index(x) for x in UTR_hit_list],:] > .95, axis=1))
+  np.save('./ensemble_predictions/utr_proba_1533.npy', utr_proba.T)
+  np.save('./ensemble_predictions/ENS_count.npy',np.sum(all_utr_predicitions[[ids_UTR.index(x) for x in UTR_hit_list],:] > .95, axis=1))
   encode_bear_RS = []
 
 
@@ -769,10 +803,10 @@ if resave_ensemble_hits:
 
 
 
-  with open('/content/drive/MyDrive/bear_encoded_hits_1533.json','w') as f:
+  with open('./ensemble_predictions/bear_encoded_hits_1533.json','w') as f:
     json.dump(encoded_bears_hits,f)
 
-  np.save('/content/drive/MyDrive/encode_array_hits_1533.npy',encoded_array_hits)
+  np.save('./ensemble_predictions/encode_array_hits_1533.npy',encoded_array_hits)
 
 
   UTR_hit_list = all_set
@@ -787,7 +821,8 @@ if resave_ensemble_hits:
     encoded_array_hits.append(a)
 
 
-  with open('/content/drive/MyDrive/utr_dot_hits_1533.json','w') as f:
+
+  with open('./ensemble_predictions/utr_dot_hits_1533.json','w') as f:
     json.dump(encoded_bears_hits,f)
 
   encode_bear_RS = []
@@ -801,7 +836,7 @@ if resave_ensemble_hits:
   mses = np.zeros([len(UTR_hit_list), len(encoded_array_RS)])
   for i in tqdm(range(len(encoded_array_hits))):
     mses[i,:] = np.sum( np.square(np.subtract(encoded_array_RS,encoded_array_hits[i])) ,axis=1)
-  np.save('/content/drive/MyDrive/utr_hits_mse_1533.npy',mses)
+  np.save('./alignment_matrices/utr_hits_mse_1533.npy',mses)
 
   len_hits = []
   len_RS = []
@@ -816,7 +851,17 @@ if resave_ensemble_hits:
   len_RS = np.array(len_RS)
   for i in tqdm(range(len(encoded_array_hits))):
     ldiff[i,:] = np.square(len_RS -  len_hits[i])
-  np.save('/content/drive/MyDrive/utr_hits_ldiff_mse_1533.npy',ldiff)
+  np.save('./alignment_matrices/utr_hits_ldiff_mse_1533.npy',ldiff)
+
+
+  if redo_levdist:
+    levdists = np.zeros([len(UTR_hit_list), len(encoded_array_RS)])
+    len_hits = np.array(len_hits)
+    len_RS = np.array(len_RS)
+    for i in tqdm(range(len(UTR_hit_list))):
+      for j in range(len(encoded_array_hits)):
+        ldiff[i,j] = lev_dist(encoded_bears_hits[i],encode_bear_RS[j])
+    np.save('./alignment_matrices/utr_hits_ldiff_mse_1533.npy',ldiff)      
 
 
 ###############################################################################
