@@ -5,6 +5,15 @@ Created on Thu Nov 16 11:05:50 2023
 @author: willi
 """
 
+'''
+Identification of potential riboswitch elements in Homo
+Sapiens mRNA 5’UTR sequences using Positive-Unlabeled
+machine learning
+
+By Dr. William Raymond, Dr. Jacob DeRoo, and Dr. Brian Munsky 
+
+
+'''
 ##############################################################################
 # This file makes the two CSV databases used for machine learning
 # It takes the original RNA central json download to make the Riboswitch dataset

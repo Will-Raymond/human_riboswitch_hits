@@ -20,11 +20,26 @@ By Dr. William Raymond, Dr. Jacob DeRoo, and Dr. Brian Munsky
 
 File sections:
     Data generation
+        Load both RS and UTR CSVs and convert them to feature vectors for machine learning
+        and visualization.
     Data visualization
+        generate several plots:
+            PCA plots of the features
+            KS distances of the feature sets
+            length distributions of the sequences
+            ligand representation of the riboswitches
     Main ensemble training
+        20 fold cross validation on withheld ligand sets
+        save the results / hits
+        testing on sub sequences
     Ensemble validation
-    Hits visualization
+        circular plot of ensemble results
+        Other ensemble training(s)
+            20 fold cross validation on random sets, no ligand hold out
+            retraining 20 fold cross validation with ligand hold out but with also negative random and exon sequences
+        synthetic riboswitch testing
     Accessory validations
+        eukaryotic riboswitch testing
 
 '''
 
