@@ -1750,7 +1750,7 @@ if reload_X_syn:
         
             k+=1
 else:
-    X_SYN = np.load('./data_files/X_SYN.npy')
+    X_SYN = np.load('./feature_npy_files/X_SYN.npy')
 
 
 predicted_syn = np.zeros([len(syn_RS), 2, 20])
