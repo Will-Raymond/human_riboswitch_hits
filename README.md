@@ -31,22 +31,22 @@ This repository contains all the final data files used for the analysis in the a
 
 ```
 
-├─  alns/ - final alignment images for the website
-│		├─ aln_%%ID%%_%%ENS_NORM%%.png
-├─  data_files/ - raw/processed data files used to make the feature sets
-│		├─ CCDS_nucleotide.current_11.28.2021.fa
-│		├─ riboswitch_RNAcentral_8.19.21.json
+├─  algnment_matrices/ - alignment matrices for the ranking metrics in the paper
+│		├─ levdist_array_1533.npy 
+│		├─ utr_hits_ldiff_mse_1533.npy
+│		├─ utr_hits_mse_1533.npy
+├─  analysis_files/ - alignment matrices for the ranking metrics in the paper
+│		├─ importances.npy
+├─  data_files/ - raw and processed data files used to make the feature sets
+│		├─ CCDS_nucleotide.current_11.28.2021.fa 
+│		├─ riboswitch_RNAcentral_8.19.21.json 
 │		├─ rs_dot.json
-│		├─ RSid_to_ligand.json
-│		├─ 5primeUTR_final_db_2.csv
-│		├─ 5primeUTR_newutrdb_ML2.csv
-│		├─ RS_final_db.csv
-│		├─ RS_id_to_ligand.csv
-│		├─ check_new_utr.py
-│		├─ data_processor.py
-│		├─ process_rna_central_rs_json.py
-│		├─ rna_central_dot_structure_scraper.py
+│		├─ RSid_to_ligand.json 
+│		├─ 5primeUTR_final_db_3.csv 
+│		├─ RS_final_with_euk2.csv 
+│		├─ RS_id_to_ligand.csv 
 │		├─ species_in_RS_set.txt
+│		├─ 5UTRaspic.Hum 
 ├─  elkanoto_models/ - PUlearn models
 │		├─ EKmodel_witheld_w_struct_features_9_26_%%LIGAND%%_%%LIGAND%%.joblib
 │		├─ load_ensemble.py
@@ -61,6 +61,9 @@ This repository contains all the final data files used for the analysis in the a
 ├─  feature_npy_files/ - extracted feature data arrays
 │		├─ X_RS_full.npy
 │		├─ X_UTR.npy
+│		├─ X_SYN.npy
+│		├─ X_EXONs.npy
+│		├─ X_RAND.npy
 │		├─ ids_UTR.npy
 │		├─ ids_RS.npy
 ├─  Figures/  ─  figure files for the paper
