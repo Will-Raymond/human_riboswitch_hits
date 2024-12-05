@@ -178,7 +178,7 @@ for i in range(len(UTR_db)):
             ids_to_update[UTR_db['ID'].iloc[i]] =  ids_to_update[UTR_db['ID'].iloc[i]] +  [i,]
 for idx in ids_to_update.keys():
     for i in range(len(ids_to_update[idx])):
-        UTR_db.iloc[ids_to_update[idx][i],4] = idx + '-' + str(i)
+        UTR_db.iloc[ids_to_update[idx][i],3] = idx + '-' + str(i)
 
 ## patch out a typo space in guanidine
 for i in range(len(RS_db)):
@@ -1107,6 +1107,7 @@ for t in np.linspace(-.25,5,1000):
     y.append(fx(t))
 
 
+plt.figure(dpi=global_dpi)
 thresh = np.linspace(-.25,5,1000)[np.argmax(y)]
 
 x,bins = np.histogram(x_utr_t[:,0], bins=30);
