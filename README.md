@@ -30,7 +30,9 @@
 This repository contains all the final data files used for the analysis in the above manuscript.
 
 ```
-
+├─  make_UTR_and_RS_csvs.py - generate the data csv's used for machine learning
+├─  rs_functions.py - small library of functions written for the paper
+├─  run_analyses.py - generate all figures and analyses from the paper in one script.
 ├─  algnment_matrices/ - alignment matrices for the ranking metrics in the paper
 │		├─ levdist_array_1533.npy 
 │		├─ utr_hits_ldiff_mse_1533.npy
